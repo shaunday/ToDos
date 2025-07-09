@@ -1,0 +1,49 @@
+# Build results
+bin/
+obj/
+
+# NuGet packages
+dependency-packages/
+packages/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# Visual Studio
+.vs/
+
+# VS Code
+.vscode/
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Publish output
+publish/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Rider/Resharper
+_ReSharper*/
+*.DotSettings.user
+.idea/
+
+# Other
+*.dbmdl
+*.dbproj.schemaview
+*.pdb
+*.cache
+*.pidb
+*.svclog
+*.scc
+*.orig 
