@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>Todos.Client.Orchestrator</RootNamespace>
+    <AssemblyName>Todos.Client.Orchestrator</AssemblyName>
+    <UseWPF>true</UseWPF>
+    <LangVersion>8.0</LangVersion>
+    <OutputPath>..\bin\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="MaterialDesignColors" Version="5.2.1" />
+    <PackageReference Include="MaterialDesignThemes" Version="5.2.1" />
+  </ItemGroup>
+</Project>
