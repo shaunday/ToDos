@@ -32,7 +32,7 @@ namespace ToDos.Ui.ViewModels
         {
             var allTaskDtos = await _taskService.GetAllTasksAsync();
             var allTaskModels = allTaskDtos.Select(dto => _mapper.Map<TaskModel>(dto));
-            tasks = new ObservableCollection<TaskModel>(allTaskModels);
+            Tasks = new ObservableCollection<TaskModel>(allTaskModels);
         }
 
         [RelayCommand]
@@ -43,32 +43,32 @@ namespace ToDos.Ui.ViewModels
             var addedTaskDto = await _taskService.AddTaskAsync(newTaskDto);
             var addedTaskModel = _mapper.Map<TaskModel>(addedTaskDto);
 
-            tasks.Add(addedTaskModel);
-            selectedTask = addedTaskModel;
+            Tasks.Add(addedTaskModel);
+            SelectedTask = addedTaskModel;
         }
 
         [RelayCommand]
         private async Task DeleteTaskAsync()
         {
-            if (selectedTask is null) return;
+            if (SelectedTask is null) return;
 
-            var taskId = selectedTask.Id;
+            var taskId = SelectedTask.Id;
             var deleted = await _taskService.DeleteTaskAsync(taskId);
             if (deleted)
             {
-                tasks.Remove(selectedTask);
-                selectedTask = null;
+                Tasks.Remove(SelectedTask);
+                SelectedTask = null;
             }
         }
 
         [RelayCommand]
         private async Task MarkCompleteAsync(bool isCompleted)
         {
-            if (selectedTask is null) return;
+            if (SelectedTask is null) return;
 
-            selectedTask.IsCompleted = isCompleted;
+            SelectedTask.IsCompleted = isCompleted;
 
-            var updatedDto = _mapper.Map<TaskDTO>(selectedTask);
+            var updatedDto = _mapper.Map<TaskDTO>(SelectedTask);
             await _taskService.UpdateTaskAsync(updatedDto);
 
             // Raise property changed for Tasks or SelectedTask if needed
