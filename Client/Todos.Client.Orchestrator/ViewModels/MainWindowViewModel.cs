@@ -22,16 +22,17 @@ namespace Todos.Client.Orchestrator.ViewModels
         [RelayCommand]
         private void LaunchClient()
         {
-            var clientExe = Path.Combine("..", "bin", "TodDos.Ui.exe");
+            var outputDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".";
+            var clientExe = Path.Combine(outputDir, "TodDos.Ui.exe");
             if (!File.Exists(clientExe))
             {
-                MessageBox.Show($"Client executable not found: {clientExe}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Client executable not found in: {outputDir}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             var startInfo = new ProcessStartInfo
             {
                 FileName = clientExe,
-                WorkingDirectory = Path.GetFullPath(Path.GetDirectoryName(clientExe) ?? ".")
+                WorkingDirectory = outputDir
             };
             var proc = Process.Start(startInfo);
             if (proc != null)
