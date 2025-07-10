@@ -52,6 +52,7 @@
     <PackageReference Include="Unity.Container" Version="5.11.11" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Microsoft.Bcl.TimeProvider" Version="9.0.7" />
+    <PackageReference Include="dotenv.net" Version="3.1.3" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Common\ToDos.DotNet.Common\ToDos.DotNet.Common.csproj" />
