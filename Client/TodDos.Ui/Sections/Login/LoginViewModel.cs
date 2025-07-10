@@ -27,7 +27,7 @@ namespace ToDos.Ui.ViewModels
         private void Login()
         {
             // TODO: Replace with real authentication logic
-            if (!string.IsNullOrWhiteSpace(username) && password == "1234")
+            if (!string.IsNullOrWhiteSpace(Username) && Password == "1234")
             {
                 _navigation.NavigateTo<TasksViewModel>();
             }
