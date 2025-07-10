@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TodDos.Ui.Global.Models
+namespace ToDos.DotNet.Common
 {
-    internal class UserModel
+    public class GlobalTypes
     {
+        public enum TaskPriority { Low, Medium, High }
     }
 }

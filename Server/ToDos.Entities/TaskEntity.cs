@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static ToDos.DotNet.Common.GlobalTypes;
 
 namespace ToDos.Entities
 {
-    public enum TaskPriority { Low, Medium, High }
-
     public class TaskEntity
     {
         public Guid Id { get; set; }

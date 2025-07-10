@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using AutoMapper;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
@@ -11,11 +12,9 @@ namespace ToDos.Ui.ViewModels
 {
     public partial class LoginViewModel : ViewModelBase
     {
-        private readonly INavigationService _navigation;
-
-        public LoginViewModel(INavigationService navigation)
+        public LoginViewModel(IMapper mapper, INavigationService navigation) : base(mapper, navigation)
         {
-            _navigation = navigation;
+
         }
 
         [ObservableProperty]

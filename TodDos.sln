@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDos.Repository", "Server\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDos.DotNet.Common", "Common\ToDos.DotNet.Common\ToDos.DotNet.Common.csproj", "{B32267F2-545E-4A99-90C4-FBC602FB1C58}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDos.TaskSyncServer", "Server\ToDos.TaskSyncServer\ToDos.TaskSyncServer.csproj", "{68F23E49-A8D4-4076-81B2-A5D9853525D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{B32267F2-545E-4A99-90C4-FBC602FB1C58}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B32267F2-545E-4A99-90C4-FBC602FB1C58}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B32267F2-545E-4A99-90C4-FBC602FB1C58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{68F23E49-A8D4-4076-81B2-A5D9853525D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{68F23E49-A8D4-4076-81B2-A5D9853525D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{68F23E49-A8D4-4076-81B2-A5D9853525D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{68F23E49-A8D4-4076-81B2-A5D9853525D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,6 +68,7 @@ Global
 		{D4D5064C-4DBD-4ECD-98EA-8272FB7A5F3C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{BA65926B-7A8F-4A28-B523-221E0CCEB4CE} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{B32267F2-545E-4A99-90C4-FBC602FB1C58} = {D8A99C96-2B68-4127-A60B-EF548F1BB00D}
+		{68F23E49-A8D4-4076-81B2-A5D9853525D3} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {18CAB5A8-F3C0-4162-B968-49435E091621}

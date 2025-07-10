@@ -1,71 +1,79 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using AutoMapper;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
+using Todos.Client.Common.Interfaces;
+using ToDos.DotNet.Common;
+using ToDos.Ui.Models;
 using ToDos.Ui.Services.Navigation;
-using ToDos.Ui.ViewModels;
 
-namespace ToDos.Ui.Views.Tasks
+namespace ToDos.Ui.ViewModels
 {
     public partial class TasksViewModel : ViewModelBase
     {
-        private readonly ITaskService _taskService;
-        private readonly INavigationService _navigation;
+        private readonly ITaskSyncClient _taskService;
 
-        public TasksViewModel(ITaskService taskService, INavigationService navigation)
+        public TasksViewModel(ITaskSyncClient taskService, IMapper mapper, INavigationService navigation) : base(mapper, navigation)
         {
             _taskService = taskService;
-            _navigation = navigation;
-
-            LoadTasks();
+            LoadTasksAsync();
         }
 
         [ObservableProperty]
-        private ObservableCollection<TaskModel> tasks = new();
+        private ObservableCollection<TaskModel> tasks = new ObservableCollection<TaskModel>();
 
         [ObservableProperty]
         private TaskModel? selectedTask;
 
-        // Load tasks from DB/service
-        private void LoadTasks()
+        // Load tasks asynchronously
+        private async void LoadTasksAsync()
         {
-            var allTasks = _taskService.GetAllTasks(); // sync or async; adjust accordingly
-            Tasks = new ObservableCollection<TaskModel>(allTasks);
+            var allTaskDtos = await _taskService.GetAllTasksAsync();
+            var allTaskModels = allTaskDtos.Select(dto => _mapper.Map<TaskModel>(dto));
+            tasks = new ObservableCollection<TaskModel>(allTaskModels);
         }
 
         [RelayCommand]
-        private void AddTask()
+        private async Task AddTaskAsync()
         {
-            var newTask = new TaskModel { Title = "New Task" };
-            _taskService.AddTask(newTask);
-            Tasks.Add(newTask);
-            SelectedTask = newTask;
+            var newTaskModel = new TaskModel { Title = "New Task" };
+            var newTaskDto = _mapper.Map<TaskDTO>(newTaskModel);
+            var addedTaskDto = await _taskService.AddTaskAsync(newTaskDto);
+            var addedTaskModel = _mapper.Map<TaskModel>(addedTaskDto);
+
+            tasks.Add(addedTaskModel);
+            selectedTask = addedTaskModel;
         }
 
         [RelayCommand]
-        private void DeleteTask()
+        private async Task DeleteTaskAsync()
         {
-            if (SelectedTask is null) return;
+            if (selectedTask is null) return;
 
-            _taskService.DeleteTask(SelectedTask);
-            Tasks.Remove(SelectedTask);
-            SelectedTask = null;
+            var taskId = selectedTask.Id;
+            var deleted = await _taskService.DeleteTaskAsync(taskId);
+            if (deleted)
+            {
+                tasks.Remove(selectedTask);
+                selectedTask = null;
+            }
         }
 
         [RelayCommand]
-        private void MarkComplete()
+        private async Task MarkCompleteAsync(bool isCompleted)
         {
-            if (SelectedTask is null) return;
+            if (selectedTask is null) return;
 
-            SelectedTask.IsCompleted = true;
-            _taskService.UpdateTask(SelectedTask);
+            selectedTask.IsCompleted = isCompleted;
 
-            // Notify UI that task updated
+            var updatedDto = _mapper.Map<TaskDTO>(selectedTask);
+            await _taskService.UpdateTaskAsync(updatedDto);
+
+            // Raise property changed for Tasks or SelectedTask if needed
             OnPropertyChanged(nameof(Tasks));
+            OnPropertyChanged(nameof(SelectedTask));
         }
-
-        // Example of navigation or other commands can be added here
-
-        // Optionally add EditTask command, etc.
     }
 }
