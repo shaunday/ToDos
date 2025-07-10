@@ -1,0 +1,42 @@
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using ToDos.Ui.Services.Navigation;
+
+namespace ToDos.Ui.ViewModels
+{
+    public partial class LoginViewModel : ViewModelBase
+    {
+        private readonly INavigationService _navigation;
+
+        public LoginViewModel(INavigationService navigation)
+        {
+            _navigation = navigation;
+        }
+
+        [ObservableProperty]
+        private string username;
+
+        [ObservableProperty]
+        private string password;
+
+        [RelayCommand]
+        private void Login()
+        {
+            // TODO: Replace with real authentication logic
+            if (!string.IsNullOrWhiteSpace(username) && password == "1234")
+            {
+                _navigation.NavigateTo<TasksViewModel>();
+            }
+            else
+            {
+                // You can add a property like ErrorMessage and bind to a TextBlock
+            }
+        }
+    }
+
+}

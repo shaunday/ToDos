@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TodDos.Ui.Properties
+namespace ToDos.Ui.Properties
 {
 
 

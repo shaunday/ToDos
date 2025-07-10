@@ -8,6 +8,6 @@ namespace ToDos.Repository
         public TaskDbContext() : base("name=TaskDbContext") { }
 
         public DbSet<TaskEntity> Tasks { get; set; }
-        public DbSet<Tag> Tags { get; set; }
+        public DbSet<TagEntity> Tags { get; set; }
     }
 } 
