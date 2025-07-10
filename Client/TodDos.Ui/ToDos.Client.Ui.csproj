@@ -8,6 +8,7 @@
     <LangVersion>8.0</LangVersion>
     <OutputPath>..\bin\</OutputPath>
     <NoWarn>$(NoWarn);MSB3277</NoWarn>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Properties\**" />
@@ -60,4 +61,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <Target Name="CopyEnvGlobal" AfterTargets="Build">
+    <Copy SourceFiles="..\..\Common\bin\.env.Global" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

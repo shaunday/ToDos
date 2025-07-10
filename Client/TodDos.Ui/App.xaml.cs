@@ -12,12 +12,10 @@ using ToDos.Ui.Services.Navigation;
 using ToDos.Ui.ViewModels;
 using Unity;
 using Serilog;
+using dotenv.net;
 
 namespace ToDos.Ui
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
         private const string LogFileName = "TodDos.Ui.log";
@@ -25,6 +23,9 @@ namespace ToDos.Ui
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            // Load .env.Global (must be in the output directory)
+            var envPath = System.IO.Path.Combine(AppContext.BaseDirectory, ".env.Global");
+            DotEnv.Load(options: new DotEnvOptions(envFilePaths: new[] { envPath }, probeForEnv: false));
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.File(LogFileName)
                 .CreateLogger();

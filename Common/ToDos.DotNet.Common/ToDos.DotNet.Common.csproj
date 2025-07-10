@@ -5,5 +5,11 @@
     <AssemblyName>ToDos.DotNet.Common</AssemblyName>
     <LangVersion>8.0</LangVersion>
     <OutputPath>..\bin\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
+  <ItemGroup>
+    <None Update=".env.Global">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

@@ -5,6 +5,7 @@
     <AssemblyName>Todos.Client.Common</AssemblyName>
     <LangVersion>8.0</LangVersion>
     <OutputPath>..\bin\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Common\ToDos.DotNet.Common\ToDos.DotNet.Common.csproj" />

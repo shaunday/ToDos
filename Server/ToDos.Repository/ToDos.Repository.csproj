@@ -6,6 +6,7 @@
     <LangVersion>8.0</LangVersion>
     <OutputPath>..\bin\</OutputPath>
     <NoWarn>$(NoWarn);MSB3277</NoWarn>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="EntityFramework" Version="6.5.1" />

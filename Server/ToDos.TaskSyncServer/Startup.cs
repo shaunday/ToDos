@@ -1,24 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using Owin;
 using System.Web.Http;
 
 namespace ToDos.TaskSyncServer
 {
-    public static class WebApiConfig
+    public class Startup
     {
-        public static void Register(HttpConfiguration config)
+        public void Configuration(IAppBuilder app)
         {
-            // Web API configuration and services
-
-            // Web API routes
+            var config = new HttpConfiguration();
+            // Attribute routing
             config.MapHttpAttributeRoutes();
-
+            // Default route
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+            app.UseWebApi(config);
         }
     }
-}
+} 
