@@ -11,6 +11,7 @@ using TodDos.Ui.Services.Mapping;
 using ToDos.Ui.Services.Navigation;
 using ToDos.Ui.ViewModels;
 using Unity;
+using Serilog;
 
 namespace ToDos.Ui
 {
@@ -19,10 +20,15 @@ namespace ToDos.Ui
     /// </summary>
     public partial class App : Application
     {
+        private const string LogFileName = "TodDos.Ui.log";
         public IUnityContainer container { get; private set; }
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File(LogFileName)
+                .CreateLogger();
+            Log.Information("TodDos.Ui started");
             base.OnStartup(e);
 
             container = new UnityContainer();
