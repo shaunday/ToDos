@@ -5,26 +5,137 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Orchestrator" Height="350" Width="525">
+        Title="Orchestrator" Height="600" Width="800" 
+        MinHeight="500" MinWidth="600"
+        WindowStartupLocation="CenterScreen">
+    
+    <Window.Resources>
+        <Style x:Key="HeaderTextStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignHeadline5TextBlock}">
+            <Setter Property="Margin" Value="0,0,0,24" />
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
+        </Style>
+        
+        <Style x:Key="StatusTextStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignBody1TextBlock}">
+            <Setter Property="Margin" Value="0,0,0,16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        
+        <Style x:Key="ClientListStyle" TargetType="ListBox">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+        
+        <Style x:Key="ClientItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="Margin" Value="0,2" />
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignCard}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    
     <Grid Background="{DynamicResource MaterialDesignPaper}">
-        <materialDesign:Card Margin="32" Padding="24">
-            <StackPanel>
-                <TextBlock Text="Orchestrator Launcher" FontSize="24" Margin="0,0,0,16" />
-                <Button Content="Launch Client" Style="{StaticResource MaterialDesignRaisedButton}" Width="150" Height="40" Command="{Binding LaunchClientCommand}" />
-                <TextBlock Text="{Binding RunningCount, StringFormat=Running: {0}}" Margin="0,16,0,8" FontWeight="Bold" />
-                <ListBox ItemsSource="{Binding RunningClients}" Height="120" Margin="0,0,0,8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        
+        <!-- Main Content -->
+        <materialDesign:Card Grid.Row="0" Margin="24" Padding="32" 
+                            materialDesign:ElevationAssist.Elevation="Dp2">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                
+                <!-- Header -->
+                <TextBlock Grid.Row="0" Text="Orchestrator Launcher" 
+                           Style="{StaticResource HeaderTextStyle}" />
+                
+                <!-- Launch Button -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,24">
+                    <Button Content="Launch Client" 
+                            Style="{StaticResource MaterialDesignRaisedButton}"
+                            Width="200" Height="48" FontSize="16"
+                            Command="{Binding LaunchClientCommand}"
+                            Margin="0,0,16,0" />
+                    
+                    <Button Content="Kill All" 
+                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                            Width="120" Height="48" FontSize="16"
+                            Command="{Binding KillAllClientsCommand}"
+                            Margin="0,0,0,0" />
+                </StackPanel>
+                
+                <!-- Status -->
+                <TextBlock Grid.Row="2" 
+                           Text="{Binding RunningCount, StringFormat=Running Clients: {0}}" 
+                           Style="{StaticResource StatusTextStyle}" />
+                
+                <!-- Client List -->
+                <ListBox Grid.Row="3" ItemsSource="{Binding RunningClients}" 
+                         Style="{StaticResource ClientListStyle}"
+                         ItemContainerStyle="{StaticResource ClientItemStyle}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="PID: " />
-                                <TextBlock Text="{Binding Id}" FontWeight="Bold" Margin="0,0,8,0" />
-                                <TextBlock Text="{Binding MainWindowTitle}" Margin="0,0,8,0" />
-                                <Button Content="Kill" Command="{Binding DataContext.KillClientCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Style="{StaticResource MaterialDesignFlatButton}" />
-                            </StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                
+                                <!-- PID -->
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" 
+                                            VerticalAlignment="Center" Margin="0,0,16,0">
+                                    <TextBlock Text="PID: " 
+                                               Style="{StaticResource MaterialDesignBody2TextBlock}"
+                                               Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    <TextBlock Text="{Binding Id}" 
+                                               Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                               FontWeight="Bold" />
+                                </StackPanel>
+                                
+                                <!-- Window Title -->
+                                <TextBlock Grid.Column="1" Text="{Binding MainWindowTitle}" 
+                                           Style="{StaticResource MaterialDesignBody1TextBlock}"
+                                           VerticalAlignment="Center"
+                                           TextTrimming="CharacterEllipsis" />
+                                
+                                <!-- Kill Button -->
+                                <Button Grid.Column="2" Content="Kill" 
+                                        Command="{Binding DataContext.KillClientCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                        CommandParameter="{Binding}" 
+                                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                                        Width="80" Height="32" FontSize="12"
+                                        Margin="16,0,0,0" />
+                            </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-            </StackPanel>
+            </Grid>
         </materialDesign:Card>
+        
+        <!-- Status Bar -->
+        <Border Grid.Row="1" Background="{DynamicResource MaterialDesignDivider}" 
+                Height="1" Margin="24,0,24,0" />
     </Grid>
 </Window>

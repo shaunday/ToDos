@@ -22,6 +22,36 @@ namespace Todos.Client.Orchestrator
         {
             InitializeComponent();
             DataContext = new MainWindowViewModel();
+            
+            // Handle window closing event
+            Closing += MainWindow_Closing;
+        }
+
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (DataContext is MainWindowViewModel viewModel && viewModel.RunningCount > 0)
+            {
+                var result = MessageBox.Show(
+                    $"You have {viewModel.RunningCount} client(s) running. Do you want to close all clients and exit?",
+                    "Confirm Exit",
+                    MessageBoxButton.YesNoCancel,
+                    MessageBoxImage.Question);
+
+                switch (result)
+                {
+                    case MessageBoxResult.Yes:
+                        // Kill all clients and close
+                        viewModel.KillAllClientsSilent();
+                        break;
+                    case MessageBoxResult.No:
+                        // Close without killing clients
+                        break;
+                    case MessageBoxResult.Cancel:
+                        // Cancel the closing
+                        e.Cancel = true;
+                        return;
+                }
+            }
         }
     }
 }
