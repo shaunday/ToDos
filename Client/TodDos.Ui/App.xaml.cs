@@ -8,6 +8,7 @@ using System.Windows;
 using TodDos.Ui.Services.Mapping;
 using Todos.Client.Common.Factories;
 using Todos.Client.Common.Interfaces;
+using Todos.Client.MockTaskSyncClient;
 using Todos.Client.SignalRClient;
 using ToDos.Ui.Services.Navigation;
 using ToDos.Ui.ViewModels;
@@ -64,7 +65,7 @@ namespace ToDos.Ui
 
             // Register services
             container.RegisterSingleton<INavigationService, NavigationService>();
-            container.RegisterSingleton<ITaskSyncClient, SignalRTaskSyncClient>();
+            container.RegisterSingleton<ITaskSyncClient, MockTaskSyncClient>();
             container.RegisterInstance(Log.Logger);
 
             // Register AutoMapper

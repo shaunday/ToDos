@@ -56,6 +56,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Common\ToDos.DotNet.Common\ToDos.DotNet.Common.csproj" />
     <ProjectReference Include="..\Todos.Client.Common\Todos.Client.Common.csproj" />
+    <ProjectReference Include="..\Todos.Client.MockTaskSyncClient\Todos.Client.MockTaskSyncClient.csproj" />
     <ProjectReference Include="..\Todos.Client.SignalRClient\Todos.Client.SignalRClient.csproj" />
   </ItemGroup>
   <ItemGroup>

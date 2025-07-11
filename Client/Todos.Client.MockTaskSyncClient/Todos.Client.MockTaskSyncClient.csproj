@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>Todos.Client.MockTaskSyncClient</RootNamespace>
+    <AssemblyName>Todos.Client.MockTaskSyncClient</AssemblyName>
+    <LangVersion>8.0</LangVersion>
+    <OutputPath>..\bin\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Todos.Client.Common\Todos.Client.Common.csproj" />
+  </ItemGroup>
+</Project>
