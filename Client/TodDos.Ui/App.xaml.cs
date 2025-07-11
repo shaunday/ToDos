@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using dotenv.net;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Extensions.Logging;
@@ -28,12 +27,6 @@ namespace ToDos.Ui
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            // Load .env.Global (must be in the output directory)
-            var envPath = System.IO.Path.Combine(AppContext.BaseDirectory, ".env.Global");
-            //DotEnv.Load(options: new DotEnvOptions(envFilePaths: new[] { envPath }, probeForEnv: false));
-            //try catch here ^ todo .. handling = ??
-
-
             // ---- Logging
             Process appProcess = Process.GetCurrentProcess();
             string logFileName = LogFactory.GetLogFileName(appProcess.Id, ClientType.UiClient);

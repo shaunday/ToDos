@@ -1,7 +1,8 @@
 using System;
 using Microsoft.Owin.Hosting;
 using Serilog;
-using dotenv.net;
+using DotNetEnv;
+using ToDos.DotNet.Common;
 
 namespace ToDos.TaskSyncServer
 {
@@ -17,8 +18,8 @@ namespace ToDos.TaskSyncServer
 
             // Load .env.Global (must be in the output directory)
             var envPath = System.IO.Path.Combine(AppContext.BaseDirectory, ".env.Global");
-            DotEnv.Load(options: new DotEnvOptions(envFilePaths: new[] { envPath }, probeForEnv: false));
-            string url = Environment.GetEnvironmentVariable("SERVER_URL") ?? "http://localhost:5000";
+            Env.Load(envPath);
+            string url = Environment.GetEnvironmentVariable(SignalRGlobals.URL_String_Identifier);
 
             using (WebApp.Start<Startup>(url))
             {
