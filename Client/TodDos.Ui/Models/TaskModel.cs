@@ -28,6 +28,9 @@ namespace ToDos.Ui.Models
         private bool isLocked;
 
         [ObservableProperty]
+        private bool isEditing = false;
+
+        [ObservableProperty]
         private TaskPriority priority;
 
         [ObservableProperty]

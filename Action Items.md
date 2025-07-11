@@ -17,7 +17,6 @@
 * JWT
 * You can add cancellation tokens or timeout policies to retry/wait delays.
 * On permanent disconnect, prompt UI to notify the user or retry manually.
-* Optionally implement a circuit breaker with Polly if you want to stop hammering the server.
 
 ---
 
@@ -63,7 +62,7 @@
 * Implement logic to send lock/unlock requests on edit start/end
 * Add user-friendly exception handling and error messages
 * Show SignalR connection state in the UI
-* Extend task model and UI with priority, tags, and due date fields
+* filter by tags
 * BONUS: Implement UI state persistence (e.g., window size, last selected task)
 ^ Save UI state on Window\.Closing and restore on Window\.Loaded using Properties.Settings.Default or JSON file in %AppData%
 
@@ -108,5 +107,4 @@ Make sure that both client and server validate all inputs (e.g., task titles not
 
 ## Moar
 
-* Client can queue local changes while offline, then sync when back online.
 * Throttle or reject low-priority writes when under heavy load.: backpressure mechanism.

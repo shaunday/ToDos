@@ -25,9 +25,6 @@ namespace ToDos.Ui.ViewModels
         [ObservableProperty]
         private ObservableCollection<TaskModel> tasks = new ObservableCollection<TaskModel>();
 
-        [ObservableProperty]
-        private TaskModel? selectedTask;
-
         private async void ConnectAndLoadTasksAsync()
         {
             try
@@ -44,6 +41,38 @@ namespace ToDos.Ui.ViewModels
         }
 
         [RelayCommand]
+        private async Task EditTaskAsync(TaskModel task)
+        {
+            if (task == null || task.IsEditing) return; // Only one edit at a time
+            var locked = await _taskService.LockTaskAsync(task.Id);
+            if (locked)
+            {
+                foreach (var t in Tasks) t.IsEditing = false;
+                task.IsEditing = true;
+            }
+            // else: show error message (optional)
+        }
+
+        [RelayCommand]
+        private async Task SaveTaskAsync(TaskModel task)
+        {
+            if (task == null || !task.IsEditing) return;
+            var updatedDto = _mapper.Map<TaskDTO>(task);
+            await _taskService.UpdateTaskAsync(updatedDto);
+            await _taskService.UnlockTaskAsync(task.Id);
+            task.IsEditing = false;
+        }
+
+        [RelayCommand]
+        private async Task CancelEditAsync(TaskModel task)
+        {
+            if (task == null || !task.IsEditing) return;
+            await _taskService.UnlockTaskAsync(task.Id);
+            // Optionally reload the task from backend to discard changes
+            task.IsEditing = false;
+        }
+
+        [RelayCommand]
         private async Task AddTaskAsync()
         {
             var newTaskModel = new TaskModel { Title = "New Task" };
@@ -52,36 +81,26 @@ namespace ToDos.Ui.ViewModels
             var addedTaskModel = _mapper.Map<TaskModel>(addedTaskDto);
 
             Tasks.Add(addedTaskModel);
-            SelectedTask = addedTaskModel;
         }
 
         [RelayCommand]
-        private async Task DeleteTaskAsync()
+        private async Task DeleteTaskAsync(TaskModel task)
         {
-            if (SelectedTask is null) return;
-
-            var taskId = SelectedTask.Id;
-            var deleted = await _taskService.DeleteTaskAsync(taskId);
+            var deleted = await _taskService.DeleteTaskAsync(task.Id);
             if (deleted)
             {
-                Tasks.Remove(SelectedTask);
-                SelectedTask = null;
+                Tasks.Remove(task);
+                if (task.IsEditing) task.IsEditing = false;
             }
         }
 
-        [RelayCommand]
-        private async Task MarkCompleteAsync(bool isCompleted)
-        {
-            if (SelectedTask is null) return;
-
-            SelectedTask.IsCompleted = isCompleted;
-
-            var updatedDto = _mapper.Map<TaskDTO>(SelectedTask);
-            await _taskService.UpdateTaskAsync(updatedDto);
-
-            // Raise property changed for Tasks or SelectedTask if needed
-            OnPropertyChanged(nameof(Tasks));
-            OnPropertyChanged(nameof(SelectedTask));
-        }
+        //[RelayCommand]
+        //private async Task MarkCompleteAsync(TaskModel task, bool isCompleted)
+        //{
+        //    task.IsCompleted = isCompleted;
+        //    var updatedDto = _mapper.Map<TaskDTO>(task);
+        //    await _taskService.UpdateTaskAsync(updatedDto);
+        //    OnPropertyChanged(nameof(Tasks));
+        //}
     }
 }
