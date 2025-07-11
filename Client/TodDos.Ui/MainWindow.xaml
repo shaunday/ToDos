@@ -8,9 +8,6 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="800" Width="1200">
     <Grid>
-        <StackPanel>
-            <TextBlock Text="{Binding CurrentViewModelTypeName}" />
-            <ContentControl Content="{Binding Navigation.CurrentViewModel}" />
-        </StackPanel>
+        <ContentControl Content="{Binding Navigation.CurrentViewModel}" />
     </Grid>
 </Window>

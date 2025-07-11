@@ -20,9 +20,8 @@
     </UserControl.Resources>
     <Grid Margin="16">
         <DataGrid ItemsSource="{Binding Tasks}"
-                  SelectedItem="{Binding SelectedTask, Mode=TwoWay}"
                   AutoGenerateColumns="False"
-                  CanUserAddRows="True"
+                  CanUserAddRows="False"
                   CanUserDeleteRows="True"
                   IsReadOnly="False"
                   materialDesign:DataGridAssist.CellPadding="8"
@@ -94,13 +93,13 @@
                                                             <StackPanel Orientation="Horizontal">
                                                                 <Button Style="{StaticResource MaterialDesignIconButton}"
                                                                         Command="{Binding DataContext.SaveTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                                        CommandParameter="{Binding}">
+                                                                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}">
                                                                     <materialDesign:PackIcon Kind="ContentSave" />
                                                                     <Button.ToolTip>Save</Button.ToolTip>
                                                                 </Button>
                                                                 <Button Style="{StaticResource MaterialDesignIconButton}"
                                                                         Command="{Binding DataContext.CancelEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                                        CommandParameter="{Binding}">
+                                                                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}">
                                                                     <materialDesign:PackIcon Kind="Cancel" />
                                                                     <Button.ToolTip>Cancel</Button.ToolTip>
                                                                 </Button>
@@ -116,13 +115,13 @@
                                                     <StackPanel Orientation="Horizontal">
                                                         <Button Style="{StaticResource MaterialDesignIconButton}"
                                                                 Command="{Binding DataContext.EditTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                                CommandParameter="{Binding}">
+                                                                CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}">
                                                             <materialDesign:PackIcon Kind="Pencil" />
                                                             <Button.ToolTip>Edit</Button.ToolTip>
                                                         </Button>
                                                         <Button Style="{StaticResource MaterialDesignIconButton}"
                                                                 Command="{Binding DataContext.DeleteTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                                CommandParameter="{Binding}">
+                                                                CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}">
                                                             <materialDesign:PackIcon Kind="Delete" />
                                                             <Button.ToolTip>Delete</Button.ToolTip>
                                                         </Button>

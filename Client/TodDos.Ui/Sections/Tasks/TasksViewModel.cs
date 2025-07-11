@@ -16,14 +16,14 @@ namespace ToDos.Ui.ViewModels
     {
         private readonly ITaskSyncClient _taskService;
 
+        [ObservableProperty]
+        private ObservableCollection<TaskModel> tasks = new ObservableCollection<TaskModel>();
+
         public TasksViewModel(ITaskSyncClient taskService, IMapper mapper, INavigationService navigation) : base(mapper, navigation)
         {
             _taskService = taskService;
             ConnectAndLoadTasksAsync();
         }
-
-        [ObservableProperty]
-        private ObservableCollection<TaskModel> tasks = new ObservableCollection<TaskModel>();
 
         private async void ConnectAndLoadTasksAsync()
         {
@@ -47,7 +47,7 @@ namespace ToDos.Ui.ViewModels
             var locked = await _taskService.LockTaskAsync(task.Id);
             if (locked)
             {
-                foreach (var t in Tasks) t.IsEditing = false;
+                //close and save <todo
                 task.IsEditing = true;
             }
             // else: show error message (optional)
@@ -67,8 +67,9 @@ namespace ToDos.Ui.ViewModels
         private async Task CancelEditAsync(TaskModel task)
         {
             if (task == null || !task.IsEditing) return;
-            await _taskService.UnlockTaskAsync(task.Id);
-            // Optionally reload the task from backend to discard changes
+            _taskService.UnlockTaskAsync(task.Id);
+            //todo if failed what now?
+            //todo reload the task
             task.IsEditing = false;
         }
 
@@ -90,7 +91,6 @@ namespace ToDos.Ui.ViewModels
             if (deleted)
             {
                 Tasks.Remove(task);
-                if (task.IsEditing) task.IsEditing = false;
             }
         }
 

@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Controls\" />
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Target Name="CopyEnvGlobal" AfterTargets="Build">
     <Copy SourceFiles="..\..\Common\bin\.env.Global" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
