@@ -3,17 +3,12 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Configuration;
-using System.Data;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using TodDos.Ui.Services.Mapping;
 using Todos.Client.Common.Factories;
+using Todos.Client.Common.Interfaces;
+using Todos.Client.SignalRClient;
 using ToDos.Ui.Services.Navigation;
 using ToDos.Ui.ViewModels;
 using Unity;
@@ -27,7 +22,19 @@ namespace ToDos.Ui
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            // ---- Logging
+            SetupLogging();
+
+            RegisterGlobalExceptionHandlers();
+
+            ConfigureContainer();
+
+            ShowMainWindow();
+
+            base.OnStartup(e);
+        }
+
+        private void SetupLogging()
+        {
             Process appProcess = Process.GetCurrentProcess();
             string logFileName = LogFactory.GetLogFileName(appProcess.Id, ClientType.UiClient);
             string logFilePath = LogFactory.GetLogFilePath(logFileName);
@@ -35,25 +42,47 @@ namespace ToDos.Ui
                 .WriteTo.File(logFilePath)
                 .CreateLogger();
             Log.Information($"TodDos.Client.Ui Process = {appProcess.Id} started");
-            base.OnStartup(e);
+        }
 
-            // ---- DI
+        private void RegisterGlobalExceptionHandlers()
+        {
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            {
+                Log.Fatal(e.ExceptionObject as Exception, "Unhandled exception");
+            };
+
+            DispatcherUnhandledException += (s, e) =>
+            {
+                Log.Fatal(e.Exception, "UI thread unhandled exception");
+                e.Handled = true;
+            };
+        }
+
+        private void ConfigureContainer()
+        {
             container = new UnityContainer();
 
-            // services
+            // Register services
             container.RegisterSingleton<INavigationService, NavigationService>();
+            container.RegisterSingleton<ITaskSyncClient, SignalRTaskSyncClient>();
+
+            // Register AutoMapper
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile<ClientMappingProfile>();
             }, new SerilogLoggerFactory(Log.Logger));
             IMapper mapper = config.CreateMapper();
-            container.RegisterInstance(mapper);
+            container.RegisterInstance<IMapper>(mapper);
 
-
-            //ViewModels
-            container.RegisterSingleton<MainViewModel>(); 
+            // Register ViewModels
+            container.RegisterSingleton<MainViewModel>();
             container.RegisterType<LoginViewModel>();
             container.RegisterType<TasksViewModel>();
+        }
+
+        private void ShowMainWindow()
+        {
+            Process appProcess = Process.GetCurrentProcess();
 
             var window = new MainWindow
             {
@@ -62,6 +91,13 @@ namespace ToDos.Ui
             };
 
             window.Show();
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            Log.Information("Application exiting.");
+            Log.CloseAndFlush(); // Properly flush and close Serilog
+            base.OnExit(e);
         }
     }
 }

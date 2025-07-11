@@ -14,6 +14,7 @@
 
 ## SignalR Client
 
+* JWT
 * You can add cancellation tokens or timeout policies to retry/wait delays.
 * On permanent disconnect, prompt UI to notify the user or retry manually.
 * Optionally implement a circuit breaker with Polly if you want to stop hammering the server.
