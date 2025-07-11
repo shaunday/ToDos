@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace ToDos.Ui.ViewModels
         public TasksViewModel(ITaskSyncClient taskService, IMapper mapper, INavigationService navigation) : base(mapper, navigation)
         {
             _taskService = taskService;
-            LoadTasksAsync();
+            ConnectAndLoadTasksAsync();
         }
 
         [ObservableProperty]
@@ -27,12 +28,19 @@ namespace ToDos.Ui.ViewModels
         [ObservableProperty]
         private TaskModel? selectedTask;
 
-        // Load tasks asynchronously
-        private async void LoadTasksAsync()
+        private async void ConnectAndLoadTasksAsync()
         {
-            var allTaskDtos = await _taskService.GetAllTasksAsync();
-            var allTaskModels = allTaskDtos.Select(dto => _mapper.Map<TaskModel>(dto));
-            Tasks = new ObservableCollection<TaskModel>(allTaskModels);
+            try
+            {
+                await _taskService.ConnectAsync();
+                var allTaskDtos = await _taskService.GetAllTasksAsync();
+                var allTaskModels = allTaskDtos.Select(dto => _mapper.Map<TaskModel>(dto));
+                Tasks = new ObservableCollection<TaskModel>(allTaskModels);
+            }
+            catch (Exception ex)
+            {
+                // Optionally, expose an error message property for the UI
+            }
         }
 
         [RelayCommand]
