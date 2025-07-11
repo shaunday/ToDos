@@ -4,6 +4,7 @@ using Polly;
 using Polly.Retry;
 using Serilog;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Todos.Client.Common.Interfaces;
@@ -34,6 +35,11 @@ namespace Todos.Client.SignalRClient
         public event Action<Guid> TaskUnlocked;
 
         public event Action<ConnectionStatus> ConnectionStatusChanged;
+
+        // Queue to hold pending hub method calls when disconnected
+        private readonly ConcurrentQueue<Func<Task>> _pendingCalls = new ConcurrentQueue<Func<Task>>();
+
+        private readonly object _connectionLock = new object();
 
         #endregion
 
@@ -70,16 +76,19 @@ namespace Todos.Client.SignalRClient
 
         public async Task ConnectAsync()
         {
-            RaiseConnectionStatus(ConnectionStatus.Connecting);
-
-            try
+            lock (_connectionLock)
             {
                 if (_hubConnection != null)
                 {
                     _logger.Information("Disconnecting existing SignalR connection...");
-                    await DisconnectAsync();
+                    DisconnectAsync().GetAwaiter().GetResult(); // sync call inside lock is safe here
                 }
+            }
 
+            RaiseConnectionStatus(ConnectionStatus.Connecting);
+
+            try
+            {
                 _logger.Information("Connecting to SignalR hub at {HubUrl}...", _hubUrl);
                 _hubConnection = new HubConnection(_hubUrl);
                 SetupReconnect();
@@ -93,8 +102,12 @@ namespace Todos.Client.SignalRClient
                 _hubProxy.On<Guid>(SignalRGlobals.TaskUnlocked, id => SafeInvoke(() => TaskUnlocked?.Invoke(id), nameof(TaskUnlocked)));
 
                 await _hubConnection.Start();
+
                 _logger.Information("SignalR connection established.");
                 RaiseConnectionStatus(ConnectionStatus.Connected);
+
+                // Drain pending calls queued while disconnected
+                await DrainPendingCallsAsync();
             }
             catch (Exception ex)
             {
@@ -104,28 +117,26 @@ namespace Todos.Client.SignalRClient
             }
         }
 
-
-        public Task DisconnectAsync()
+        public async Task DisconnectAsync()
         {
-            return Task.Run(() =>
+            try
             {
-                try
+                if (_hubConnection != null)
                 {
-                    if (_hubConnection != null)
-                    {
-                        _logger.Information("Stopping SignalR connection...");
-                        _hubConnection.Stop();
-                        _hubConnection.Dispose();
-                        _hubConnection = null;
-                        _logger.Information("SignalR connection stopped.");
-                        RaiseConnectionStatus(ConnectionStatus.Disconnected);
-                    }
+                    _logger.Information("Stopping SignalR connection...");
+                    _hubConnection.Stop();
+                    _hubConnection.Dispose();
+                    _hubConnection = null;
+                    _logger.Information("SignalR connection stopped.");
+                    RaiseConnectionStatus(ConnectionStatus.Disconnected);
                 }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, "Error while disconnecting SignalR connection.");
-                }
-            });
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error while disconnecting SignalR connection.");
+            }
+
+            await Task.CompletedTask;
         }
 
         private void SetupReconnect()
@@ -148,6 +159,10 @@ namespace Todos.Client.SignalRClient
                         _logger.Information("SignalR reconnected.");
                         RaiseConnectionStatus(ConnectionStatus.Connected);
                         _reconnectAttempts = 0;
+
+                        // Drain pending calls if any
+                        await DrainPendingCallsAsync();
+
                         break;
                     }
                     catch (Exception ex)
@@ -164,43 +179,80 @@ namespace Todos.Client.SignalRClient
             };
         }
 
+        private async Task DrainPendingCallsAsync()
+        {
+            while (_pendingCalls.TryDequeue(out var call))
+            {
+                try
+                {
+                    await call();
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Error while executing queued SignalR call.");
+                }
+            }
+        }
+
         #endregion
 
         #region Public API Methods
 
         public Task<IEnumerable<TaskDTO>> GetAllTasksAsync() =>
-            InvokeWithRetryAsync<IEnumerable<TaskDTO>>(SignalRGlobals.GetAllTasks);
+            InvokeWithRetrySafeAsync<IEnumerable<TaskDTO>>(SignalRGlobals.GetAllTasks);
 
         public Task<TaskDTO> AddTaskAsync(TaskDTO task) =>
-            InvokeWithRetryAsync<TaskDTO>(SignalRGlobals.AddTask, task);
+            InvokeWithRetrySafeAsync<TaskDTO>(SignalRGlobals.AddTask, task);
 
         public Task<TaskDTO> UpdateTaskAsync(TaskDTO task) =>
-            InvokeWithRetryAsync<TaskDTO>(SignalRGlobals.UpdateTask, task);
+            InvokeWithRetrySafeAsync<TaskDTO>(SignalRGlobals.UpdateTask, task);
 
         public Task<bool> DeleteTaskAsync(Guid taskId) =>
-            InvokeWithRetryAsync<bool>(SignalRGlobals.DeleteTask, taskId);
+            InvokeWithRetrySafeAsync<bool>(SignalRGlobals.DeleteTask, taskId);
 
         public Task<bool> SetTaskCompletionAsync(Guid taskId, bool isCompleted) =>
-            InvokeWithRetryAsync<bool>(SignalRGlobals.SetTaskCompletion, taskId, isCompleted);
+            InvokeWithRetrySafeAsync<bool>(SignalRGlobals.SetTaskCompletion, taskId, isCompleted);
 
         public Task<bool> LockTaskAsync(Guid taskId) =>
-            InvokeWithRetryAsync<bool>(SignalRGlobals.LockTask, taskId);
+            InvokeWithRetrySafeAsync<bool>(SignalRGlobals.LockTask, taskId);
 
         public Task<bool> UnlockTaskAsync(Guid taskId) =>
-            InvokeWithRetryAsync<bool>(SignalRGlobals.UnlockTask, taskId);
+            InvokeWithRetrySafeAsync<bool>(SignalRGlobals.UnlockTask, taskId);
 
         #endregion
 
         #region Helpers
 
-        private async Task<T> InvokeWithRetryAsync<T>(string methodName, params object[] args)
+        private Task<T> InvokeWithRetrySafeAsync<T>(string methodName, params object[] args)
         {
             if (!IsConnected)
             {
-                _logger.Warning("Attempted operation while not connected to SignalR hub.");
-                throw new InvalidOperationException("Not connected to SignalR hub.");
+                _logger.Warning("Not connected to SignalR hub. Queuing {MethodName} call.", methodName);
+
+                // Queue call for later, return default(T) wrapped in Task immediately to avoid crashing
+                var tcs = new TaskCompletionSource<T>();
+
+                _pendingCalls.Enqueue(async () =>
+                {
+                    try
+                    {
+                        var result = await InvokeWithRetryAsync<T>(methodName, args);
+                        tcs.TrySetResult(result);
+                    }
+                    catch (Exception ex)
+                    {
+                        tcs.TrySetException(ex);
+                    }
+                });
+
+                return tcs.Task;
             }
 
+            return InvokeWithRetryAsync<T>(methodName, args);
+        }
+
+        private async Task<T> InvokeWithRetryAsync<T>(string methodName, params object[] args)
+        {
             return await _retryPolicy.ExecuteAsync(async () =>
             {
                 _logger.Information("Invoking {MethodName} on SignalR hub...", methodName);

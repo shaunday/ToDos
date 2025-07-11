@@ -65,6 +65,7 @@ namespace ToDos.Ui
             // Register services
             container.RegisterSingleton<INavigationService, NavigationService>();
             container.RegisterSingleton<ITaskSyncClient, SignalRTaskSyncClient>();
+            container.RegisterInstance(Log.Logger);
 
             // Register AutoMapper
             var config = new MapperConfiguration(cfg =>
