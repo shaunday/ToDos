@@ -9,5 +9,15 @@ namespace Todos.Client.Common
     public class TypesGlobal
     {
         public enum ClientType { UiClient, UiSimulator }
+
+        public enum ConnectionStatus
+        {
+            Connecting,
+            Connected,
+            Reconnecting,
+            Disconnected,
+            Failed
+        }
+
     }
 }

@@ -12,7 +12,15 @@
 
 ---
 
-## SignalR
+## SignalR Client
+
+* You can add cancellation tokens or timeout policies to retry/wait delays.
+* On permanent disconnect, prompt UI to notify the user or retry manually.
+* Optionally implement a circuit breaker with Polly if you want to stop hammering the server.
+
+---
+
+## SignalR HOST
 
 * API Versioning
 * Implement SignalR hub for real-time task updates
@@ -64,7 +72,7 @@ Make sure that both client and server validate all inputs (e.g., task titles not
 
 ## Testing and Tooling
 
-* Create LoadTester or orchestrator app to launch multiple WPF clients concurrently
+* Create simulator client, add logging display to orchestrator, add auto login with a user
 * Simulate multiple users editing tasks concurrently to test locking and queues
 * Simulate a large number of clients, throttled writes, and sharded reads
 ---

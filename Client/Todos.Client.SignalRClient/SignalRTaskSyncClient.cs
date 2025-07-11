@@ -1,18 +1,29 @@
+using DotNetEnv;
 using Microsoft.AspNet.SignalR.Client;
+using Polly;
+using Polly.Retry;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Todos.Client.Common.Interfaces;
 using ToDos.DotNet.Common;
-using DotNetEnv;
+using static Todos.Client.Common.TypesGlobal;
 
 namespace Todos.Client.SignalRClient
 {
     public class SignalRTaskSyncClient : ITaskSyncClient
     {
+        #region Fields, Properties & Events
+
         private HubConnection _hubConnection;
         private IHubProxy _hubProxy;
         private readonly string _hubUrl;
+        private readonly ILogger _logger;
+        private readonly AsyncRetryPolicy _retryPolicy;
+
+        private int _reconnectAttempts = 0;
+        private const int MaxReconnectAttempts = 5;
 
         public bool IsConnected => _hubConnection?.State == ConnectionState.Connected;
 
@@ -22,94 +33,206 @@ namespace Todos.Client.SignalRClient
         public event Action<Guid> TaskLocked;
         public event Action<Guid> TaskUnlocked;
 
-        public SignalRTaskSyncClient()
+        public event Action<ConnectionStatus> ConnectionStatusChanged;
+
+        #endregion
+
+        #region Constructor
+
+        public SignalRTaskSyncClient(ILogger logger)
         {
+            _logger = logger;
             var envPath = System.IO.Path.Combine(AppContext.BaseDirectory, ".env.Global");
             Env.Load(envPath);
             _hubUrl = Environment.GetEnvironmentVariable(SignalRGlobals.URL_String_Identifier);
 
             if (string.IsNullOrWhiteSpace(_hubUrl))
-                throw new InvalidOperationException("SIGNALR_SERVER_URL is not set in .env file.");
+            {
+                string errorMsg = $"{SignalRGlobals.URL_String_Identifier} is not set in .env file.";
+                _logger.Error(errorMsg);
+                throw new InvalidOperationException(errorMsg);
+            }
+
+            _retryPolicy = Policy
+                .Handle<Exception>()
+                .WaitAndRetryAsync(
+                    retryCount: 3,
+                    sleepDurationProvider: attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
+                    onRetry: (exception, timeSpan, retryCount, context) =>
+                    {
+                        _logger.Warning("Retry {RetryCount} after {TimeSpan} due to: {Exception}", retryCount, timeSpan, exception.Message);
+                    });
         }
+
+        #endregion
+
+        #region Connect / Disconnect
 
         public async Task ConnectAsync()
         {
-            if (_hubConnection != null)
+            RaiseConnectionStatus(ConnectionStatus.Connecting);
+
+            try
             {
-                await DisconnectAsync();
+                if (_hubConnection != null)
+                {
+                    _logger.Information("Disconnecting existing SignalR connection...");
+                    await DisconnectAsync();
+                }
+
+                _logger.Information("Connecting to SignalR hub at {HubUrl}...", _hubUrl);
+                _hubConnection = new HubConnection(_hubUrl);
+                SetupReconnect();
+
+                _hubProxy = _hubConnection.CreateHubProxy("TaskHub");
+
+                _hubProxy.On<TaskDTO>(SignalRGlobals.TaskAdded, task => SafeInvoke(() => TaskAdded?.Invoke(task), nameof(TaskAdded)));
+                _hubProxy.On<TaskDTO>(SignalRGlobals.TaskUpdated, task => SafeInvoke(() => TaskUpdated?.Invoke(task), nameof(TaskUpdated)));
+                _hubProxy.On<Guid>(SignalRGlobals.TaskDeleted, id => SafeInvoke(() => TaskDeleted?.Invoke(id), nameof(TaskDeleted)));
+                _hubProxy.On<Guid>(SignalRGlobals.TaskLocked, id => SafeInvoke(() => TaskLocked?.Invoke(id), nameof(TaskLocked)));
+                _hubProxy.On<Guid>(SignalRGlobals.TaskUnlocked, id => SafeInvoke(() => TaskUnlocked?.Invoke(id), nameof(TaskUnlocked)));
+
+                await _hubConnection.Start();
+                _logger.Information("SignalR connection established.");
+                RaiseConnectionStatus(ConnectionStatus.Connected);
             }
-
-            _hubConnection = new HubConnection(_hubUrl);
-            _hubProxy = _hubConnection.CreateHubProxy("TaskHub");
-
-            _hubProxy.On<TaskDTO>(SignalRGlobals.TaskAdded, task => TaskAdded?.Invoke(task));
-            _hubProxy.On<TaskDTO>(SignalRGlobals.TaskUpdated, task => TaskUpdated?.Invoke(task));
-            _hubProxy.On<Guid>(SignalRGlobals.TaskDeleted, id => TaskDeleted?.Invoke(id));
-            _hubProxy.On<Guid>(SignalRGlobals.TaskLocked, id => TaskLocked?.Invoke(id));
-            _hubProxy.On<Guid>(SignalRGlobals.TaskUnlocked, id => TaskUnlocked?.Invoke(id));
-
-            await _hubConnection.Start();
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Failed to connect to SignalR hub.");
+                RaiseConnectionStatus(ConnectionStatus.Failed);
+                throw;
+            }
         }
+
 
         public Task DisconnectAsync()
         {
             return Task.Run(() =>
             {
-                if (_hubConnection != null)
+                try
                 {
-                    _hubConnection.Stop();
-                    _hubConnection.Dispose();
-                    _hubConnection = null;
+                    if (_hubConnection != null)
+                    {
+                        _logger.Information("Stopping SignalR connection...");
+                        _hubConnection.Stop();
+                        _hubConnection.Dispose();
+                        _hubConnection = null;
+                        _logger.Information("SignalR connection stopped.");
+                        RaiseConnectionStatus(ConnectionStatus.Disconnected);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Error while disconnecting SignalR connection.");
                 }
             });
         }
 
-        public Task<IEnumerable<TaskDTO>> GetAllTasksAsync()
+        private void SetupReconnect()
         {
-            EnsureConnected();
-            return _hubProxy.Invoke<IEnumerable<TaskDTO>>(SignalRGlobals.GetAllTasks);
+            _hubConnection.Closed += async () =>
+            {
+                _logger.Warning("SignalR connection closed. Attempting reconnect...");
+                RaiseConnectionStatus(ConnectionStatus.Reconnecting);
+
+                while (_reconnectAttempts < MaxReconnectAttempts)
+                {
+                    try
+                    {
+                        _reconnectAttempts++;
+                        var delay = TimeSpan.FromSeconds(Math.Pow(2, _reconnectAttempts));
+                        _logger.Information("Waiting {Delay} before reconnect attempt {Attempt}", delay, _reconnectAttempts);
+                        await Task.Delay(delay);
+
+                        await _hubConnection.Start();
+                        _logger.Information("SignalR reconnected.");
+                        RaiseConnectionStatus(ConnectionStatus.Connected);
+                        _reconnectAttempts = 0;
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "Reconnect attempt {Attempt} failed.", _reconnectAttempts);
+                    }
+                }
+
+                if (_reconnectAttempts >= MaxReconnectAttempts)
+                {
+                    _logger.Error("Max reconnect attempts reached. Giving up.");
+                    RaiseConnectionStatus(ConnectionStatus.Failed);
+                }
+            };
         }
 
-        public Task<TaskDTO> AddTaskAsync(TaskDTO task)
-        {
-            EnsureConnected();
-            return _hubProxy.Invoke<TaskDTO>(SignalRGlobals.AddTask, task);
-        }
+        #endregion
 
-        public Task<TaskDTO> UpdateTaskAsync(TaskDTO task)
-        {
-            EnsureConnected();
-            return _hubProxy.Invoke<TaskDTO>(SignalRGlobals.UpdateTask, task);
-        }
+        #region Public API Methods
 
-        public Task<bool> DeleteTaskAsync(Guid taskId)
-        {
-            EnsureConnected();
-            return _hubProxy.Invoke<bool>(SignalRGlobals.DeleteTask, taskId);
-        }
+        public Task<IEnumerable<TaskDTO>> GetAllTasksAsync() =>
+            InvokeWithRetryAsync<IEnumerable<TaskDTO>>(SignalRGlobals.GetAllTasks);
 
-        public Task<bool> SetTaskCompletionAsync(Guid taskId, bool isCompleted)
-        {
-            EnsureConnected();
-            return _hubProxy.Invoke<bool>(SignalRGlobals.SetTaskCompletion, taskId, isCompleted);
-        }
+        public Task<TaskDTO> AddTaskAsync(TaskDTO task) =>
+            InvokeWithRetryAsync<TaskDTO>(SignalRGlobals.AddTask, task);
 
-        public Task<bool> LockTaskAsync(Guid taskId)
-        {
-            EnsureConnected();
-            return _hubProxy.Invoke<bool>(SignalRGlobals.LockTask, taskId);
-        }
+        public Task<TaskDTO> UpdateTaskAsync(TaskDTO task) =>
+            InvokeWithRetryAsync<TaskDTO>(SignalRGlobals.UpdateTask, task);
 
-        public Task<bool> UnlockTaskAsync(Guid taskId)
-        {
-            EnsureConnected();
-            return _hubProxy.Invoke<bool>(SignalRGlobals.UnlockTask, taskId);
-        }
+        public Task<bool> DeleteTaskAsync(Guid taskId) =>
+            InvokeWithRetryAsync<bool>(SignalRGlobals.DeleteTask, taskId);
 
-        private void EnsureConnected()
+        public Task<bool> SetTaskCompletionAsync(Guid taskId, bool isCompleted) =>
+            InvokeWithRetryAsync<bool>(SignalRGlobals.SetTaskCompletion, taskId, isCompleted);
+
+        public Task<bool> LockTaskAsync(Guid taskId) =>
+            InvokeWithRetryAsync<bool>(SignalRGlobals.LockTask, taskId);
+
+        public Task<bool> UnlockTaskAsync(Guid taskId) =>
+            InvokeWithRetryAsync<bool>(SignalRGlobals.UnlockTask, taskId);
+
+        #endregion
+
+        #region Helpers
+
+        private async Task<T> InvokeWithRetryAsync<T>(string methodName, params object[] args)
         {
             if (!IsConnected)
+            {
+                _logger.Warning("Attempted operation while not connected to SignalR hub.");
                 throw new InvalidOperationException("Not connected to SignalR hub.");
+            }
+
+            return await _retryPolicy.ExecuteAsync(async () =>
+            {
+                _logger.Information("Invoking {MethodName} on SignalR hub...", methodName);
+                return await _hubProxy.Invoke<T>(methodName, args);
+            });
         }
+
+        private void SafeInvoke(Action action, string context)
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error in event handler for {Context}", context);
+            }
+        }
+
+        private void RaiseConnectionStatus(ConnectionStatus status)
+        {
+            _logger.Information("Connection status changed to {Status}", status);
+            try
+            {
+                ConnectionStatusChanged?.Invoke(status);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error while raising ConnectionStatusChanged event.");
+            }
+        }
+
+        #endregion
     }
 }
