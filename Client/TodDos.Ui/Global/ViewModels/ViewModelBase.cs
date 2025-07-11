@@ -15,10 +15,16 @@ namespace ToDos.Ui.ViewModels
         protected readonly IMapper _mapper;
         protected readonly INavigationService _navigation;
 
-        public ViewModelBase(IMapper mapper, INavigationService navigation)
+        public ViewModelBase CurrentViewModel => _navigation?.CurrentViewModel;
+
+        public ViewModelBase(INavigationService navigation)
+        {
+            _navigation = navigation;
+        }
+
+        public ViewModelBase(IMapper mapper, INavigationService navigation) : this(navigation)
         {
             _mapper = mapper;
-            _navigation = navigation;
         }
     }
 

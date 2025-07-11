@@ -46,7 +46,7 @@
 
 ## Client-Side (WPF + MVVM)
 
-* Implement MainViewModel, TaskViewModel, and task models
+* set login stuff
 * Create UI for task list, add/edit/delete, mark complete/incomplete
 * Add UI indication for locked tasks (lock icon, disabled editing controls)
 * Implement service layer for communication with SignalR and REST API

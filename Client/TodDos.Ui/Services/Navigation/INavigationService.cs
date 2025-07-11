@@ -9,6 +9,8 @@ namespace ToDos.Ui.Services.Navigation
 {
     public interface INavigationService
     {
+        ViewModelBase CurrentViewModel { get; set; }
+
         void NavigateTo<TViewModel>() where TViewModel : ViewModelBase;
     }
 }

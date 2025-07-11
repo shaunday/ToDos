@@ -1,15 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using ToDos.Ui.Services.Navigation;
+using ToDos.Ui.ViewModels;
 
 namespace ToDos.Ui
 {
-    public class MainViewModel : ObservableObject
+    public class MainViewModel : ViewModelBase
     {
-        public INavigationService _navigation { get; }
-
-        public MainViewModel(INavigationService navigation)
+        public MainViewModel(INavigationService navigation) :base(navigation)
         {
-            _navigation = navigation;
+            _navigation.NavigateTo<TasksViewModel>();
         }
     }
 

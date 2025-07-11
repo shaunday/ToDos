@@ -58,7 +58,7 @@ namespace ToDos.Ui
 
 
             //ViewModels
-            container.RegisterType<MainViewModel>(); //todo singleton?
+            container.RegisterSingleton<MainViewModel>(); 
             container.RegisterType<LoginViewModel>();
             container.RegisterType<TasksViewModel>();
 
