@@ -27,10 +27,10 @@
             <Setter Property="HorizontalAlignment" Value="Center" />
         </Style>
     </UserControl.Resources>
-    <materialDesign:Card Padding="24" materialDesign:ElevationAssist.Elevation="Dp2">
+    <materialDesign:Card Padding="12" materialDesign:ElevationAssist.Elevation="Dp3">
         <DockPanel LastChildFill="True">
             <!-- Kill All Button -->
-            <Button Content="Kill All" Style="{StaticResource MaterialDesignOutlinedButton}" Width="180" Height="38" FontSize="16" Command="{Binding KillAllClientsCommand}" DockPanel.Dock="Top" />
+            <Button Content="Kill All" Style="{StaticResource MaterialDesignOutlinedButton}" Width="220" Height="30" FontSize="16" Command="{Binding KillAllClientsCommand}" DockPanel.Dock="Top" />
             <!-- Client List -->
             <ListView x:Name="ClientListView"
                       ItemsSource="{Binding FilteredClients}"

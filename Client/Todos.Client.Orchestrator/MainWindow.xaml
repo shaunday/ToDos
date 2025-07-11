@@ -100,12 +100,12 @@
                     <TextBlock Text="Client Type:" />
                     <ComboBox x:Name="ClientTypeCombo"
                               ItemsSource="{Binding Source={StaticResource ClientTypeValues}}"
-                              SelectedItem="{Binding FilterClientType, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              SelectedItem="{Binding FilterClientType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                               IsEditable="False" />
-                    <CheckBox x:Name="IsAliveCheck" Content="Alive Only" IsChecked="{Binding FilterIsAlive, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <CheckBox x:Name="IsAliveCheck" Content="Alive Only" IsChecked="{Binding FilterIsAlive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock Text="PID:" />
-                    <TextBox Text="{Binding FilterProcessIdText, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" />
-                    <Button Content="Clear All Filters" Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding ClearFiltersCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="0" />
+                    <TextBox Text="{Binding FilterProcessIdText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" />
+                    <Button Content="Clear All Filters" Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding ClearFiltersCommand}" Margin="0" />
                 </StackPanel>
             </GroupBox>
         </StackPanel>
