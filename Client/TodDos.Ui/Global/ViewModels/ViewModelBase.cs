@@ -13,13 +13,11 @@ namespace ToDos.Ui.ViewModels
     public class ViewModelBase : ObservableObject
     {
         protected readonly IMapper _mapper;
-        protected readonly INavigationService _navigation;
-
-        public ViewModelBase CurrentViewModel => _navigation?.CurrentViewModel;
+        public INavigationService Navigation { get; }
 
         public ViewModelBase(INavigationService navigation)
         {
-            _navigation = navigation;
+            Navigation = navigation;
         }
 
         public ViewModelBase(IMapper mapper, INavigationService navigation) : this(navigation)

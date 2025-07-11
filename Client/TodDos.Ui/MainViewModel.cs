@@ -8,7 +8,7 @@ namespace ToDos.Ui
     {
         public MainViewModel(INavigationService navigation) :base(navigation)
         {
-            _navigation.NavigateTo<TasksViewModel>();
+            Navigation.NavigateTo<TasksViewModel>();
         }
     }
 
