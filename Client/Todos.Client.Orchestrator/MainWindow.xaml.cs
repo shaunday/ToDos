@@ -29,10 +29,10 @@ namespace Todos.Client.Orchestrator
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (DataContext is MainWindowViewModel viewModel && viewModel.RunningCount > 0)
+            if (DataContext is MainWindowViewModel viewModel && viewModel.Clients.Count > 0)
             {
                 var result = MessageBox.Show(
-                    $"You have {viewModel.RunningCount} client(s) running. Do you want to close all clients and exit?",
+                    $"You have {viewModel.Clients.Count} client(s) running. Do you want to close all clients and exit?",
                     "Confirm Exit",
                     MessageBoxButton.YesNoCancel,
                     MessageBoxImage.Question);
@@ -41,7 +41,7 @@ namespace Todos.Client.Orchestrator
                 {
                     case MessageBoxResult.Yes:
                         // Kill all clients and close
-                        viewModel.KillAllClientsSilent();
+                        viewModel.KillAllClientsCommand.Execute(null);
                         break;
                     case MessageBoxResult.No:
                         // Close without killing clients

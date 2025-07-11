@@ -4,138 +4,123 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:controls="clr-namespace:Todos.Client.Orchestrator.Controls"
+        xmlns:common="clr-namespace:Todos.Client.Common;assembly=Todos.Client.Common"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="Orchestrator" Height="600" Width="800" 
-        MinHeight="500" MinWidth="600"
+        Title="Orchestrator" Height="800" Width="1600" 
+        MinHeight="600" MinWidth="1200"
         WindowStartupLocation="CenterScreen">
-    
     <Window.Resources>
+        <ObjectDataProvider x:Key="ClientTypeValues"
+                            MethodName="GetValues"
+                            ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="common:TypesGlobal+ClientType"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
         <Style x:Key="HeaderTextStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignHeadline5TextBlock}">
             <Setter Property="Margin" Value="0,0,0,24" />
             <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
         </Style>
-        
-        <Style x:Key="StatusTextStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignBody1TextBlock}">
-            <Setter Property="Margin" Value="0,0,0,16" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-        </Style>
-        
-        <Style x:Key="ClientListStyle" TargetType="ListBox">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
-            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
-        </Style>
-        
-        <Style x:Key="ClientItemStyle" TargetType="ListBoxItem">
-            <Setter Property="Padding" Value="16,12" />
-            <Setter Property="Margin" Value="0,2" />
-            <Setter Property="Background" Value="{DynamicResource MaterialDesignCard}" />
+        <Style TargetType="GroupBox" BasedOn="{StaticResource MaterialDesignGroupBox}">
             <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListBoxItem">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter />
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+            <Setter Property="MinHeight" Value="80" />
         </Style>
     </Window.Resources>
-    
     <Grid Background="{DynamicResource MaterialDesignPaper}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MinWidth="600" />
+            <ColumnDefinition Width="2" />
+            <ColumnDefinition Width="*" MinWidth="600" />
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        
-        <!-- Main Content -->
-        <materialDesign:Card Grid.Row="0" Margin="24" Padding="32" 
-                            materialDesign:ElevationAssist.Elevation="Dp2">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-                
-                <!-- Header -->
-                <TextBlock Grid.Row="0" Text="Orchestrator Launcher" 
-                           Style="{StaticResource HeaderTextStyle}" />
-                
-                <!-- Launch Button -->
-                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,24">
-                    <Button Content="Launch Client" 
-                            Style="{StaticResource MaterialDesignRaisedButton}"
-                            Width="200" Height="48" FontSize="16"
-                            Command="{Binding LaunchClientCommand}"
-                            Margin="0,0,16,0" />
-                    
-                    <Button Content="Kill All" 
-                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                            Width="120" Height="48" FontSize="16"
-                            Command="{Binding KillAllClientsCommand}"
-                            Margin="0,0,0,0" />
+
+        <!-- Unified vertical stack for title and groups -->
+        <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Vertical" Margin="24,24,24,24" VerticalAlignment="Top" HorizontalAlignment="Stretch" >
+            <StackPanel.Resources>
+                <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBoxBase}">
+                    <Setter Property="Margin" Value="0,0,25,0" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Setter Property="FontWeight" Value="Normal" />
+                    <Setter Property="FontSize" Value="14" />
+                    <Setter Property="Width" Value="120" />
+                </Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubtitle1TextBlock}">
+                    <Setter Property="Margin" Value="0,0,16,0" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+                <Style TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignComboBox}">
+                    <Setter Property="Margin" Value="0,0,25,0" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Setter Property="FontWeight" Value="Normal" />
+                    <Setter Property="FontSize" Value="15" />
+                    <Setter Property="Width" Value="120" />
+                </Style>
+                <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+                    <Setter Property="Margin" Value="0,0,16,0" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                    <Setter Property="FontSize" Value="15" />
+                    <Setter Property="MinWidth" Value="100" />
+                    <Setter Property="Height" Value="32" />
+                </Style>
+                <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignDarkCheckBox}">
+                    <Setter Property="Margin" Value="0,0,25,0" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+            </StackPanel.Resources>
+            <TextBlock Text="Orchestrator Launcher" Style="{StaticResource HeaderTextStyle}"/>
+            <GroupBox Header="Client Launcher">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="Client Type:" />
+                    <ComboBox x:Name="ClientTypeComboBox" SelectedItem="{Binding LaunchClientType, Mode=TwoWay}" ItemsSource="{Binding Source={StaticResource ClientTypeValues}}" SelectedIndex="0" />
+                    <TextBlock Text="Count:" />
+                    <TextBox x:Name="ClientCountTextBox" Text="{Binding LaunchClientCount, Mode=TwoWay}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
+                    <Button Content="Launch Client" Style="{StaticResource MaterialDesignRaisedButton}" Command="{Binding LaunchClientCommand}" HorizontalAlignment="Center" Margin="0" />
                 </StackPanel>
-                
-                <!-- Status -->
-                <TextBlock Grid.Row="2" 
-                           Text="{Binding RunningCount, StringFormat=Running Clients: {0}}" 
-                           Style="{StaticResource StatusTextStyle}" />
-                
-                <!-- Client List -->
-                <ListBox Grid.Row="3" ItemsSource="{Binding RunningClients}" 
-                         Style="{StaticResource ClientListStyle}"
-                         ItemContainerStyle="{StaticResource ClientItemStyle}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                
-                                <!-- PID -->
-                                <StackPanel Grid.Column="0" Orientation="Horizontal" 
-                                            VerticalAlignment="Center" Margin="0,0,16,0">
-                                    <TextBlock Text="PID: " 
-                                               Style="{StaticResource MaterialDesignBody2TextBlock}"
-                                               Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                                    <TextBlock Text="{Binding Id}" 
-                                               Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                               FontWeight="Bold" />
-                                </StackPanel>
-                                
-                                <!-- Window Title -->
-                                <TextBlock Grid.Column="1" Text="{Binding MainWindowTitle}" 
-                                           Style="{StaticResource MaterialDesignBody1TextBlock}"
-                                           VerticalAlignment="Center"
-                                           TextTrimming="CharacterEllipsis" />
-                                
-                                <!-- Kill Button -->
-                                <Button Grid.Column="2" Content="Kill" 
-                                        Command="{Binding DataContext.KillClientCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
-                                        CommandParameter="{Binding}" 
-                                        Style="{StaticResource MaterialDesignOutlinedButton}"
-                                        Width="80" Height="32" FontSize="12"
-                                        Margin="16,0,0,0" />
-                            </Grid>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-            </Grid>
+            </GroupBox>
+            <GroupBox Header="Simulator Controls">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="Simulator PID:" />
+                    <ComboBox x:Name="SimulatorPidComboBox" ItemsSource="{Binding SimulatorPids}" SelectedItem="{Binding SelectedSimulatorPid, Mode=TwoWay}" />
+                    <TextBlock Text="Command:" />
+                    <ComboBox x:Name="SimulatorCommandComboBox" ItemsSource="{Binding SimulatorCommands}" SelectedItem="{Binding SelectedSimulatorCommand, Mode=TwoWay}" />
+                    <Button Content="Simulate" Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding SimulateCommand}" HorizontalAlignment="Center" Margin="0" />
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Header="Filtering" Margin="0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="Client Type:" />
+                    <ComboBox x:Name="ClientTypeCombo"
+                              ItemsSource="{Binding Source={StaticResource ClientTypeValues}}"
+                              SelectedItem="{Binding FilterClientType, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              IsEditable="False" />
+                    <CheckBox x:Name="IsAliveCheck" Content="Alive Only" IsChecked="{Binding FilterIsAlive, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Text="PID:" />
+                    <TextBox Text="{Binding FilterProcessIdText, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" />
+                    <Button Content="Clear All Filters" Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding ClearFiltersCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" Margin="0" />
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+
+        <!-- Client List and Actions -->
+        <controls:ClientListControl Grid.Column="0" Grid.Row="1" Margin="24,0,24,24" />
+
+        <!-- Combined Log Viewer -->
+        <materialDesign:Card Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" Margin="24,24,24,24" Padding="24" materialDesign:ElevationAssist.Elevation="Dp2">
+            <StackPanel>
+                <TextBlock Text="Combined Logs (Filtered)" Style="{StaticResource HeaderTextStyle}" />
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Height="700">
+                    <TextBox Text="{Binding CombinedLogs}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="13" Background="{DynamicResource MaterialDesignPaper}" BorderThickness="0"/>
+                </ScrollViewer>
+            </StackPanel>
         </materialDesign:Card>
-        
-        <!-- Status Bar -->
-        <Border Grid.Row="1" Background="{DynamicResource MaterialDesignDivider}" 
-                Height="1" Margin="24,0,24,0" />
     </Grid>
 </Window>

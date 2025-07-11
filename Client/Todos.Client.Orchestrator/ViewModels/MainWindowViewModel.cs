@@ -1,202 +1,166 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System;
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using Serilog;
-using System;
+using Todos.Client.Common;
+using Todos.Client.Orchestrator.Services;
 
 namespace Todos.Client.Orchestrator.ViewModels
 {
     public partial class MainWindowViewModel : ObservableObject
     {
-        public ObservableCollection<Process> RunningClients { get; } = new ObservableCollection<Process>();
+        private readonly ClientProcessService _clientService = new ClientProcessService();
 
-        public int RunningCount => RunningClients.Count;
+        [ObservableProperty]
+        private TypesGlobal.ClientType? filterClientType;
+        [ObservableProperty]
+        private bool? filterIsAlive;
+        [ObservableProperty]
+        private string filterProcessIdText = string.Empty;
+        [ObservableProperty]
+        private ClientModel? selectedClient;
+
+        [ObservableProperty]
+        private TypesGlobal.ClientType launchClientType = TypesGlobal.ClientType.UiClient;
+        [ObservableProperty]
+        private int launchClientCount = 1;
+        [ObservableProperty]
+        private ObservableCollection<int> simulatorPids = new ObservableCollection<int>();
+        [ObservableProperty]
+        private int selectedSimulatorPid;
+        [ObservableProperty]
+        private ObservableCollection<string> simulatorCommands = new ObservableCollection<string> { "AddTask", "UpdateTask", "DeleteTask" };
+        [ObservableProperty]
+        private string selectedSimulatorCommand;
+
+        public ObservableCollection<ClientModel> Clients => _clientService.Clients;
+
+        public ObservableCollection<ClientModel> FilteredClients { get; } = new ObservableCollection<ClientModel>();
+
+        [ObservableProperty]
+        private string combinedLogs = string.Empty;
 
         public MainWindowViewModel()
         {
-            RunningClients.CollectionChanged += (s, e) => OnPropertyChanged(nameof(RunningCount));
+            // Initial filter
+            UpdateFilteredClients();
+        }
+
+        partial void OnFilterClientTypeChanged(TypesGlobal.ClientType? value) => UpdateFilteredClients();
+        partial void OnFilterIsAliveChanged(bool? value) => UpdateFilteredClients();
+        partial void OnFilterProcessIdTextChanged(string value) => UpdateFilteredClients();
+
+        [RelayCommand]
+        private void ClearFilters()
+        {
+            FilterClientType = null;
+            FilterIsAlive = null;
+            FilterProcessIdText = string.Empty;
+        }
+
+
+        private void UpdateFilteredClients()
+        {
+            var filtered = _clientService.Clients.Where(c =>
+                (!FilterClientType.HasValue || c.ClientType == FilterClientType.Value) &&
+                (!FilterIsAlive.HasValue || c.IsAlive == FilterIsAlive.Value) &&
+                (string.IsNullOrWhiteSpace(FilterProcessIdText) || c.ProcessId.ToString().Contains(FilterProcessIdText))
+            ).ToList();
+            FilteredClients.Clear();
+            foreach (var c in filtered)
+            {
+                Console.WriteLine($"[DEBUG] Filtered client: PID={c.ProcessId}, LogFilePath={c.LogFilePath}");
+                FilteredClients.Add(c);
+            }
         }
 
         [RelayCommand]
         private void LaunchClient()
         {
-            try
+            // Launch as many clients as specified by LaunchClientCount (minimum 1)
+            int count = Math.Max(1, LaunchClientCount);
+            var outputDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".";
+            var clientExe = Path.Combine(outputDir, "TodDos.Ui.exe");
+            if (!File.Exists(clientExe))
             {
-                var outputDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".";
-                var clientExe = Path.Combine(outputDir, "TodDos.Ui.exe");
-                
-                Log.Information("Attempting to launch client from: {ClientExe}", clientExe);
-                
-                if (!File.Exists(clientExe))
-                {
-                    var errorMsg = $"Client executable not found in: {outputDir}";
-                    Log.Error(errorMsg);
-                    MessageBox.Show(errorMsg, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                // Check for required dependencies
-                var envFile = Path.Combine(outputDir, ".env.Global");
-                if (!File.Exists(envFile))
-                {
-                    Log.Warning(".env.Global file not found in output directory: {EnvFile}", envFile);
-                }
-
+                MessageBox.Show($"Client executable not found in: {outputDir}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            for (int i = 0; i < count; i++)
+            {
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = clientExe,
-                    WorkingDirectory = outputDir,
-                    UseShellExecute = false, // This allows us to capture output
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = false
+                    WorkingDirectory = outputDir
                 };
-
-                Log.Information("Starting client process with working directory: {WorkingDir}", outputDir);
-                
                 var proc = Process.Start(startInfo);
                 if (proc != null)
                 {
-                    Log.Information("Client process started successfully with PID: {Pid}", proc.Id);
-                    
-                    RunningClients.Add(proc);
+                    _clientService.AddClient(TypesGlobal.ClientType.UiClient, proc);
                     proc.EnableRaisingEvents = true;
-                    
-                    // Handle process exit
-                    proc.Exited += (s, e) =>
-                    {
-                        App.Current.Dispatcher.Invoke(() =>
-                        {
-                            Log.Information("Client process exited with PID: {Pid}, ExitCode: {ExitCode}", proc.Id, proc.ExitCode);
-                            RunningClients.Remove(proc);
-                        });
-                    };
-
-                    // Capture output for debugging
-                    proc.OutputDataReceived += (s, e) =>
-                    {
-                        if (!string.IsNullOrEmpty(e.Data))
-                        {
-                            Log.Information("Client Output [{Pid}]: {Output}", proc.Id, e.Data);
-                        }
-                    };
-
-                    proc.ErrorDataReceived += (s, e) =>
-                    {
-                        if (!string.IsNullOrEmpty(e.Data))
-                        {
-                            Log.Error("Client Error [{Pid}]: {Error}", proc.Id, e.Data);
-                        }
-                    };
-
-                    proc.BeginOutputReadLine();
-                    proc.BeginErrorReadLine();
-                }
-                else
-                {
-                    Log.Error("Failed to start client process");
-                    MessageBox.Show("Failed to start client process", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    proc.Exited += (s, e) => Application.Current?.Dispatcher.Invoke(UpdateFilteredClients);
                 }
             }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Exception occurred while launching client");
-                MessageBox.Show($"Error launching client: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            UpdateFilteredClients();
         }
 
         [RelayCommand]
-        private void KillClient(Process? proc)
+        private void KillClient(ClientModel? model)
         {
-            if (proc == null) return;
-            
-            try
-            {
-                Log.Information("Attempting to kill client process with PID: {Pid}", proc.Id);
-                
-                if (!proc.HasExited)
-                {
-                    proc.Kill();
-                    Log.Information("Successfully killed client process with PID: {Pid}", proc.Id);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error killing client process with PID: {Pid}", proc.Id);
-            }
-            finally
-            {
-                RunningClients.Remove(proc);
-            }
+            if (model == null) return;
+            _clientService.KillClient(model);
+            UpdateFilteredClients();
         }
 
         [RelayCommand]
         private void KillAllClients()
         {
-            if (RunningClients.Count == 0) return;
-
-            var result = MessageBox.Show(
-                $"Are you sure you want to kill all {RunningClients.Count} running client(s)?",
-                "Confirm Kill All",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
-
+            if (Clients.Count == 0) return;
+            var result = MessageBox.Show($"Are you sure you want to kill all {Clients.Count} running client(s)?", "Confirm Kill All", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
-                Log.Information("Killing all {Count} client processes", RunningClients.Count);
-                
-                var processesToKill = RunningClients.ToList(); // Create a copy to avoid collection modification issues
-                
-                foreach (var proc in processesToKill)
-                {
-                    try
-                    {
-                        if (!proc.HasExited)
-                        {
-                            proc.Kill();
-                            Log.Information("Killed client process with PID: {Pid}", proc.Id);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex, "Error killing client process with PID: {Pid}", proc.Id);
-                    }
-                }
-                
-                RunningClients.Clear();
-                Log.Information("All client processes have been terminated");
+                _clientService.KillAllClients();
+                UpdateFilteredClients();
             }
         }
 
-        public void KillAllClientsSilent()
+        [RelayCommand]
+        private void OpenLog(ClientModel? model)
         {
-            if (RunningClients.Count == 0) return;
+            if (model == null) return;
+            Console.WriteLine($"[DEBUG] Attempting to open log file: {model.LogFilePath}");
+            if (File.Exists(model.LogFilePath))
+                Process.Start(new ProcessStartInfo(model.LogFilePath) { UseShellExecute = true });
+            else
+                MessageBox.Show($"Log file not found: {model.LogFilePath}", "Log Not Found", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
 
-            Log.Information("Silently killing all {Count} client processes", RunningClients.Count);
-            
-            var processesToKill = RunningClients.ToList();
-            
-            foreach (var proc in processesToKill)
+        [RelayCommand]
+        private void DeleteSelected(System.Collections.IList? selectedItems)
+        {
+            if (selectedItems == null || selectedItems.Count == 0) return;
+            var toDelete = selectedItems.Cast<ClientModel>().ToList();
+            foreach (var model in toDelete)
             {
-                try
-                {
-                    if (!proc.HasExited)
-                    {
-                        proc.Kill();
-                        Log.Information("Killed client process with PID: {Pid}", proc.Id);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Error killing client process with PID: {Pid}", proc.Id);
-                }
+                _clientService.RemoveClient(model);
             }
-            
-            RunningClients.Clear();
+            UpdateFilteredClients();
+        }
+
+        [RelayCommand]
+        private void Simulate()
+        {
+            // SimulateAddTaskAsync(selectedSimulatorPid, ...);
+        }
+
+        public void OnFilterChanged()
+        {
+            UpdateFilteredClients();
         }
     }
 } 

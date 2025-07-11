@@ -1,0 +1,93 @@
+<UserControl x:Class="Todos.Client.Orchestrator.Controls.ClientListControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:Todos.Client.Orchestrator.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="600" d:DesignWidth="600">
+    <UserControl.Resources>
+        <Style x:Key="CenterCellTextBlock" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Padding" Value="8,4" />
+            <Setter Property="FontSize" Value="15" />
+        </Style>
+        <Style x:Key="CenterCellButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Width" Value="120" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Margin" Value="0,0,12,0" />
+        </Style>
+        <Style x:Key="CenterCellCheckBox" TargetType="CheckBox">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+    </UserControl.Resources>
+    <materialDesign:Card Padding="24" materialDesign:ElevationAssist.Elevation="Dp2">
+        <DockPanel LastChildFill="True">
+            <!-- Kill All Button -->
+            <Button Content="Kill All" Style="{StaticResource MaterialDesignOutlinedButton}" Width="180" Height="38" FontSize="16" Command="{Binding KillAllClientsCommand}" DockPanel.Dock="Top" />
+            <!-- Client List -->
+            <ListView x:Name="ClientListView"
+                      ItemsSource="{Binding FilteredClients}"
+                      SelectedItem="{Binding SelectedClient, Mode=TwoWay}"
+                      SelectionMode="Extended"
+                      Margin="0,0,0,0" Height="500"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="PID">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ProcessId}" Style="{StaticResource CenterCellTextBlock}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Type">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding ClientType}" Style="{StaticResource CenterCellTextBlock}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Alive">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <CheckBox IsChecked="{Binding IsAlive, Mode=OneWay}" Style="{StaticResource CenterCellCheckBox}" IsHitTestVisible="False" Focusable="False"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Log File">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding LogFileName}" Style="{StaticResource CenterCellTextBlock}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Actions">
+                            <GridViewColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="Actions" HorizontalAlignment="Center" />
+                                </DataTemplate>
+                            </GridViewColumn.HeaderTemplate>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Button Content="Open Log" Command="{Binding DataContext.OpenLogCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Style="{StaticResource CenterCellButton}" />
+                                        <Button Content="Kill" Command="{Binding DataContext.KillClientCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Style="{StaticResource CenterCellButton}" IsEnabled="{Binding IsAlive}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </DockPanel>
+    </materialDesign:Card>
+</UserControl> 

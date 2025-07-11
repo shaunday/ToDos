@@ -10,7 +10,7 @@ namespace Todos.Client.Common.Factories
         /// Generates a log file name based on process ID and client type.
         /// </summary>
         /// <param name="pid">Process ID</param>
-        /// <param name="clientType">Client type enum (e.g., Ui, Orchestrator)</param>
+        /// <param name="clientType">Client type enum</param>
         /// <returns>Log file name in the format "{clientType}_{pid}.log"</returns>
         public static string GetLogFileName(int pid, ClientType clientType)
         {
@@ -23,7 +23,12 @@ namespace Todos.Client.Common.Factories
 
         public static string GetLogFilePath(string fileName)
         {
-            return Path.Combine("Logs", fileName);
+            // Use the directory of the running executable
+            var baseDir = AppContext.BaseDirectory;
+            var logsDir = Path.Combine(baseDir, "Logs");
+            if (!Directory.Exists(logsDir))
+                Directory.CreateDirectory(logsDir);
+            return Path.Combine(logsDir, fileName);
         }
     }
 } 
