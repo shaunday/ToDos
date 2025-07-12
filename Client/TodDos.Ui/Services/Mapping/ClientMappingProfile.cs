@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using TodDos.Ui.Models;
 using ToDos.DotNet.Common;
 using ToDos.Ui.Models;
+using static ToDos.DotNet.Common.GlobalTypes;
 
 namespace TodDos.Ui.Services.Mapping
 {
@@ -15,7 +16,11 @@ namespace TodDos.Ui.Services.Mapping
         public ClientMappingProfile()
         {
             CreateMap<TaskDTO, TaskModel>()
-                .ReverseMap();
+                .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => 
+                    string.IsNullOrEmpty(src.Priority) ? TaskPriority.Medium : 
+                    (TaskPriority)Enum.Parse(typeof(TaskPriority), src.Priority)))
+                .ReverseMap()
+                .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => src.Priority.ToString()));
 
             CreateMap<TagDTO, TagModel>()
                 .ReverseMap();
