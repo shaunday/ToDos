@@ -51,8 +51,7 @@ namespace ToDos.Ui.ViewModels
             var locked = await _taskService.LockTaskAsync(task.Id);
             if (locked)
             {
-                EditingTask = task;
-                task.IsEditing = true;
+                ChangeTaskEditMode(task, true);
             }
             // else: show error message (optional)
         }
@@ -64,7 +63,7 @@ namespace ToDos.Ui.ViewModels
             var updatedDto = _mapper.Map<TaskDTO>(task);
             await _taskService.UpdateTaskAsync(updatedDto);
             await _taskService.UnlockTaskAsync(task.Id);
-            task.IsEditing = false;
+            ChangeTaskEditMode(task, false);
         }
 
         [RelayCommand]
@@ -74,7 +73,13 @@ namespace ToDos.Ui.ViewModels
             _taskService.UnlockTaskAsync(task.Id);
             //todo if failed what now?
             //todo reload the task
-            task.IsEditing = false;
+            ChangeTaskEditMode(task, false);
+        }
+
+        private void ChangeTaskEditMode(TaskModel task, bool isEditing)
+        {
+            task.IsEditing = isEditing;
+            EditingTask = isEditing ? task : null;
         }
 
         [RelayCommand]

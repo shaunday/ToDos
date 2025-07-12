@@ -21,6 +21,30 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
+        <!-- Centered TextBlock Style -->
+        <Style x:Key="CenteredTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+
+        <!-- Centered TextBox Style -->
+        <Style x:Key="CenteredTextBoxStyle" TargetType="TextBox">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+
+        <!-- Centered ComboBox Style -->
+        <Style x:Key="CenteredComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+
+        <!-- Centered ContentControl Style -->
+        <Style x:Key="CenteredContentControlStyle" TargetType="ContentControl">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+
         <!-- Actions: View Mode Template -->
         <DataTemplate x:Key="ActionsViewTemplate">
             <StackPanel Orientation="Horizontal">
@@ -62,12 +86,19 @@
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="Opacity" Value="1" />
+            <Setter Property="Background" Value="Transparent" />
 
             <Style.Triggers>
+                <!-- Disable default selection highlighting -->
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
+                </Trigger>
+
                 <!-- Highlight border if this row is being edited -->
                 <DataTrigger Binding="{Binding IsEditing}" Value="True">
-                    <Setter Property="BorderThickness" Value="3" />
-                    <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignPrimaryHueMidBrush}" />
+                    <Setter Property="BorderThickness" Value="2" />
+                    <Setter Property="BorderBrush" Value="Azure" />
                     <Setter Property="ToolTip" Value="Currently being edited" />
                 </DataTrigger>
 
@@ -119,6 +150,7 @@
                   CanUserAddRows="False"
                   CanUserDeleteRows="True"
                   IsReadOnly="False"
+                  Padding="10"
                   RowStyle="{StaticResource TaskRowStyle}"
                   CellStyle="{StaticResource TaskCellStyle}"
                   materialDesign:DataGridAssist.CellPadding="8"
@@ -129,15 +161,13 @@
                 <!-- Title Column -->
                 <DataGridTextColumn Header="Title" Width="*">
                     <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource CenteredTextBlockStyle}">
                             <Setter Property="Text" Value="{Binding Title}" />
-                            <Setter Property="VerticalAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.EditingElementStyle>
-                        <Style TargetType="TextBox">
+                        <Style TargetType="TextBox" BasedOn="{StaticResource CenteredTextBoxStyle}">
                             <Setter Property="Text" Value="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                            <Setter Property="VerticalAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
@@ -145,16 +175,14 @@
                 <!-- Description Column -->
                 <DataGridTextColumn Header="Description" Width="3*">
                     <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource CenteredTextBlockStyle}">
                             <Setter Property="Text" Value="{Binding Description}" />
-                            <Setter Property="VerticalAlignment" Value="Center" />
                             <Setter Property="TextWrapping" Value="Wrap" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.EditingElementStyle>
-                        <Style TargetType="TextBox">
+                        <Style TargetType="TextBox" BasedOn="{StaticResource CenteredTextBoxStyle}">
                             <Setter Property="Text" Value="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                            <Setter Property="VerticalAlignment" Value="Center" />
                             <Setter Property="TextWrapping" Value="Wrap" />
                             <Setter Property="AcceptsReturn" Value="True" />
                         </Style>
@@ -165,7 +193,14 @@
                 <DataGridComboBoxColumn Header="Priority"
                                        SelectedItemBinding="{Binding Priority, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                        ItemsSource="{Binding Source={StaticResource TaskPriorityValues}}"
-                                       Width="0.75*" />
+                                       Width="0.75*">
+                    <DataGridComboBoxColumn.ElementStyle>
+                        <Style TargetType="ComboBox" BasedOn="{StaticResource CenteredComboBoxStyle}" />
+                    </DataGridComboBoxColumn.ElementStyle>
+                    <DataGridComboBoxColumn.EditingElementStyle>
+                        <Style TargetType="ComboBox" BasedOn="{StaticResource CenteredComboBoxStyle}" />
+                    </DataGridComboBoxColumn.EditingElementStyle>
+                </DataGridComboBoxColumn>
 
                 <!-- Completed Column -->
                 <DataGridCheckBoxColumn Header="Completed" 
@@ -177,7 +212,8 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <DatePicker SelectedDate="{Binding DueDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        VerticalAlignment="Center" />
+                                        VerticalAlignment="Center" 
+                                        HorizontalAlignment="Center" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -186,7 +222,9 @@
                 <DataGridTemplateColumn Header="Tags" Width="1.5*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ItemsControl ItemsSource="{Binding Tags}" VerticalAlignment="Center">
+                            <ItemsControl ItemsSource="{Binding Tags}" 
+                                          VerticalAlignment="Center" 
+                                          HorizontalAlignment="Center">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <WrapPanel />
@@ -210,7 +248,7 @@
                         <DataTemplate>
                             <ContentControl>
                                 <ContentControl.Style>
-                                    <Style TargetType="ContentControl">
+                                    <Style TargetType="ContentControl" BasedOn="{StaticResource CenteredContentControlStyle}">
                                         <Setter Property="ContentTemplate" Value="{StaticResource ActionsViewTemplate}" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsEditing}" Value="True">
