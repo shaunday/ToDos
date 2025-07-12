@@ -55,11 +55,8 @@
 ## Client-Side (WPF + MVVM)
 
 * set login stuff
-* Create UI for task list, add/edit/delete, mark complete/incomplete
 * Add UI indication for locked tasks (lock icon, disabled editing controls)
 * Implement service layer for communication with SignalR and REST API
-* Handle real-time updates from server (add/edit/delete/lock/unlock)
-* Implement logic to send lock/unlock requests on edit start/end
 * Add user-friendly exception handling and error messages
 * Show SignalR connection state in the UI
 * filter by tags

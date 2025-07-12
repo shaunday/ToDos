@@ -58,13 +58,15 @@
             <StackPanel Orientation="Horizontal">
                 <Button Style="{StaticResource MaterialDesignIconButton}"
                         Command="{Binding DataContext.EditTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}">
+                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}"
+                        Foreground="{DynamicResource MaterialDesignPrimary}">
                     <materialDesign:PackIcon Kind="Pencil" />
                     <Button.ToolTip>Edit</Button.ToolTip>
                 </Button>
                 <Button Style="{StaticResource MaterialDesignIconButton}"
                         Command="{Binding DataContext.DeleteTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}">
+                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}"
+                        Foreground="Red">
                     <materialDesign:PackIcon Kind="Delete" />
                     <Button.ToolTip>Delete</Button.ToolTip>
                 </Button>
@@ -76,13 +78,15 @@
             <StackPanel Orientation="Horizontal">
                 <Button Style="{StaticResource MaterialDesignIconButton}"
                         Command="{Binding DataContext.SaveTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}">
+                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}"
+                        Foreground="Green">
                     <materialDesign:PackIcon Kind="ContentSave" />
                     <Button.ToolTip>Save</Button.ToolTip>
                 </Button>
                 <Button Style="{StaticResource MaterialDesignIconButton}"
                         Command="{Binding DataContext.CancelEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}">
+                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}"
+                        Foreground="Orange">
                     <materialDesign:PackIcon Kind="Cancel" />
                     <Button.ToolTip>Cancel</Button.ToolTip>
                 </Button>
@@ -91,23 +95,25 @@
 
         <!-- Row Style -->
         <Style x:Key="TaskRowStyle" TargetType="DataGridRow">
-            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="BorderThickness" Value="2" />
             <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="Opacity" Value="1" />
+            <Setter Property="Margin" Value="1" />
        
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="Transparent"/>
                 </Trigger>
                 
-                <!-- Highlight border if this row is being edited -->
+                <!-- Highlight row if this row is being edited -->
                 <DataTrigger Binding="{Binding IsEditing}" Value="True">
-                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="BorderThickness" Value="3" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignPrimary}" />
                     <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}" />
                     <Setter Property="Effect">
                         <Setter.Value>
-                            <DropShadowEffect Color="Gray" Direction="270" ShadowDepth="2" BlurRadius="4" Opacity="0.3" />
+                            <DropShadowEffect Color="{DynamicResource MaterialDesignPrimary}" Direction="270" ShadowDepth="4" BlurRadius="8" Opacity="0.4" />
                         </Setter.Value>
                     </Setter>
                     <Setter Property="Margin" Value="2" />
@@ -116,11 +122,17 @@
 
                 <!-- Lock row if IsLocked true -->
                 <DataTrigger Binding="{Binding IsLocked}" Value="True">
-                    <Setter Property="Opacity" Value="0.75" />
+                    <Setter Property="Background" Value="#FFFFF0F0" />
+                    <Setter Property="Opacity" Value="0.8" />
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect Color="Red" Direction="270" ShadowDepth="2" BlurRadius="4" Opacity="0.2" />
+                        </Setter.Value>
+                    </Setter>
                     <Setter Property="ToolTip" Value="Locked due to external reason" />
                 </DataTrigger>
 
-                <!-- Disable other rows when any row is being edited and this row is not the editing row -->
+                <!-- Dim non-editing rows when any row is being edited -->
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
                         <!-- Some row is being edited -->
@@ -128,7 +140,8 @@
                         <!-- This row is not the editing row -->
                         <Condition Binding="{Binding IsEditing}" Value="False" />
                     </MultiDataTrigger.Conditions>
-                    <Setter Property="Opacity" Value="0.75" />
+                    <Setter Property="Opacity" Value="0.6" />
+                    <Setter Property="Background" Value="#FFF5F5F5" />
                     <Setter Property="ToolTip" Value="Another task is being edited" />
                 </MultiDataTrigger>
             </Style.Triggers>
@@ -145,8 +158,17 @@
                     <Setter Property="Background" Value="Transparent"/>
                 </Trigger>
 
-                <!-- Disable hit testing when row is locked -->
+                <!-- Enhanced styling for editing cells -->
+                <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                    <Setter Property="Background" Value="#FFF0F8FF" />
+                    <Setter Property="BorderThickness" Value="1" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignPrimary}" />
+                </DataTrigger>
+
+                <!-- Enhanced styling for locked cells -->
                 <DataTrigger Binding="{Binding IsLocked}" Value="True">
+                    <Setter Property="Background" Value="#FFFFF0F0" />
+                    <Setter Property="Foreground" Value="Gray" />
                     <Setter Property="IsHitTestVisible" Value="False" />
                 </DataTrigger>
 
@@ -159,6 +181,7 @@
                         <Condition Binding="{Binding IsEditing}" Value="False" />
                     </MultiDataTrigger.Conditions>
                     <Setter Property="IsHitTestVisible" Value="False" />
+                    <Setter Property="Background" Value="#FFF5F5F5" />
                 </MultiDataTrigger>
             </Style.Triggers>
         </Style>
@@ -185,11 +208,28 @@
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock" BasedOn="{StaticResource CenteredTextBlockStyle}">
                             <Setter Property="Text" Value="{Binding Title}" />
+                            <Setter Property="FontWeight" Value="Normal" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                    <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPrimary}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsLocked}" Value="True">
+                                    <Setter Property="Foreground" Value="Gray" />
+                                    <Setter Property="FontStyle" Value="Italic" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                    <Setter Property="TextDecorations" Value="Strikethrough" />
+                                    <Setter Property="Foreground" Value="Gray" />
+                                </DataTrigger>
+                            </Style.Triggers>
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox" BasedOn="{StaticResource CenteredTextBoxStyle}">
                             <Setter Property="Text" Value="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Setter Property="FontWeight" Value="Bold" />
+                            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPrimary}" />
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
@@ -200,6 +240,21 @@
                         <Style TargetType="TextBlock" BasedOn="{StaticResource CenteredTextBlockStyle}">
                             <Setter Property="Text" Value="{Binding Description}" />
                             <Setter Property="TextWrapping" Value="Wrap" />
+                            <Setter Property="FontWeight" Value="Normal" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                    <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPrimary}" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsLocked}" Value="True">
+                                    <Setter Property="Foreground" Value="Gray" />
+                                    <Setter Property="FontStyle" Value="Italic" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                    <Setter Property="TextDecorations" Value="Strikethrough" />
+                                    <Setter Property="Foreground" Value="Gray" />
+                                </DataTrigger>
+                            </Style.Triggers>
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.EditingElementStyle>
@@ -207,6 +262,8 @@
                             <Setter Property="Text" Value="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                             <Setter Property="TextWrapping" Value="Wrap" />
                             <Setter Property="AcceptsReturn" Value="True" />
+                            <Setter Property="FontWeight" Value="Bold" />
+                            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPrimary}" />
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
@@ -260,6 +317,60 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Status Column -->
+                <DataGridTemplateColumn Header="Status" Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <!-- Editing indicator -->
+                                <Border Background="Green" 
+                                        CornerRadius="4" 
+                                        Padding="3,1" 
+                                        Margin="1"
+                                        Height="24"
+                                        VerticalAlignment="Center"
+                                        Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="EDITING..." 
+                                               FontSize="8" 
+                                               FontWeight="Normal" 
+                                               Foreground="White"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                                
+                                <!-- Locked indicator -->
+                                <Border Background="Red" 
+                                        CornerRadius="4" 
+                                        Padding="3,1" 
+                                        Margin="1"
+                                        Height="24"
+                                        VerticalAlignment="Center"
+                                        Visibility="{Binding IsLocked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="LOCKED" 
+                                               FontSize="8" 
+                                               FontWeight="Normal" 
+                                               Foreground="White"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                                
+                                <!-- Completed indicator -->
+                                <Border Background="Blue" 
+                                        CornerRadius="4" 
+                                        Padding="3,1" 
+                                        Margin="1"
+                                        Height="24"
+                                        VerticalAlignment="Center"
+                                        Visibility="{Binding IsCompleted, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                    <TextBlock Text="DONE" 
+                                               FontSize="8" 
+                                               FontWeight="Normal" 
+                                               Foreground="White"
+                                               VerticalAlignment="Center" />
+                                </Border>
+                            </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

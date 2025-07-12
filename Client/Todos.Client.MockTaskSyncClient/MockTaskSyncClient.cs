@@ -24,7 +24,7 @@ namespace Todos.Client.MockTaskSyncClient
             {
                 new TaskDTO { Id = Guid.NewGuid(), Title = "Mock Task 1", Description = "Test task 1", IsCompleted = false },
                 new TaskDTO { Id = Guid.NewGuid(), Title = "Mock Task 2", Description = "Test task 2", IsCompleted = true },
-                new TaskDTO { Id = Guid.NewGuid(), Title = "Mock Task 3", Description = "Test task 3", IsCompleted = false }
+                new TaskDTO { Id = Guid.NewGuid(), Title = "Mock Task 3", Description = "Test task 3", IsCompleted = false, IsLocked = true }
             };
             return Task.FromResult<IEnumerable<TaskDTO>>(tasks);
         }
