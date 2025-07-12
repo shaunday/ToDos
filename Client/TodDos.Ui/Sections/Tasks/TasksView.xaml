@@ -130,6 +130,8 @@
         <!-- Generic Task Text Element Style -->
         <Style x:Key="TaskTextElementStyle" TargetType="TextBlock" BasedOn="{StaticResource CenteredTextBlockStyle}">
             <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Text}" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding IsEditing}" Value="True">
                     <Setter Property="FontWeight" Value="Bold" />
@@ -150,12 +152,43 @@
         <Style x:Key="TaskTextEditingElementStyle" TargetType="TextBox" BasedOn="{StaticResource CenteredTextBoxStyle}">
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPrimary}" />
+            <Setter Property="Background" Value="#FFF8F9FA" />
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignPrimary}" />
+            <Setter Property="BorderThickness" Value="1.5" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Margin" Value="3" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}"
+                                Margin="{TemplateBinding Margin}">
+                            <Border.Effect>
+                                <DropShadowEffect Color="{DynamicResource MaterialDesignPrimary}" 
+                                                  Direction="270" 
+                                                  ShadowDepth="2" 
+                                                  BlurRadius="6" 
+                                                  Opacity="0.15" />
+                            </Border.Effect>
+                            <ScrollViewer x:Name="PART_ContentHost" 
+                                          VerticalAlignment="Center"
+                                          HorizontalAlignment="Left"
+                                          Margin="0" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <!-- Actions Column Cell Style - Always hit test visible -->
         <Style x:Key="ActionsCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource TaskCellStyle}">
             <Setter Property="IsHitTestVisible" Value="True"/>
         </Style>
+
+
 
         </ResourceDictionary>
     </UserControl.Resources>
@@ -176,7 +209,7 @@
                   ColumnHeaderStyle="{StaticResource CenteredColumnHeaderStyle}">
 
             <DataGrid.Columns>
-                <!-- Title Column -->
+                                <!-- Title Column -->
                 <DataGridTextColumn Header="Title" Width="*"
                                     Binding="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     ElementStyle="{StaticResource TaskTextElementStyle}"

@@ -55,7 +55,7 @@
 ## Client-Side (WPF + MVVM)
 
 * set login stuff
-* Add UI indication for locked tasks (lock icon, disabled editing controls)
+* tags ?
 * Implement service layer for communication with SignalR and REST API
 * Add user-friendly exception handling and error messages
 * Show SignalR connection state in the UI
