@@ -1,0 +1,56 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Status Indicator DataTemplates -->
+    <DataTemplate x:Key="EditingStatusTemplate">
+        <Border Background="Green" 
+                CornerRadius="4" 
+                Padding="3,1" 
+                Margin="1"
+                Height="24"
+                VerticalAlignment="Center">
+            <TextBlock Text="EDITING..." 
+                       FontSize="8" 
+                       FontWeight="Normal" 
+                       Foreground="White"
+                       VerticalAlignment="Center" />
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate x:Key="LockedStatusTemplate">
+        <Border Background="Red" 
+                CornerRadius="4" 
+                Padding="3,1" 
+                Margin="1"
+                Height="24"
+                VerticalAlignment="Center">
+            <TextBlock Text="LOCKED" 
+                       FontSize="8" 
+                       FontWeight="Normal" 
+                       Foreground="White"
+                       VerticalAlignment="Center" />
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate x:Key="CompletedStatusTemplate">
+        <Border Background="Blue" 
+                CornerRadius="4" 
+                Padding="3,1" 
+                Margin="1"
+                Height="24"
+                VerticalAlignment="Center">
+            <TextBlock Text="DONE" 
+                       FontSize="8" 
+                       FontWeight="Normal" 
+                       Foreground="White"
+                       VerticalAlignment="Center" />
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate x:Key="EmptyStatusTemplate">
+        <Border Background="Transparent" 
+                Height="24"
+                VerticalAlignment="Center" />
+    </DataTemplate>
+
+</ResourceDictionary> 
