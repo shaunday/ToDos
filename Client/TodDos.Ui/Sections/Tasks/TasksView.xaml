@@ -21,37 +21,7 @@
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
 
-        <!-- Centered TextBlock Style -->
-        <Style x:Key="CenteredTextBlockStyle" TargetType="TextBlock">
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-        </Style>
 
-        <!-- Centered TextBox Style -->
-        <Style x:Key="CenteredTextBoxStyle" TargetType="TextBox">
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-        </Style>
-
-        <!-- Centered ComboBox Style -->
-        <Style x:Key="CenteredComboBoxStyle" TargetType="ComboBox">
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-        </Style>
-
-        <!-- Centered ContentControl Style -->
-        <Style x:Key="CenteredContentControlStyle" TargetType="ContentControl">
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="HorizontalAlignment" Value="Center" />
-        </Style>
-
-        <!-- Centered Column Header Style -->
-        <Style x:Key="CenteredColumnHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
-            <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-        </Style>
 
         <!-- Actions: View Mode Template -->
         <DataTemplate x:Key="ActionsViewTemplate">
