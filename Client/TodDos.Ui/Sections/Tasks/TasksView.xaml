@@ -13,9 +13,10 @@
 
     <UserControl.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="../../Resources/StatusStyles.xaml" />
-            </ResourceDictionary.MergedDictionaries>
+                    <ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary Source="../../Resources/StatusStyles.xaml" />
+            <ResourceDictionary Source="ActionsColumnTemplate.xaml" />
+        </ResourceDictionary.MergedDictionaries>
 
             <!-- Enum values for Priority -->
             <ObjectDataProvider x:Key="TaskPriorityValues"
@@ -26,45 +27,7 @@
                 </ObjectDataProvider.MethodParameters>
             </ObjectDataProvider>
 
-            <!-- Actions: View Mode Template -->
-        <DataTemplate x:Key="ActionsViewTemplate">
-            <StackPanel Orientation="Horizontal">
-                <Button Style="{StaticResource MaterialDesignIconButton}"
-                        Command="{Binding DataContext.EditTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}"
-                        Foreground="{DynamicResource MaterialDesignPrimary}">
-                    <materialDesign:PackIcon Kind="Pencil" />
-                    <Button.ToolTip>Edit</Button.ToolTip>
-                </Button>
-                <Button Style="{StaticResource MaterialDesignIconButton}"
-                        Command="{Binding DataContext.DeleteTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}"
-                        Foreground="Red">
-                    <materialDesign:PackIcon Kind="Delete" />
-                    <Button.ToolTip>Delete</Button.ToolTip>
-                </Button>
-            </StackPanel>
-        </DataTemplate>
 
-        <!-- Actions: Edit Mode Template -->
-        <DataTemplate x:Key="ActionsEditTemplate">
-            <StackPanel Orientation="Horizontal">
-                <Button Style="{StaticResource MaterialDesignIconButton}"
-                        Command="{Binding DataContext.SaveTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}"
-                        Foreground="Green">
-                    <materialDesign:PackIcon Kind="ContentSave" />
-                    <Button.ToolTip>Save</Button.ToolTip>
-                </Button>
-                <Button Style="{StaticResource MaterialDesignIconButton}"
-                        Command="{Binding DataContext.CancelEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}"
-                        Foreground="Orange">
-                    <materialDesign:PackIcon Kind="Cancel" />
-                    <Button.ToolTip>Cancel</Button.ToolTip>
-                </Button>
-            </StackPanel>
-        </DataTemplate>
 
         <!-- Row Style -->
         <Style x:Key="TaskRowStyle" TargetType="DataGridRow">
@@ -361,20 +324,7 @@
                         <Style TargetType="DataGridCell" BasedOn="{StaticResource ActionsCellStyle}" />
                     </DataGridTemplateColumn.CellStyle>
                     <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <ContentControl>
-                                <ContentControl.Style>
-                                    <Style TargetType="ContentControl" BasedOn="{StaticResource CenteredContentControlStyle}">
-                                        <Setter Property="ContentTemplate" Value="{StaticResource ActionsViewTemplate}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsEditing}" Value="True">
-                                                <Setter Property="ContentTemplate" Value="{StaticResource ActionsEditTemplate}" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ContentControl.Style>
-                            </ContentControl>
-                        </DataTemplate>
+                        <StaticResource ResourceKey="ActionsColumnTemplate" />
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
