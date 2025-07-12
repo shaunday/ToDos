@@ -19,6 +19,9 @@ namespace ToDos.Ui.ViewModels
         [ObservableProperty]
         private ObservableCollection<TaskModel> tasks = new ObservableCollection<TaskModel>();
 
+        [ObservableProperty]
+        private TaskModel? editingTask;
+
         public TasksViewModel(ITaskSyncClient taskService, IMapper mapper, INavigationService navigation) : base(mapper, navigation)
         {
             _taskService = taskService;
@@ -43,11 +46,12 @@ namespace ToDos.Ui.ViewModels
         [RelayCommand]
         private async Task EditTaskAsync(TaskModel task)
         {
-            if (task == null || task.IsEditing) return; // Only one edit at a time
+            if (task == null || EditingTask != null) return; // Only one edit at a time
+
             var locked = await _taskService.LockTaskAsync(task.Id);
             if (locked)
             {
-                //close and save <todo
+                EditingTask = task;
                 task.IsEditing = true;
             }
             // else: show error message (optional)

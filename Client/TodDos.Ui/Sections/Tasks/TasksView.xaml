@@ -2,14 +2,17 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:models="clr-namespace:ToDos.Ui.Models"
              xmlns:DotNetCommon="clr-namespace:ToDos.DotNet.Common;assembly=Todos.DotNet.Common"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:local="clr-namespace:ToDos.Ui.Resources.Converters"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="900">
+
     <UserControl.Resources>
+        <!-- Enum values for Priority -->
         <ObjectDataProvider x:Key="TaskPriorityValues"
                             MethodName="GetValues"
                             ObjectType="{x:Type sys:Enum}">
@@ -17,7 +20,44 @@
                 <x:Type TypeName="DotNetCommon:GlobalTypes+TaskPriority"/>
             </ObjectDataProvider.MethodParameters>
         </ObjectDataProvider>
+
+        <!-- Actions: View Mode Template -->
+        <DataTemplate x:Key="ActionsViewTemplate">
+            <StackPanel Orientation="Horizontal">
+                <Button Style="{StaticResource MaterialDesignIconButton}"
+                        Command="{Binding DataContext.EditTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}">
+                    <materialDesign:PackIcon Kind="Pencil" />
+                    <Button.ToolTip>Edit</Button.ToolTip>
+                </Button>
+                <Button Style="{StaticResource MaterialDesignIconButton}"
+                        Command="{Binding DataContext.DeleteTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}">
+                    <materialDesign:PackIcon Kind="Delete" />
+                    <Button.ToolTip>Delete</Button.ToolTip>
+                </Button>
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Actions: Edit Mode Template -->
+        <DataTemplate x:Key="ActionsEditTemplate">
+            <StackPanel Orientation="Horizontal">
+                <Button Style="{StaticResource MaterialDesignIconButton}"
+                        Command="{Binding DataContext.SaveTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}">
+                    <materialDesign:PackIcon Kind="ContentSave" />
+                    <Button.ToolTip>Save</Button.ToolTip>
+                </Button>
+                <Button Style="{StaticResource MaterialDesignIconButton}"
+                        Command="{Binding DataContext.CancelEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}">
+                    <materialDesign:PackIcon Kind="Cancel" />
+                    <Button.ToolTip>Cancel</Button.ToolTip>
+                </Button>
+            </StackPanel>
+        </DataTemplate>
     </UserControl.Resources>
+
     <Grid Margin="16">
         <DataGrid ItemsSource="{Binding Tasks}"
                   AutoGenerateColumns="False"
@@ -27,6 +67,61 @@
                   materialDesign:DataGridAssist.CellPadding="8"
                   materialDesign:DataGridAssist.ColumnHeaderPadding="12,4"
                   Margin="0,0,0,48">
+
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="BorderThickness" Value="0" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
+                    <Setter Property="Opacity" Value="1" />
+                    <Setter Property="IsEnabled" Value="True" />
+
+                    <Style.Triggers>
+                        <!-- 1. Highlight border if row's task == EditingTask -->
+                        <DataTrigger Value="True">
+                            <DataTrigger.Binding>
+                                <MultiBinding Converter="{StaticResource MultiEqualityConverter}">
+                                    <Binding Path="DataContext" RelativeSource="{RelativeSource Self}" />
+                                    <Binding Path="EditingTask" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                </MultiBinding>
+                            </DataTrigger.Binding>
+                            <Setter Property="BorderThickness" Value="2" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignSecondaryHueMidBrush}" />
+                        </DataTrigger>
+
+                        <!-- 2. Lock row if IsLocked true -->
+                        <DataTrigger Binding="{Binding IsLocked}" Value="True">
+                            <Setter Property="Opacity" Value="0.5" />
+                            <Setter Property="IsEnabled" Value="False" />
+                            <Setter Property="ToolTip" Value="Locked due to external reason" />
+                        </DataTrigger>
+
+                        <!-- 3. Disable other rows when EditingTask is not null and this row != EditingTask -->
+                        <MultiDataTrigger>
+                            <MultiDataTrigger.Conditions>
+                                <!-- EditingTask is not null -->
+                                <Condition Binding="{Binding EditingTask, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource SingleNotEqualConverter}, ConverterParameter={x:Null}}" Value="True" />
+                                <!-- Current row's task != EditingTask -->
+                                <Condition>
+                                    <Condition.Binding>
+                                        <MultiBinding Converter="{StaticResource MultiEqualityConverter}">
+                                            <Binding Path="DataContext" RelativeSource="{RelativeSource Self}" />
+                                            <Binding Path="EditingTask" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                        </MultiBinding>
+                                    </Condition.Binding>
+                                    <Condition.Value>
+                                        <!-- Use False because we want "not equal" -->
+                                        <sys:Boolean>False</sys:Boolean>
+                                    </Condition.Value>
+                                </Condition>
+                            </MultiDataTrigger.Conditions>
+                            <Setter Property="Opacity" Value="0.5" />
+                            <Setter Property="IsEnabled" Value="False" />
+                            <Setter Property="ToolTip" Value="Another task is being edited" />
+                        </MultiDataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Title" Width="*">
                     <DataGridTextColumn.ElementStyle>
@@ -40,6 +135,7 @@
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
+
                 <DataGridTextColumn Header="Description" Width="3*">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -52,11 +148,14 @@
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
+
                 <DataGridComboBoxColumn Header="Priority"
                                        SelectedItemBinding="{Binding Priority, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                        ItemsSource="{Binding Source={StaticResource TaskPriorityValues}}"
-                                       Width="0.75*"/>
-                <DataGridCheckBoxColumn Header="Completed" Binding="{Binding IsCompleted, Mode=TwoWay}" Width="*"/>
+                                       Width="0.75*" />
+
+                <DataGridCheckBoxColumn Header="Completed" Binding="{Binding IsCompleted, Mode=TwoWay}" Width="*" />
+
                 <DataGridTemplateColumn Header="Due Date" Width="0.75*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -64,6 +163,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+
                 <DataGridTemplateColumn Header="Tags" Width="1.5*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -79,63 +179,34 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+
                 <DataGridTemplateColumn Header="Actions" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <ContentControl>
                                 <ContentControl.Style>
                                     <Style TargetType="ContentControl">
+                                        <Setter Property="ContentTemplate" Value="{StaticResource ActionsViewTemplate}" />
+
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsEditing}" Value="True">
-                                                <Setter Property="ContentTemplate">
-                                                    <Setter.Value>
-                                                        <DataTemplate>
-                                                            <StackPanel Orientation="Horizontal">
-                                                                <Button Style="{StaticResource MaterialDesignIconButton}"
-                                                                        Command="{Binding DataContext.SaveTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}">
-                                                                    <materialDesign:PackIcon Kind="ContentSave" />
-                                                                    <Button.ToolTip>Save</Button.ToolTip>
-                                                                </Button>
-                                                                <Button Style="{StaticResource MaterialDesignIconButton}"
-                                                                        Command="{Binding DataContext.CancelEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                                        CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}">
-                                                                    <materialDesign:PackIcon Kind="Cancel" />
-                                                                    <Button.ToolTip>Cancel</Button.ToolTip>
-                                                                </Button>
-                                                            </StackPanel>
-                                                        </DataTemplate>
-                                                    </Setter.Value>
-                                                </Setter>
+                                            <DataTrigger Value="True">
+                                                <DataTrigger.Binding>
+                                                    <MultiBinding Converter="{StaticResource MultiEqualityConverter}">
+                                                        <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=ContentControl}" />
+                                                        <Binding Path="EditingTask" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                    </MultiBinding>
+                                                </DataTrigger.Binding>
+                                                <Setter Property="ContentTemplate" Value="{StaticResource ActionsEditTemplate}" />
                                             </DataTrigger>
                                         </Style.Triggers>
-                                        <Setter Property="ContentTemplate">
-                                            <Setter.Value>
-                                                <DataTemplate>
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <Button Style="{StaticResource MaterialDesignIconButton}"
-                                                                Command="{Binding DataContext.EditTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                                CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}">
-                                                            <materialDesign:PackIcon Kind="Pencil" />
-                                                            <Button.ToolTip>Edit</Button.ToolTip>
-                                                        </Button>
-                                                        <Button Style="{StaticResource MaterialDesignIconButton}"
-                                                                Command="{Binding DataContext.DeleteTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                                CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}">
-                                                            <materialDesign:PackIcon Kind="Delete" />
-                                                            <Button.ToolTip>Delete</Button.ToolTip>
-                                                        </Button>
-                                                    </StackPanel>
-                                                </DataTemplate>
-                                            </Setter.Value>
-                                        </Setter>
                                     </Style>
                                 </ContentControl.Style>
                             </ContentControl>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
+
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
-</UserControl> 
+</UserControl>
