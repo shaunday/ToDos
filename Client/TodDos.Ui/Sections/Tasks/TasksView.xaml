@@ -56,6 +56,61 @@
                 </Button>
             </StackPanel>
         </DataTemplate>
+
+        <!-- Row Style -->
+        <Style x:Key="TaskRowStyle" TargetType="DataGridRow">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Opacity" Value="1" />
+
+            <Style.Triggers>
+                <!-- Highlight border if this row is being edited -->
+                <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                    <Setter Property="BorderThickness" Value="3" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignPrimaryHueMidBrush}" />
+                    <Setter Property="ToolTip" Value="Currently being edited" />
+                </DataTrigger>
+
+                <!-- Lock row if IsLocked true -->
+                <DataTrigger Binding="{Binding IsLocked}" Value="True">
+                    <Setter Property="Opacity" Value="0.75" />
+                    <Setter Property="ToolTip" Value="Locked due to external reason" />
+                </DataTrigger>
+
+                <!-- Disable other rows when any row is being edited and this row is not the editing row -->
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <!-- Some row is being edited -->
+                        <Condition Binding="{Binding DataContext.EditingTask, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource SingleNotEqualConverter}, ConverterParameter={x:Null}}" Value="True" />
+                        <!-- This row is not the editing row -->
+                        <Condition Binding="{Binding IsEditing}" Value="False" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Opacity" Value="0.75" />
+                    <Setter Property="ToolTip" Value="Another task is being edited" />
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Cell Style -->
+        <Style x:Key="TaskCellStyle" TargetType="DataGridCell">
+            <Style.Triggers>
+                <!-- Disable hit testing when row is locked -->
+                <DataTrigger Binding="{Binding IsLocked}" Value="True">
+                    <Setter Property="IsHitTestVisible" Value="False" />
+                </DataTrigger>
+
+                <!-- Disable hit testing when another row is being edited and this row is not the editing row -->
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <!-- Some row is being edited -->
+                        <Condition Binding="{Binding DataContext.EditingTask, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource SingleNotEqualConverter}, ConverterParameter={x:Null}}" Value="True" />
+                        <!-- This row is not the editing row -->
+                        <Condition Binding="{Binding IsEditing}" Value="False" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="IsHitTestVisible" Value="False" />
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
 
     <Grid Margin="16">
@@ -64,139 +119,83 @@
                   CanUserAddRows="False"
                   CanUserDeleteRows="True"
                   IsReadOnly="False"
+                  RowStyle="{StaticResource TaskRowStyle}"
+                  CellStyle="{StaticResource TaskCellStyle}"
                   materialDesign:DataGridAssist.CellPadding="8"
                   materialDesign:DataGridAssist.ColumnHeaderPadding="12,4"
                   Margin="0,0,0,48">
 
-            <DataGrid.RowStyle>
-                <Style TargetType="DataGridRow">
-                    <Setter Property="BorderThickness" Value="0" />
-                    <Setter Property="BorderBrush" Value="Transparent" />
-                    <Setter Property="Opacity" Value="1" />
-                    <Setter Property="IsEnabled" Value="True" />
-
-                    <Style.Triggers>
-                        <!-- 1. Highlight border if row's task == EditingTask -->
-                        <DataTrigger Value="True">
-                            <DataTrigger.Binding>
-                                <MultiBinding Converter="{StaticResource MultiEqualityConverter}">
-                                    <Binding Path="DataContext" RelativeSource="{RelativeSource Self}" />
-                                    <Binding Path="DataContext.EditingTask" RelativeSource="{RelativeSource AncestorType=DataGrid}" />
-                                </MultiBinding>
-                            </DataTrigger.Binding>
-                            <Setter Property="BorderThickness" Value="2" />
-                            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignSecondaryHueMidBrush}" />
-                        </DataTrigger>
-
-                        <!-- 2. Lock row if IsLocked true -->
-                        <DataTrigger Binding="{Binding IsLocked}" Value="True">
-                            <Setter Property="Opacity" Value="0.75" />
-                            <Setter Property="ToolTip" Value="Locked due to external reason" />
-                        </DataTrigger>
-
-                        <!-- 3. Disable other rows when EditingTask is not null and this row != EditingTask -->
-                        <MultiDataTrigger>
-                            <MultiDataTrigger.Conditions>
-                                <!-- EditingTask is not null -->
-                                <Condition Binding="{Binding DataContext.EditingTask, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource SingleNotEqualConverter}, ConverterParameter={x:Null}}" Value="True" />
-                                <!-- Current row's task != EditingTask -->
-                                <Condition>
-                                    <Condition.Binding>
-                                        <MultiBinding Converter="{StaticResource MultiEqualityConverter}">
-                                            <Binding Path="DataContext" RelativeSource="{RelativeSource Self}" />
-                                            <Binding Path="DataContext.EditingTask" RelativeSource="{RelativeSource AncestorType=DataGrid}" />
-                                        </MultiBinding>
-                                    </Condition.Binding>
-                                    <Condition.Value>
-                                        <!-- Use False because we want "not equal" -->
-                                        <sys:Boolean>False</sys:Boolean>
-                                    </Condition.Value>
-                                </Condition>
-                            </MultiDataTrigger.Conditions>
-                            <Setter Property="Opacity" Value="0.75" />
-                            <Setter Property="ToolTip" Value="Another task is being edited" />
-                        </MultiDataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.RowStyle>
-
-            <DataGrid.CellStyle>
-                <Style TargetType="DataGridCell">
-                    <Style.Triggers>
-                        <!-- Disable hit testing on cells when another row is being edited -->
-                        <MultiDataTrigger>
-                            <MultiDataTrigger.Conditions>
-                                <!-- EditingTask is not null -->
-                                <Condition Binding="{Binding DataContext.EditingTask, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource SingleNotEqualConverter}, ConverterParameter={x:Null}}" Value="True" />
-                                <!-- Current row's task != EditingTask -->
-                                <Condition>
-                                    <Condition.Binding>
-                                        <MultiBinding Converter="{StaticResource MultiEqualityConverter}">
-                                            <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=DataGridRow}" />
-                                            <Binding Path="DataContext.EditingTask" RelativeSource="{RelativeSource AncestorType=DataGrid}" />
-                                        </MultiBinding>
-                                    </Condition.Binding>
-                                    <Condition.Value>
-                                        <sys:Boolean>False</sys:Boolean>
-                                    </Condition.Value>
-                                </Condition>
-                            </MultiDataTrigger.Conditions>
-                            <Setter Property="IsEnabled" Value="False" />
-                        </MultiDataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.CellStyle>
-
             <DataGrid.Columns>
+                <!-- Title Column -->
                 <DataGridTextColumn Header="Title" Width="*">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="Text" Value="{Binding Title}" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox">
                             <Setter Property="Text" Value="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
 
+                <!-- Description Column -->
                 <DataGridTextColumn Header="Description" Width="3*">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="Text" Value="{Binding Description}" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                            <Setter Property="TextWrapping" Value="Wrap" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="TextBox">
                             <Setter Property="Text" Value="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                            <Setter Property="TextWrapping" Value="Wrap" />
+                            <Setter Property="AcceptsReturn" Value="True" />
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
 
+                <!-- Priority Column -->
                 <DataGridComboBoxColumn Header="Priority"
                                        SelectedItemBinding="{Binding Priority, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                        ItemsSource="{Binding Source={StaticResource TaskPriorityValues}}"
                                        Width="0.75*" />
 
-                <DataGridCheckBoxColumn Header="Completed" Binding="{Binding IsCompleted, Mode=TwoWay}" Width="*" />
+                <!-- Completed Column -->
+                <DataGridCheckBoxColumn Header="Completed" 
+                                       Binding="{Binding IsCompleted, Mode=TwoWay}" 
+                                       Width="*" />
 
+                <!-- Due Date Column -->
                 <DataGridTemplateColumn Header="Due Date" Width="0.75*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <DatePicker SelectedDate="{Binding DueDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <DatePicker SelectedDate="{Binding DueDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        VerticalAlignment="Center" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
+                <!-- Tags Column -->
                 <DataGridTemplateColumn Header="Tags" Width="1.5*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ItemsControl ItemsSource="{Binding Tags}">
+                            <ItemsControl ItemsSource="{Binding Tags}" VerticalAlignment="Center">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Border Margin="2" Padding="4" Background="#EEE" CornerRadius="4">
-                                            <TextBlock Text="{Binding Name}"/>
+                                        <Border Margin="2" Padding="4,2" Background="{DynamicResource MaterialDesignChipBackgroundBrush}" CornerRadius="12">
+                                            <TextBlock Text="{Binding Name}" FontSize="11" />
                                         </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
@@ -205,6 +204,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
+                <!-- Actions Column -->
                 <DataGridTemplateColumn Header="Actions" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -212,15 +212,8 @@
                                 <ContentControl.Style>
                                     <Style TargetType="ContentControl">
                                         <Setter Property="ContentTemplate" Value="{StaticResource ActionsViewTemplate}" />
-
                                         <Style.Triggers>
-                                            <DataTrigger Value="True">
-                                                <DataTrigger.Binding>
-                                                    <MultiBinding Converter="{StaticResource MultiEqualityConverter}">
-                                                        <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=ContentControl}" />
-                                                        <Binding Path="DataContext.EditingTask" RelativeSource="{RelativeSource AncestorType=DataGrid}" />
-                                                    </MultiBinding>
-                                                </DataTrigger.Binding>
+                                            <DataTrigger Binding="{Binding IsEditing}" Value="True">
                                                 <Setter Property="ContentTemplate" Value="{StaticResource ActionsEditTemplate}" />
                                             </DataTrigger>
                                         </Style.Triggers>
