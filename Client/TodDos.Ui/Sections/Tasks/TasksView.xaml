@@ -281,33 +281,76 @@
                 <DataGridTemplateColumn Header="Status" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ContentControl HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <ContentControl.Style>
-                                    <Style TargetType="ContentControl">
-                                        <Setter Property="ContentTemplate" Value="{StaticResource EmptyStatusTemplate}" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsEditing}" Value="True">
-                                                <Setter Property="ContentTemplate" Value="{StaticResource EditingStatusTemplate}" />
-                                            </DataTrigger>
-                                            <MultiDataTrigger>
-                                                <MultiDataTrigger.Conditions>
-                                                    <Condition Binding="{Binding IsEditing}" Value="False" />
-                                                    <Condition Binding="{Binding IsLocked}" Value="True" />
-                                                </MultiDataTrigger.Conditions>
-                                                <Setter Property="ContentTemplate" Value="{StaticResource LockedStatusTemplate}" />
-                                            </MultiDataTrigger>
-                                            <MultiDataTrigger>
-                                                <MultiDataTrigger.Conditions>
-                                                    <Condition Binding="{Binding IsEditing}" Value="False" />
-                                                    <Condition Binding="{Binding IsLocked}" Value="False" />
-                                                    <Condition Binding="{Binding IsCompleted}" Value="True" />
-                                                </MultiDataTrigger.Conditions>
-                                                <Setter Property="ContentTemplate" Value="{StaticResource CompletedStatusTemplate}" />
-                                            </MultiDataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ContentControl.Style>
-                            </ContentControl>
+                            <ItemsControl HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <ContentControl Content="{Binding}" Margin="1,0" />
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                                <ItemsControl.Items>
+                                    <!-- Editing Status -->
+                                    <ContentControl Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <Border Background="Green" 
+                                                        CornerRadius="4" 
+                                                        Padding="3,1" 
+                                                        Height="24"
+                                                        VerticalAlignment="Center">
+                                                    <TextBlock Text="EDITING..." 
+                                                               FontSize="8" 
+                                                               FontWeight="Normal" 
+                                                               Foreground="White"
+                                                               VerticalAlignment="Center" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
+                                    </ContentControl>
+                                    
+                                    <!-- Locked Status -->
+                                    <ContentControl Visibility="{Binding IsLocked, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <Border Background="Red" 
+                                                        CornerRadius="4" 
+                                                        Padding="3,1" 
+                                                        Height="24"
+                                                        VerticalAlignment="Center">
+                                                    <TextBlock Text="LOCKED" 
+                                                               FontSize="8" 
+                                                               FontWeight="Normal" 
+                                                               Foreground="White"
+                                                               VerticalAlignment="Center" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
+                                    </ContentControl>
+                                    
+                                    <!-- Completed Status -->
+                                    <ContentControl Visibility="{Binding IsCompleted, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <ContentControl.ContentTemplate>
+                                            <DataTemplate>
+                                                <Border Background="Blue" 
+                                                        CornerRadius="4" 
+                                                        Padding="3,1" 
+                                                        Height="24"
+                                                        VerticalAlignment="Center">
+                                                    <TextBlock Text="DONE" 
+                                                               FontSize="8" 
+                                                               FontWeight="Normal" 
+                                                               Foreground="White"
+                                                               VerticalAlignment="Center" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </ContentControl.ContentTemplate>
+                                    </ContentControl>
+                                </ItemsControl.Items>
+                            </ItemsControl>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
