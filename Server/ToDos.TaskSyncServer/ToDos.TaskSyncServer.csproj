@@ -52,6 +52,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Common\ToDos.DotNet.Common\ToDos.DotNet.Common.csproj" />
     <ProjectReference Include="..\ToDos.Server.Common\ToDos.Server.Common.csproj" />
+    <ProjectReference Include="..\Todos.Server.MockTaskService\Todos.Server.MockTaskService.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Web.Debug.config">

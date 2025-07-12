@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ToDos.Entities;
@@ -7,14 +8,15 @@ namespace ToDos.Repository
     public interface ITaskRepository
     {
         Task<IEnumerable<TaskEntity>> GetAllAsync();
-        Task<TaskEntity> GetByIdAsync(int id);
+        Task<TaskEntity> GetByIdAsync(Guid id);
         Task AddAsync(TaskEntity task);
         Task UpdateAsync(TaskEntity task);
-        Task DeleteAsync(int id);
+        Task<bool> DeleteAsync(Guid id);
+        Task<bool> SetCompletionAsync(Guid taskId, bool isCompleted);
 
         // Locking methods
-        Task<bool> LockTaskAsync(int id);
-        Task<bool> UnlockTaskAsync(int id);
-        Task<bool> IsTaskLockedAsync(int id);
+        Task<bool> LockTaskAsync(Guid id);
+        Task<bool> UnlockTaskAsync(Guid id);
+        Task<bool> IsTaskLockedAsync(Guid id);
     }
 } 
