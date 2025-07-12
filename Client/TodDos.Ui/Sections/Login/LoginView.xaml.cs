@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace ToDos.Ui.Sections
+namespace Todos.Ui.Sections
 {
     public partial class LoginView : UserControl
     {

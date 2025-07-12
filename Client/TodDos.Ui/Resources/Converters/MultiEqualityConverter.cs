@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
-namespace ToDos.Ui.Resources.Converters
+namespace Todos.Ui.Resources.Converters
 {
     public class MultiEqualityConverter : IMultiValueConverter
     {

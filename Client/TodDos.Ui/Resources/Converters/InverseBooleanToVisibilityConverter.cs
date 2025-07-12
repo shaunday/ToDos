@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace ToDos.Ui.Resources.Converters
+namespace Todos.Ui.Resources.Converters
 {
     public class InverseBooleanToVisibilityConverter : IValueConverter
     {

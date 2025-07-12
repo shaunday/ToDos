@@ -6,9 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ToDos.Ui.Services.Navigation;
+using Todos.Ui.Services.Navigation;
 
-namespace ToDos.Ui.ViewModels
+namespace Todos.Ui.ViewModels
 {
     public partial class LoginViewModel : ViewModelBase
     {

@@ -7,10 +7,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Todos.Client.Common.Interfaces;
 using ToDos.DotNet.Common;
-using ToDos.Ui.Models;
-using ToDos.Ui.Services.Navigation;
+using Todos.Ui.Models;
+using Todos.Ui.Services.Navigation;
 
-namespace ToDos.Ui.ViewModels
+namespace Todos.Ui.ViewModels
 {
     public partial class TasksViewModel : ViewModelBase
     {

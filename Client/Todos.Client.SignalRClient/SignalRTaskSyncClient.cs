@@ -26,15 +26,14 @@ namespace Todos.Client.SignalRClient
         private int _reconnectAttempts = 0;
         private const int MaxReconnectAttempts = 5;
 
-        public bool IsConnected => _hubConnection?.State == ConnectionState.Connected;
+        public ConnectionStatus ConnectionStatus { get; private set; } = ConnectionStatus.Disconnected;
+        public event Action<ConnectionStatus> ConnectionStatusChanged;
 
         public event Action<TaskDTO> TaskAdded;
         public event Action<TaskDTO> TaskUpdated;
         public event Action<Guid> TaskDeleted;
         public event Action<Guid> TaskLocked;
         public event Action<Guid> TaskUnlocked;
-
-        public event Action<ConnectionStatus> ConnectionStatusChanged;
 
         // Queue to hold pending hub method calls when disconnected
         private readonly ConcurrentQueue<Func<Task>> _pendingCalls = new ConcurrentQueue<Func<Task>>();
@@ -85,7 +84,7 @@ namespace Todos.Client.SignalRClient
                 }
             }
 
-            RaiseConnectionStatus(ConnectionStatus.Connecting);
+            SetConnectionStatus(ConnectionStatus.Connecting);
 
             try
             {
@@ -104,7 +103,7 @@ namespace Todos.Client.SignalRClient
                 await _hubConnection.Start();
 
                 _logger.Information("SignalR connection established.");
-                RaiseConnectionStatus(ConnectionStatus.Connected);
+                SetConnectionStatus(ConnectionStatus.Connected);
 
                 // Drain pending calls queued while disconnected
                 await DrainPendingCallsAsync();
@@ -112,7 +111,7 @@ namespace Todos.Client.SignalRClient
             catch (Exception ex)
             {
                 _logger.Error(ex, "Failed to connect to SignalR hub.");
-                RaiseConnectionStatus(ConnectionStatus.Failed);
+                SetConnectionStatus(ConnectionStatus.Failed);
                 throw;
             }
         }
@@ -128,7 +127,7 @@ namespace Todos.Client.SignalRClient
                     _hubConnection.Dispose();
                     _hubConnection = null;
                     _logger.Information("SignalR connection stopped.");
-                    RaiseConnectionStatus(ConnectionStatus.Disconnected);
+                    SetConnectionStatus(ConnectionStatus.Disconnected);
                 }
             }
             catch (Exception ex)
@@ -144,7 +143,7 @@ namespace Todos.Client.SignalRClient
             _hubConnection.Closed += async () =>
             {
                 _logger.Warning("SignalR connection closed. Attempting reconnect...");
-                RaiseConnectionStatus(ConnectionStatus.Reconnecting);
+                SetConnectionStatus(ConnectionStatus.Reconnecting);
 
                 while (_reconnectAttempts < MaxReconnectAttempts)
                 {
@@ -157,7 +156,7 @@ namespace Todos.Client.SignalRClient
 
                         await _hubConnection.Start();
                         _logger.Information("SignalR reconnected.");
-                        RaiseConnectionStatus(ConnectionStatus.Connected);
+                        SetConnectionStatus(ConnectionStatus.Connected);
                         _reconnectAttempts = 0;
 
                         // Drain pending calls if any
@@ -174,7 +173,7 @@ namespace Todos.Client.SignalRClient
                 if (_reconnectAttempts >= MaxReconnectAttempts)
                 {
                     _logger.Error("Max reconnect attempts reached. Giving up.");
-                    RaiseConnectionStatus(ConnectionStatus.Failed);
+                    SetConnectionStatus(ConnectionStatus.Failed);
                 }
             };
         }
@@ -225,7 +224,7 @@ namespace Todos.Client.SignalRClient
 
         private Task<T> InvokeWithRetrySafeAsync<T>(string methodName, params object[] args)
         {
-            if (!IsConnected)
+            if (ConnectionStatus != ConnectionStatus.Connected)
             {
                 _logger.Warning("Not connected to SignalR hub. Queuing {MethodName} call.", methodName);
 
@@ -272,16 +271,20 @@ namespace Todos.Client.SignalRClient
             }
         }
 
-        private void RaiseConnectionStatus(ConnectionStatus status)
+        private void SetConnectionStatus(ConnectionStatus newStatus)
         {
-            _logger.Information("Connection status changed to {Status}", status);
-            try
+            if (ConnectionStatus != newStatus)
             {
-                ConnectionStatusChanged?.Invoke(status);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error while raising ConnectionStatusChanged event.");
+                _logger.Information("Connection status changed from {OldStatus} to {NewStatus}", ConnectionStatus, newStatus);
+                ConnectionStatus = newStatus;
+                try
+                {
+                    ConnectionStatusChanged?.Invoke(newStatus);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Error while raising ConnectionStatusChanged event.");
+                }
             }
         }
 

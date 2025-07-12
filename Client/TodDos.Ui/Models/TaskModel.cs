@@ -1,11 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.ObjectModel;
-using TodDos.Ui.Models;
+using Todos.Ui.Models;
 using static global::ToDos.DotNet.Common.GlobalTypes;
 
 
-namespace ToDos.Ui.Models
+namespace Todos.Ui.Models
 {
     public partial class TaskModel : ObservableObject
     {

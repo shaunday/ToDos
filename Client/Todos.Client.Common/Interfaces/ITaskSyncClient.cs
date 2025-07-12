@@ -2,20 +2,21 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ToDos.DotNet.Common;
+using static Todos.Client.Common.TypesGlobal;
 
 namespace Todos.Client.Common.Interfaces
 {
-   
     public interface ITaskSyncClient
     {
+        // Connection state
+        ConnectionStatus ConnectionStatus { get; }
+        event Action<ConnectionStatus> ConnectionStatusChanged;
+
         // Connects to the server (real-time sync or API handshake)
         Task ConnectAsync();
 
         // Disconnects from server
         Task DisconnectAsync();
-
-        // Indicates whether the client is connected to the backend
-        bool IsConnected { get; }
 
         // CRUD operations
         Task<IEnumerable<TaskDTO>> GetAllTasksAsync();
@@ -35,5 +36,4 @@ namespace Todos.Client.Common.Interfaces
         event Action<Guid> TaskLocked;
         event Action<Guid> TaskUnlocked;
     }
-
 }

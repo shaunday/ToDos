@@ -3,20 +3,47 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Todos.Client.Common.Interfaces;
 using ToDos.DotNet.Common;
+using static Todos.Client.Common.TypesGlobal;
 
 namespace Todos.Client.MockTaskSyncClient
 {
     public class MockTaskSyncClient : ITaskSyncClient
     {
-        public bool IsConnected => true;
+        private ConnectionStatus _connectionStatus = ConnectionStatus.Connected;
+        
+        public ConnectionStatus ConnectionStatus 
+        { 
+            get => _connectionStatus;
+            private set
+            {
+                if (_connectionStatus != value)
+                {
+                    _connectionStatus = value;
+                    ConnectionStatusChanged?.Invoke(_connectionStatus);
+                }
+            }
+        }
+        
+        public event Action<ConnectionStatus> ConnectionStatusChanged;
         public event Action<TaskDTO> TaskAdded;
         public event Action<TaskDTO> TaskUpdated;
         public event Action<Guid> TaskDeleted;
         public event Action<Guid> TaskLocked;
         public event Action<Guid> TaskUnlocked;
 
-        public Task ConnectAsync() => Task.CompletedTask;
-        public Task DisconnectAsync() => Task.CompletedTask;
+        public Task ConnectAsync()
+        {
+            ConnectionStatus = ConnectionStatus.Connecting;
+            // Simulate connection delay
+            Task.Delay(500).ContinueWith(_ => ConnectionStatus = ConnectionStatus.Connected);
+            return Task.CompletedTask;
+        }
+        
+        public Task DisconnectAsync()
+        {
+            ConnectionStatus = ConnectionStatus.Disconnected;
+            return Task.CompletedTask;
+        }
 
         public Task<IEnumerable<TaskDTO>> GetAllTasksAsync()
         {

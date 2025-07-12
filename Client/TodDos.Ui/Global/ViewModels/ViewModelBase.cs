@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Todos.Client.Common.Interfaces;
-using ToDos.Ui.Services.Navigation;
+using Todos.Ui.Services.Navigation;
 
-namespace ToDos.Ui.ViewModels
+namespace Todos.Ui.ViewModels
 {
     public class ViewModelBase : ObservableObject
     {

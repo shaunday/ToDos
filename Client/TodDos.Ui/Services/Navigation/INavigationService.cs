@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ToDos.Ui.ViewModels;
+using Todos.Ui.ViewModels;
 
-namespace ToDos.Ui.Services.Navigation
+namespace Todos.Ui.Services.Navigation
 {
     public interface INavigationService
     {

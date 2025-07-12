@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TodDos.Ui.Models
+namespace Todos.Ui.Models
 {
     public partial class TagModel : ObservableObject
     {

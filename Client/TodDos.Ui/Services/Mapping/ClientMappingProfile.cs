@@ -4,12 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TodDos.Ui.Models;
 using ToDos.DotNet.Common;
-using ToDos.Ui.Models;
+using Todos.Ui.Models;
 using static ToDos.DotNet.Common.GlobalTypes;
 
-namespace TodDos.Ui.Services.Mapping
+namespace Todos.Ui.Services.Mapping
 {
     public class ClientMappingProfile : Profile
     {

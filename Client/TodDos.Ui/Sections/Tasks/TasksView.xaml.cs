@@ -1,6 +1,6 @@
 using System.Windows.Controls;
 
-namespace ToDos.Ui.Sections
+namespace Todos.Ui.Sections
 {
     public partial class TasksView : UserControl
     {

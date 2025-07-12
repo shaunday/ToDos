@@ -1,15 +1,19 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using ToDos.Ui.Services.Navigation;
-using ToDos.Ui.ViewModels;
+using Todos.Ui.Services.Navigation;
+using Todos.Ui.ViewModels;
+using Todos.Client.Common.Interfaces;
 
-namespace ToDos.Ui
+namespace Todos.Ui
 {
-    public class MainViewModel : ViewModelBase
+    public partial class MainViewModel : ViewModelBase
     {
-        public MainViewModel(INavigationService navigation) :base(navigation)
+        [ObservableProperty]
+        private ApplicationViewModel applicationViewModel;
+
+        public MainViewModel(INavigationService navigation, ITaskSyncClient taskSyncClient) : base(navigation)
         {
+            applicationViewModel = new ApplicationViewModel(taskSyncClient);
             Navigation.NavigateTo<TasksViewModel>();
         }
     }
-
 }

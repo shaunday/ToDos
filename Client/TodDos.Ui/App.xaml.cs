@@ -5,17 +5,17 @@ using Serilog.Extensions.Logging;
 using System;
 using System.Diagnostics;
 using System.Windows;
-using TodDos.Ui.Services.Mapping;
+using Todos.Ui.Services.Mapping;
 using Todos.Client.Common.Factories;
 using Todos.Client.Common.Interfaces;
 using Todos.Client.MockTaskSyncClient;
 using Todos.Client.SignalRClient;
-using ToDos.Ui.Services.Navigation;
-using ToDos.Ui.ViewModels;
+using Todos.Ui.Services.Navigation;
+using Todos.Ui.ViewModels;
 using Unity;
 using static Todos.Client.Common.TypesGlobal;
 
-namespace ToDos.Ui
+namespace Todos.Ui
 {
     public partial class App : Application
     {
@@ -77,7 +77,7 @@ namespace ToDos.Ui
             container.RegisterInstance<IMapper>(mapper);
 
             // Register ViewModels
-            container.RegisterSingleton<MainViewModel>();
+            container.RegisterType<MainViewModel>();
             container.RegisterType<LoginViewModel>();
             container.RegisterType<TasksViewModel>();
         }

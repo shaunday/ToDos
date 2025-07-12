@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ToDos.Ui.ViewModels;
+using Todos.Ui.ViewModels;
 using Unity;
 
-namespace ToDos.Ui.Services.Navigation
+namespace Todos.Ui.Services.Navigation
 {
     public class NavigationService : ObservableObject, INavigationService
     {
