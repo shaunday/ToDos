@@ -10,6 +10,8 @@ using Todos.Client.Common.Factories;
 using Todos.Client.Common.Interfaces;
 using Todos.Client.MockTaskSyncClient;
 using Todos.Client.SignalRClient;
+using Todos.Client.UserService;
+using Todos.Client.UserService.Interfaces;
 using Todos.Ui.Services.Navigation;
 using Todos.Ui.ViewModels;
 using Unity;
@@ -65,6 +67,7 @@ namespace Todos.Ui
 
             // Register services
             container.RegisterSingleton<INavigationService, NavigationService>();
+            container.RegisterSingleton<IUserService, MockUserService>();
             container.RegisterSingleton<ITaskSyncClient, MockTaskSyncClient>();
             container.RegisterInstance(Log.Logger);
 

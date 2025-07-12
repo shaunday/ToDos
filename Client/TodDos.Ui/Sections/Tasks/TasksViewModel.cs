@@ -14,7 +14,7 @@ namespace Todos.Ui.ViewModels
 {
     public partial class TasksViewModel : ViewModelBase
     {
-        private readonly ITaskSyncClient _taskService;
+        private readonly ITaskSyncClient _taskSyncClient;
 
         [ObservableProperty]
         private ObservableCollection<TaskModel> tasks = new ObservableCollection<TaskModel>();
@@ -22,18 +22,17 @@ namespace Todos.Ui.ViewModels
         [ObservableProperty]
         private TaskModel? editingTask;
 
-        public TasksViewModel(ITaskSyncClient taskService, IMapper mapper, INavigationService navigation) : base(mapper, navigation)
+        public TasksViewModel(ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation) : base(mapper, navigation)
         {
-            _taskService = taskService;
-            ConnectAndLoadTasksAsync();
+            _taskSyncClient = taskSyncClient;
+            LoadTasksAsync();
         }
 
-        private async void ConnectAndLoadTasksAsync()
+        private async void LoadTasksAsync()
         {
             try
             {
-                await _taskService.ConnectAsync();
-                var allTaskDtos = await _taskService.GetAllTasksAsync();
+                var allTaskDtos = await _taskSyncClient.GetAllTasksAsync();
                 var allTaskModels = allTaskDtos.Select(dto => _mapper.Map<TaskModel>(dto));
                 Tasks = new ObservableCollection<TaskModel>(allTaskModels);
             }
@@ -48,7 +47,7 @@ namespace Todos.Ui.ViewModels
         {
             if (task == null || EditingTask != null) return; // Only one edit at a time
 
-            var locked = await _taskService.LockTaskAsync(task.Id);
+            var locked = await _taskSyncClient.LockTaskAsync(task.Id);
             if (locked)
             {
                 ChangeTaskEditMode(task, true);
@@ -61,8 +60,8 @@ namespace Todos.Ui.ViewModels
         {
             if (task == null || !task.IsEditing) return;
             var updatedDto = _mapper.Map<TaskDTO>(task);
-            await _taskService.UpdateTaskAsync(updatedDto);
-            await _taskService.UnlockTaskAsync(task.Id);
+            await _taskSyncClient.UpdateTaskAsync(updatedDto);
+            await _taskSyncClient.UnlockTaskAsync(task.Id);
             ChangeTaskEditMode(task, false);
         }
 
@@ -70,7 +69,7 @@ namespace Todos.Ui.ViewModels
         private async Task CancelEditAsync(TaskModel task)
         {
             if (task == null || !task.IsEditing) return;
-            _taskService.UnlockTaskAsync(task.Id);
+            await _taskSyncClient.UnlockTaskAsync(task.Id);
             //todo if failed what now?
             //todo reload the task
             ChangeTaskEditMode(task, false);
@@ -87,7 +86,7 @@ namespace Todos.Ui.ViewModels
         {
             var newTaskModel = new TaskModel { Title = "New Task" };
             var newTaskDto = _mapper.Map<TaskDTO>(newTaskModel);
-            var addedTaskDto = await _taskService.AddTaskAsync(newTaskDto);
+            var addedTaskDto = await _taskSyncClient.AddTaskAsync(newTaskDto);
             var addedTaskModel = _mapper.Map<TaskModel>(addedTaskDto);
 
             Tasks.Add(addedTaskModel);
@@ -96,7 +95,7 @@ namespace Todos.Ui.ViewModels
         [RelayCommand]
         private async Task DeleteTaskAsync(TaskModel task)
         {
-            var deleted = await _taskService.DeleteTaskAsync(task.Id);
+            var deleted = await _taskSyncClient.DeleteTaskAsync(task.Id);
             if (deleted)
             {
                 Tasks.Remove(task);
@@ -108,7 +107,7 @@ namespace Todos.Ui.ViewModels
         //{
         //    task.IsCompleted = isCompleted;
         //    var updatedDto = _mapper.Map<TaskDTO>(task);
-        //    await _taskService.UpdateTaskAsync(updatedDto);
+        //    await _taskSyncClient.UpdateTaskAsync(updatedDto);
         //    OnPropertyChanged(nameof(Tasks));
         //}
     }

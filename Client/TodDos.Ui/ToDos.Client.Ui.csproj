@@ -58,6 +58,7 @@
     <ProjectReference Include="..\Todos.Client.Common\Todos.Client.Common.csproj" />
     <ProjectReference Include="..\Todos.Client.MockTaskSyncClient\Todos.Client.MockTaskSyncClient.csproj" />
     <ProjectReference Include="..\Todos.Client.SignalRClient\Todos.Client.SignalRClient.csproj" />
+    <ProjectReference Include="..\Todos.Client.UserService\Todos.Client.UserService.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

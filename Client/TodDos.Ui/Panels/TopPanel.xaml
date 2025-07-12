@@ -56,6 +56,16 @@
                            VerticalAlignment="Center" />
                 <TextBlock Text=")" 
                            VerticalAlignment="Center" />
+                
+                <!-- Logout Button -->
+                <Button Style="{DynamicResource MaterialDesignIconButton}"
+                        Command="{Binding ApplicationViewModel.LogoutCommand}"
+                        ToolTip="Logout"
+                        Margin="16,0,0,0">
+                    <materialDesign:PackIcon Kind="Logout" 
+                                             Width="16" 
+                                             Height="16" />
+                </Button>
             </StackPanel>
         </Grid>
     </Border>

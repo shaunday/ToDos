@@ -12,6 +12,10 @@ namespace Todos.Client.Common.Interfaces
         ConnectionStatus ConnectionStatus { get; }
         event Action<ConnectionStatus> ConnectionStatusChanged;
 
+        // JWT Token management (commented out for now as requested)
+        // void SetJwtToken(string jwt);
+        // string GetJwtToken();
+
         // Connects to the server (real-time sync or API handshake)
         Task ConnectAsync();
 

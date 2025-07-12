@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static ToDos.DotNet.Common.GlobalTypes;
+using static ToDos.DotNet.Common.Globals;
 
 namespace ToDos.Entities
 {

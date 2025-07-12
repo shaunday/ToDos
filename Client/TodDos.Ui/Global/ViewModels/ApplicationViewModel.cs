@@ -6,7 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Todos.Client.Common.Interfaces;
-using Todos.Ui.Models;
+using Todos.Client.UserService.Interfaces;
+using Todos.Client.UserService.Models;
+using Todos.Ui.Services.Navigation;
 using static Todos.Client.Common.TypesGlobal;
 
 namespace Todos.Ui.ViewModels
@@ -22,17 +24,22 @@ namespace Todos.Ui.ViewModels
         [ObservableProperty]
         private UserModel currentUser;
 
+        private readonly IUserService _userService;
         private readonly ITaskSyncClient _taskSyncClient;
+        private readonly INavigationService _navigation;
 
-        public ApplicationViewModel(ITaskSyncClient taskSyncClient) 
+        public ApplicationViewModel(IUserService userService, ITaskSyncClient taskSyncClient, INavigationService navigation) 
         {
+            _userService = userService;
             _taskSyncClient = taskSyncClient;
-            CurrentUser = new UserModel();
+            _navigation = navigation;
             
-            // Subscribe to connection status changes
+            // Subscribe to events
+            _userService.TokenChanged += HandleTokenChanged;
             _taskSyncClient.ConnectionStatusChanged += HandleConnectionStatusChanged;
             
-            // Initialize connection status
+            // Initialize with current state
+            CurrentUser = _userService.CurrentUser;
             UpdateConnectionStatus();
         }
 
@@ -42,12 +49,51 @@ namespace Todos.Ui.ViewModels
             UpdateConnectionStatus();
         }
 
+        private async void HandleTokenChanged(string newToken)
+        {
+            // When token changes, update the task sync client
+            if (!string.IsNullOrEmpty(newToken))
+            {
+                // TODO: Uncomment when JWT support is implemented in TaskSyncClient
+                // _taskSyncClient.SetJwtToken(newToken);
+                
+                // For now, just connect without JWT
+                try
+                {
+                    await _taskSyncClient.ConnectAsync();
+                }
+                catch (Exception)
+                {
+                    // Handle connection error
+                    ConnectionStatusText = "Connection failed";
+                }
+            }
+            else
+            {
+                // Token cleared (logout), disconnect
+                try
+                {
+                    await _taskSyncClient.DisconnectAsync();
+                }
+                catch (Exception)
+                {
+                    // Handle disconnection error
+                }
+            }
+        }
+
         [RelayCommand]
         private async Task ConnectAsync()
         {
             try
             {
-                await _taskSyncClient.ConnectAsync();
+                // Authenticate user first
+                var authenticated = await _userService.AuthenticateAsync("defaultuser", "1234");
+                if (!authenticated)
+                {
+                    ConnectionStatusText = "Authentication failed";
+                }
+                // Connection will be handled by HandleTokenChanged
             }
             catch (Exception)
             {
@@ -57,16 +103,52 @@ namespace Todos.Ui.ViewModels
         }
 
         [RelayCommand]
+        private async Task LoginAsync()
+        {
+            try
+            {
+                // For now, use default credentials - in real app, this would come from login form
+                var authenticated = await _userService.AuthenticateAsync("defaultuser", "1234");
+                if (!authenticated)
+                {
+                    ConnectionStatusText = "Authentication failed";
+                }
+                // Connection will be handled by HandleTokenChanged
+            }
+            catch (Exception)
+            {
+                // Handle login error
+                ConnectionStatusText = "Login failed";
+            }
+        }
+
+        [RelayCommand]
         private async Task DisconnectAsync()
         {
             try
             {
-                await _taskSyncClient.DisconnectAsync();
+                await _userService.LogoutAsync();
+                // Disconnection will be handled by HandleTokenChanged
             }
             catch (Exception)
             {
                 // Handle disconnection error
                 ConnectionStatusText = "Disconnection failed";
+            }
+        }
+
+        [RelayCommand]
+        private async Task LogoutAsync()
+        {
+            try
+            {
+                await _userService.LogoutAsync();
+                // Navigation will be handled by HandleUserChanged
+            }
+            catch (Exception)
+            {
+                // Handle logout error
+                ConnectionStatusText = "Logout failed";
             }
         }
 

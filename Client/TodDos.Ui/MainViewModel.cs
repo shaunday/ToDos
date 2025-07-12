@@ -1,7 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Todos.Client.Common.Interfaces;
+using Todos.Client.UserService.Interfaces;
 using Todos.Ui.Services.Navigation;
 using Todos.Ui.ViewModels;
-using Todos.Client.Common.Interfaces;
 
 namespace Todos.Ui
 {
@@ -10,9 +11,9 @@ namespace Todos.Ui
         [ObservableProperty]
         private ApplicationViewModel applicationViewModel;
 
-        public MainViewModel(INavigationService navigation, ITaskSyncClient taskSyncClient) : base(navigation)
+        public MainViewModel(INavigationService navigation, IUserService userService, ITaskSyncClient taskSyncClient) : base(navigation)
         {
-            applicationViewModel = new ApplicationViewModel(taskSyncClient);
+            applicationViewModel = new ApplicationViewModel(userService, taskSyncClient, navigation);
             Navigation.NavigateTo<TasksViewModel>();
         }
     }
