@@ -12,15 +12,17 @@
                 <ContentControl Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <ContentControl.ContentTemplate>
                         <DataTemplate>
-                            <Border Background="Green" 
-                                    CornerRadius="4" 
-                                    Padding="3,1" 
-                                    Height="24"
+                            <Border Background="#E8F5E8" 
+                                    BorderBrush="#4CAF50"
+                                    BorderThickness="1"
+                                    CornerRadius="3" 
+                                    Padding="4,2" 
+                                    Height="20"
                                     VerticalAlignment="Center">
-                                <TextBlock Text="EDITING..." 
-                                           FontSize="8" 
+                                <TextBlock Text="Editing" 
+                                           FontSize="9" 
                                            FontWeight="Normal" 
-                                           Foreground="White"
+                                           Foreground="#2E7D32"
                                            VerticalAlignment="Center" />
                             </Border>
                         </DataTemplate>
@@ -31,15 +33,17 @@
                 <ContentControl Visibility="{Binding IsLocked, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <ContentControl.ContentTemplate>
                         <DataTemplate>
-                            <Border Background="Red" 
-                                    CornerRadius="4" 
-                                    Padding="3,1" 
-                                    Height="24"
+                            <Border Background="#FFEBEE" 
+                                    BorderBrush="#F44336"
+                                    BorderThickness="1"
+                                    CornerRadius="3" 
+                                    Padding="4,2" 
+                                    Height="20"
                                     VerticalAlignment="Center">
-                                <TextBlock Text="LOCKED" 
-                                           FontSize="8" 
+                                <TextBlock Text="Locked" 
+                                           FontSize="9" 
                                            FontWeight="Normal" 
-                                           Foreground="White"
+                                           Foreground="#C62828"
                                            VerticalAlignment="Center" />
                             </Border>
                         </DataTemplate>
@@ -50,15 +54,17 @@
                 <ContentControl Visibility="{Binding IsCompleted, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <ContentControl.ContentTemplate>
                         <DataTemplate>
-                            <Border Background="Blue" 
-                                    CornerRadius="4" 
-                                    Padding="3,1" 
-                                    Height="24"
+                            <Border Background="#E3F2FD" 
+                                    BorderBrush="#2196F3"
+                                    BorderThickness="1"
+                                    CornerRadius="3" 
+                                    Padding="4,2" 
+                                    Height="20"
                                     VerticalAlignment="Center">
-                                <TextBlock Text="DONE" 
-                                           FontSize="8" 
+                                <TextBlock Text="Done" 
+                                           FontSize="9" 
                                            FontWeight="Normal" 
-                                           Foreground="White"
+                                           Foreground="#1565C0"
                                            VerticalAlignment="Center" />
                             </Border>
                         </DataTemplate>
