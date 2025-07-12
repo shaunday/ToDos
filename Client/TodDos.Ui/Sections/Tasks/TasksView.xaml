@@ -155,6 +155,31 @@
                 </MultiDataTrigger>
             </Style.Triggers>
         </Style>
+
+        <!-- Generic Task Text Element Style -->
+        <Style x:Key="TaskTextElementStyle" TargetType="TextBlock" BasedOn="{StaticResource CenteredTextBlockStyle}">
+            <Setter Property="FontWeight" Value="Normal" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                    <Setter Property="FontWeight" Value="Bold" />
+                    <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPrimary}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsLocked}" Value="True">
+                    <Setter Property="Foreground" Value="Gray" />
+                    <Setter Property="FontStyle" Value="Italic" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                    <Setter Property="TextDecorations" Value="Strikethrough" />
+                    <Setter Property="Foreground" Value="Gray" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Generic Task Text Editing Element Style -->
+        <Style x:Key="TaskTextEditingElementStyle" TargetType="TextBox" BasedOn="{StaticResource CenteredTextBoxStyle}">
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPrimary}" />
+        </Style>
     </UserControl.Resources>
 
     <Grid Margin="16">
@@ -174,69 +199,16 @@
 
             <DataGrid.Columns>
                 <!-- Title Column -->
-                <DataGridTextColumn Header="Title" Width="*">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock" BasedOn="{StaticResource CenteredTextBlockStyle}">
-                            <Setter Property="Text" Value="{Binding Title}" />
-                            <Setter Property="FontWeight" Value="Normal" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsEditing}" Value="True">
-                                    <Setter Property="FontWeight" Value="Bold" />
-                                    <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPrimary}" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsLocked}" Value="True">
-                                    <Setter Property="Foreground" Value="Gray" />
-                                    <Setter Property="FontStyle" Value="Italic" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
-                                    <Setter Property="TextDecorations" Value="Strikethrough" />
-                                    <Setter Property="Foreground" Value="Gray" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                    <DataGridTextColumn.EditingElementStyle>
-                        <Style TargetType="TextBox" BasedOn="{StaticResource CenteredTextBoxStyle}">
-                            <Setter Property="Text" Value="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                            <Setter Property="FontWeight" Value="Bold" />
-                            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPrimary}" />
-                        </Style>
-                    </DataGridTextColumn.EditingElementStyle>
-                </DataGridTextColumn>
+                <DataGridTextColumn Header="Title" Width="*"
+                                    Binding="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    ElementStyle="{StaticResource TaskTextElementStyle}"
+                                    EditingElementStyle="{StaticResource TaskTextEditingElementStyle}" />
 
                 <!-- Description Column -->
-                <DataGridTextColumn Header="Description" Width="3*">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock" BasedOn="{StaticResource CenteredTextBlockStyle}">
-                            <Setter Property="Text" Value="{Binding Description}" />
-                            <Setter Property="TextWrapping" Value="Wrap" />
-                            <Setter Property="FontWeight" Value="Normal" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsEditing}" Value="True">
-                                    <Setter Property="FontWeight" Value="Bold" />
-                                    <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPrimary}" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsLocked}" Value="True">
-                                    <Setter Property="Foreground" Value="Gray" />
-                                    <Setter Property="FontStyle" Value="Italic" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
-                                    <Setter Property="TextDecorations" Value="Strikethrough" />
-                                    <Setter Property="Foreground" Value="Gray" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                    <DataGridTextColumn.EditingElementStyle>
-                        <Style TargetType="TextBox" BasedOn="{StaticResource CenteredTextBoxStyle}">
-                            <Setter Property="Text" Value="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                            <Setter Property="TextWrapping" Value="Wrap" />
-                            <Setter Property="AcceptsReturn" Value="True" />
-                            <Setter Property="FontWeight" Value="Bold" />
-                            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPrimary}" />
-                        </Style>
-                    </DataGridTextColumn.EditingElementStyle>
-                </DataGridTextColumn>
+                <DataGridTextColumn Header="Description" Width="3*"
+                                    Binding="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    ElementStyle="{StaticResource TaskTextElementStyle}"
+                                    EditingElementStyle="{StaticResource TaskTextEditingElementStyle}" />
 
                 <!-- Priority Column -->
                 <DataGridComboBoxColumn Header="Priority"
