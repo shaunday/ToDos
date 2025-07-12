@@ -127,17 +127,19 @@
             <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="Transparent"/>
                         <Setter Property="BorderBrush" Value="Transparent"/>
                     </Trigger>
 
-                <!-- Enhanced styling for editing cells -->
+                <!-- Enable hit testing for editing cells -->
                 <DataTrigger Binding="{Binding IsEditing}" Value="True">
                     <Setter Property="Background" Value="#FFF0F8FF" />
                     <Setter Property="BorderThickness" Value="1" />
                     <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignPrimary}" />
+                    <Setter Property="IsHitTestVisible" Value="True" />
                 </DataTrigger>
 
                 <!-- Enhanced styling for locked cells -->
@@ -184,6 +186,11 @@
         <Style x:Key="TaskTextEditingElementStyle" TargetType="TextBox" BasedOn="{StaticResource CenteredTextBoxStyle}">
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPrimary}" />
+        </Style>
+
+        <!-- Actions Column Cell Style - Always hit test visible -->
+        <Style x:Key="ActionsCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource TaskCellStyle}">
+            <Setter Property="IsHitTestVisible" Value="True"/>
         </Style>
 
         </ResourceDictionary>
@@ -307,6 +314,9 @@
 
                 <!-- Actions Column -->
                 <DataGridTemplateColumn Header="Actions" Width="*">
+                    <DataGridTemplateColumn.CellStyle>
+                        <Style TargetType="DataGridCell" BasedOn="{StaticResource ActionsCellStyle}" />
+                    </DataGridTemplateColumn.CellStyle>
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <ContentControl>
