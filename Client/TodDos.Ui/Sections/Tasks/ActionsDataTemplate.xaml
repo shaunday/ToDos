@@ -43,7 +43,7 @@
     </DataTemplate>
 
     <!-- Actions Column Template -->
-    <DataTemplate x:Key="ActionsColumnTemplate">
+    <DataTemplate x:Key="ActionsDataTemplate">
         <ContentControl>
             <ContentControl.Style>
                 <Style TargetType="ContentControl" BasedOn="{StaticResource CenteredContentControlStyle}">

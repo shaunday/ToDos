@@ -15,7 +15,8 @@
         <ResourceDictionary>
                     <ResourceDictionary.MergedDictionaries>
             <ResourceDictionary Source="../../Resources/StatusStyles.xaml" />
-            <ResourceDictionary Source="ActionsColumnTemplate.xaml" />
+            <ResourceDictionary Source="ActionsDataTemplate.xaml" />
+            <ResourceDictionary Source="StatusDataTemplate.xaml" />
         </ResourceDictionary.MergedDictionaries>
 
             <!-- Enum values for Priority -->
@@ -60,7 +61,7 @@
                 <!-- Lock row if IsLocked true -->
                 <DataTrigger Binding="{Binding IsLocked}" Value="True">
                     <Setter Property="Background" Value="#FFFFF0F0" />
-                    <Setter Property="Opacity" Value="0.8" />
+                    <Setter Property="Opacity" Value="0.6" />
                     <Setter Property="Effect">
                         <Setter.Value>
                             <DropShadowEffect Color="Red" Direction="270" ShadowDepth="2" BlurRadius="4" Opacity="0.2" />
@@ -243,78 +244,7 @@
                 <!-- Status Column -->
                 <DataGridTemplateColumn Header="Status" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <ItemsControl HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <ContentControl Content="{Binding}" Margin="1,0" />
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                                <ItemsControl.Items>
-                                    <!-- Editing Status -->
-                                    <ContentControl Visibility="{Binding IsEditing, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <ContentControl.ContentTemplate>
-                                            <DataTemplate>
-                                                <Border Background="Green" 
-                                                        CornerRadius="4" 
-                                                        Padding="3,1" 
-                                                        Height="24"
-                                                        VerticalAlignment="Center">
-                                                    <TextBlock Text="EDITING..." 
-                                                               FontSize="8" 
-                                                               FontWeight="Normal" 
-                                                               Foreground="White"
-                                                               VerticalAlignment="Center" />
-                                                </Border>
-                                            </DataTemplate>
-                                        </ContentControl.ContentTemplate>
-                                    </ContentControl>
-                                    
-                                    <!-- Locked Status -->
-                                    <ContentControl Visibility="{Binding IsLocked, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <ContentControl.ContentTemplate>
-                                            <DataTemplate>
-                                                <Border Background="Red" 
-                                                        CornerRadius="4" 
-                                                        Padding="3,1" 
-                                                        Height="24"
-                                                        VerticalAlignment="Center">
-                                                    <TextBlock Text="LOCKED" 
-                                                               FontSize="8" 
-                                                               FontWeight="Normal" 
-                                                               Foreground="White"
-                                                               VerticalAlignment="Center" />
-                                                </Border>
-                                            </DataTemplate>
-                                        </ContentControl.ContentTemplate>
-                                    </ContentControl>
-                                    
-                                    <!-- Completed Status -->
-                                    <ContentControl Visibility="{Binding IsCompleted, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <ContentControl.ContentTemplate>
-                                            <DataTemplate>
-                                                <Border Background="Blue" 
-                                                        CornerRadius="4" 
-                                                        Padding="3,1" 
-                                                        Height="24"
-                                                        VerticalAlignment="Center">
-                                                    <TextBlock Text="DONE" 
-                                                               FontSize="8" 
-                                                               FontWeight="Normal" 
-                                                               Foreground="White"
-                                                               VerticalAlignment="Center" />
-                                                </Border>
-                                            </DataTemplate>
-                                        </ContentControl.ContentTemplate>
-                                    </ContentControl>
-                                </ItemsControl.Items>
-                            </ItemsControl>
-                        </DataTemplate>
+                        <StaticResource ResourceKey="StatusDataTemplate" />
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
@@ -324,7 +254,7 @@
                         <Style TargetType="DataGridCell" BasedOn="{StaticResource ActionsCellStyle}" />
                     </DataGridTemplateColumn.CellStyle>
                     <DataGridTemplateColumn.CellTemplate>
-                        <StaticResource ResourceKey="ActionsColumnTemplate" />
+                        <StaticResource ResourceKey="ActionsDataTemplate" />
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
