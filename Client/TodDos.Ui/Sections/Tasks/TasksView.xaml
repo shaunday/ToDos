@@ -93,6 +93,7 @@
         <Style x:Key="TaskRowStyle" TargetType="DataGridRow">
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Background" Value="Transparent" />
             <Setter Property="Opacity" Value="1" />
        
             <Style.Triggers>
@@ -136,6 +137,7 @@
         <!-- Cell Style -->
         <Style x:Key="TaskCellStyle" TargetType="DataGridCell">
             <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Style.Triggers>
