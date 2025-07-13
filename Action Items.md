@@ -17,21 +17,7 @@
 ---
 
 ## SignalR Client
-
-* JWT
-* You can add cancellation tokens or timeout policies to retry/wait delays.
-
----
-
-## SignalR HOST
-
-* API Versioning
-  services.AddSignalR().AddHubOptions(opts =>
-  {
-  opts.KeepAliveInterval = TimeSpan.FromSeconds(30);
-  opts.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
-  });
-* Broadcast task changes and lock/unlock events to all connected clients
+can add cancellation tokens or timeout policies to retry/wait delays.
 
 ---
 
@@ -89,7 +75,6 @@ Make sure that both client and server validate all inputs (e.g., task titles not
 
 ## Notes and Reminders
 
-* Check if task is locked or exists before allowing edits or saves
 * Track and simulate connection drops, reconnect logic, slow DB writes, and queue overflow
 * Be aware SignalR doesn’t guarantee message delivery, handle edge cases
 

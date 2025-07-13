@@ -25,6 +25,13 @@ namespace ToDos.TaskSyncServer
             // Register SignalR with Unity container
             GlobalHost.DependencyResolver = new UnitySignalRDependencyResolver(unityContainer);
             
+            // Configure SignalR with keep-alive and timeout settings
+            // KeepAlive: Sends periodic "ping" messages to keep connections alive and detect disconnections
+            // ConnectionTimeout: Maximum time to wait for a client to respond before considering it disconnected
+            // These settings help with network stability, connection monitoring, and resource management
+            GlobalHost.Configuration.KeepAlive = TimeSpan.FromSeconds(30);
+            GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(60);
+            
             app.MapSignalR();
             
             var config = new HttpConfiguration();
