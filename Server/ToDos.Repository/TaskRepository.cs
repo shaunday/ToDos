@@ -11,20 +11,12 @@ namespace ToDos.Repository
     public class TaskRepository : ITaskRepository
     {
         private readonly TaskDbContext _context;
+        private readonly ILogger _logger;
 
-        static TaskRepository()
-        {
-            if (Log.Logger == null || Log.Logger.GetType().Name == "SilentLogger")
-            {
-                Log.Logger = new LoggerConfiguration()
-                    .WriteTo.File("ToDos.Repository.log")
-                    .CreateLogger();
-            }
-        }
-
-        public TaskRepository(TaskDbContext context)
+        public TaskRepository(TaskDbContext context, ILogger logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<TaskEntity>> GetAllAsync()
@@ -35,7 +27,7 @@ namespace ToDos.Repository
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Exception in GetAllAsync");
+                _logger.Error(ex, "Exception in GetAllAsync");
                 throw;
             }
         }
@@ -48,7 +40,7 @@ namespace ToDos.Repository
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Exception in GetByIdAsync");
+                _logger.Error(ex, "Exception in GetByIdAsync");
                 throw;
             }
         }
@@ -62,7 +54,7 @@ namespace ToDos.Repository
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Exception in AddAsync");
+                _logger.Error(ex, "Exception in AddAsync");
                 throw;
             }
         }
@@ -80,7 +72,7 @@ namespace ToDos.Repository
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Exception in UpdateAsync");
+                _logger.Error(ex, "Exception in UpdateAsync");
                 throw;
             }
         }
@@ -99,7 +91,7 @@ namespace ToDos.Repository
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Exception in DeleteAsync");
+                _logger.Error(ex, "Exception in DeleteAsync");
                 throw;
             }
         }
@@ -118,7 +110,7 @@ namespace ToDos.Repository
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Exception in SetCompletionAsync");
+                _logger.Error(ex, "Exception in SetCompletionAsync");
                 throw;
             }
         }
@@ -137,7 +129,7 @@ namespace ToDos.Repository
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Exception in LockTaskAsync (Guid)");
+                _logger.Error(ex, "Exception in LockTaskAsync (Guid)");
                 throw;
             }
         }
@@ -156,7 +148,7 @@ namespace ToDos.Repository
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Exception in UnlockTaskAsync (Guid)");
+                _logger.Error(ex, "Exception in UnlockTaskAsync (Guid)");
                 throw;
             }
         }
@@ -170,7 +162,7 @@ namespace ToDos.Repository
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Exception in IsTaskLockedAsync (Guid)");
+                _logger.Error(ex, "Exception in IsTaskLockedAsync (Guid)");
                 throw;
             }
         }
@@ -191,7 +183,7 @@ namespace ToDos.Repository
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Exception in LockTaskAsync (int)");
+                _logger.Error(ex, "Exception in LockTaskAsync (int)");
                 throw;
             }
         }
@@ -211,7 +203,7 @@ namespace ToDos.Repository
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Exception in UnlockTaskAsync (int)");
+                _logger.Error(ex, "Exception in UnlockTaskAsync (int)");
                 throw;
             }
         }
@@ -225,7 +217,7 @@ namespace ToDos.Repository
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Exception in IsTaskLockedAsync (int)");
+                _logger.Error(ex, "Exception in IsTaskLockedAsync (int)");
                 throw;
             }
         }
