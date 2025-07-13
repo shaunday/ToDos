@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using ToDos.DotNet.Common;
 using Todos.Ui.Models;
 using Todos.Client.UserService.Models;
-using static ToDos.DotNet.Common.Globals;
 
 namespace Todos.Ui.Services.Mapping
 {

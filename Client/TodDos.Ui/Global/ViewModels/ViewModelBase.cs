@@ -29,6 +29,7 @@ namespace Todos.Ui.ViewModels
         public ViewModelBase(ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation) : this(navigation)
         {
             _mapper = mapper;
+            _taskSyncClient = taskSyncClient;
         }
     }
 

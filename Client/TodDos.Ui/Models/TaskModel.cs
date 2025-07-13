@@ -2,8 +2,7 @@
 using System;
 using System.Collections.ObjectModel;
 using Todos.Ui.Models;
-using static global::ToDos.DotNet.Common.Globals;
-
+using ToDos.DotNet.Common;
 
 namespace Todos.Ui.Models
 {
