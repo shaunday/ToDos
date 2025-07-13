@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using ToDos.DotNet.Common;
 
-namespace Todos.Ui.Models
+namespace Todos.Ui.Sections.Tasks
 {
     public partial class NewTaskInputModel : ObservableObject
     {

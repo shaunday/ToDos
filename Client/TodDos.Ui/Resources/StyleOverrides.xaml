@@ -8,12 +8,6 @@
         <Setter Property="HorizontalAlignment" Value="Center" />
     </Style>
 
-    <!-- Centered TextBox Style -->
-    <Style x:Key="CenteredTextBoxStyle" TargetType="TextBox">
-        <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="HorizontalAlignment" Value="Center" />
-    </Style>
-
     <!-- Centered ComboBox Style -->
     <Style x:Key="CenteredComboBoxStyle" TargetType="ComboBox">
         <Setter Property="VerticalAlignment" Value="Center" />

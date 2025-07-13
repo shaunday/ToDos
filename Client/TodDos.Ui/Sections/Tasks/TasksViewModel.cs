@@ -7,8 +7,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Todos.Client.Common.Interfaces;
 using ToDos.DotNet.Common;
-using Todos.Ui.Models;
+using Todos.Ui.Sections.Tasks;
 using Todos.Ui.Services.Navigation;
+using Todos.Ui.Models;
 
 namespace Todos.Ui.ViewModels
 {
