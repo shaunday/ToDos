@@ -5,7 +5,7 @@ using AutoMapper;
 using Serilog;
 using ToDos.DotNet.Common;
 using ToDos.Repository;
-using ToDos.Server.Common.Entities;
+using ToDos.Entities;
 using ToDos.Server.Common.Interfaces;
 
 namespace ToDos.TaskSyncServer.Services

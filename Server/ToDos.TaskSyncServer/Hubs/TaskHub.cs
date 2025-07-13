@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using ToDos.DotNet.Common;
 using ToDos.Server.Common.Interfaces;
+using ToDos.TaskSyncServer.Interfaces;
 
 namespace ToDos.TaskSyncServer.Hubs
 {

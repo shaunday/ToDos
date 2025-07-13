@@ -1,13 +1,18 @@
+using AutoMapper;
 using Microsoft.AspNet.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Owin;
 using Serilog;
+using Serilog.Extensions.Logging;
+using System;
+using System.Configuration;
 using System.Web.Http;
-using ToDos.Repository;
-using ToDos.Server.Common.Entities;
-using ToDos.Server.Common.Interfaces;
-using ToDos.TaskSyncServer.Services;
 using Todos.Server.MockTaskService;
+using ToDos.Entities;
+using ToDos.Repository;
+using ToDos.Server.Common.Interfaces;
+using ToDos.TaskSyncServer.Mapping;
+using ToDos.TaskSyncServer.Services;
 using Unity;
 using Unity.Lifetime;
 
@@ -63,15 +68,15 @@ namespace ToDos.TaskSyncServer
                 container.RegisterType<ITaskService, TaskService>();
                 Log.Information("Using TaskService with real database");
             }
-            
+
             // Register AutoMapper
-            var mapperConfig = new AutoMapper.MapperConfiguration(cfg =>
+            var config = new MapperConfiguration(cfg =>
             {
-                cfg.AddProfile<ToDos.TaskSyncServer.Services.Mapping.ServerMappingProfile>();
-            });
-            var mapper = mapperConfig.CreateMapper();
-            container.RegisterInstance(mapper);
-            
+                cfg.AddProfile<ServerMappingProfile>();
+            }, new SerilogLoggerFactory(Log.Logger));
+            IMapper mapper = config.CreateMapper();
+            container.RegisterInstance<IMapper>(mapper);
+
             return container;
         }
     }
