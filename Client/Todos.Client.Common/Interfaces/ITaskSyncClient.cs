@@ -12,9 +12,9 @@ namespace Todos.Client.Common.Interfaces
         ConnectionStatus ConnectionStatus { get; }
         event Action<ConnectionStatus> ConnectionStatusChanged;
 
-        // JWT Token management (commented out for now as requested)
-        // void SetJwtToken(string jwt);
-        // string GetJwtToken();
+        // JWT Token management
+        void SetJwtToken(string jwt);
+        string GetJwtToken();
 
         // Connects to the server (real-time sync or API handshake)
         Task ConnectAsync();
@@ -23,21 +23,23 @@ namespace Todos.Client.Common.Interfaces
         Task DisconnectAsync();
 
         // CRUD operations
-        Task<IEnumerable<TaskDTO>> GetAllTasksAsync();
         Task<TaskDTO> AddTaskAsync(TaskDTO task);
         Task<TaskDTO> UpdateTaskAsync(TaskDTO task);
-        Task<bool> DeleteTaskAsync(Guid taskId);
-        Task<bool> SetTaskCompletionAsync(Guid taskId, bool isCompleted);
+        Task<bool> DeleteTaskAsync(int taskId);
+        Task<bool> SetTaskCompletionAsync(int taskId, bool isCompleted);
+
+        // Get tasks by user ID for initial loading
+        Task<IEnumerable<TaskDTO>> GetUserTasksAsync(int userId);
 
         // Events raised when tasks change in real-time
         event Action<TaskDTO> TaskAdded;
         event Action<TaskDTO> TaskUpdated;
-        event Action<Guid> TaskDeleted;
+        event Action<int> TaskDeleted;
 
         // Optional: For task locking
-        Task<bool> LockTaskAsync(Guid taskId);
-        Task<bool> UnlockTaskAsync(Guid taskId);
-        event Action<Guid> TaskLocked;
-        event Action<Guid> TaskUnlocked;
+        Task<bool> LockTaskAsync(int taskId);
+        Task<bool> UnlockTaskAsync(int taskId);
+        event Action<int> TaskLocked;
+        event Action<int> TaskUnlocked;
     }
 }

@@ -14,12 +14,13 @@ namespace Todos.Server.MockTaskService
         private readonly ILogger _logger;
         private readonly List<TaskDTO> _tasks = new List<TaskDTO>();
         private readonly object _lockObject = new object();
+        private int _nextTaskId = 1;
 
         public event Action<TaskDTO> TaskAdded;
         public event Action<TaskDTO> TaskUpdated;
-        public event Action<Guid> TaskDeleted;
-        public event Action<Guid> TaskLocked;
-        public event Action<Guid> TaskUnlocked;
+        public event Action<int> TaskDeleted;
+        public event Action<int> TaskLocked;
+        public event Action<int> TaskUnlocked;
 
         public MockTaskService(ILogger logger)
         {
@@ -29,57 +30,45 @@ namespace Todos.Server.MockTaskService
 
         private void InitializeMockData()
         {
-            var mockTasks = new[]
-            {
-                new TaskDTO
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Complete SignalR Implementation",
-                    Description = "Implement the SignalR hub for real-time task synchronization",
-                    IsCompleted = false,
-                    IsLocked = false,
-                    Priority = TaskPriority.High.ToString(),
-                    DueDate = DateTime.Now.AddDays(2),
-                    Tags = new List<TagDTO> { new TagDTO { Id = Guid.NewGuid(), Name = "Development" } }
-                },
-                new TaskDTO
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Write Unit Tests",
-                    Description = "Create comprehensive unit tests for the task service",
-                    IsCompleted = true,
-                    IsLocked = false,
-                    Priority = TaskPriority.Medium.ToString(),
-                    DueDate = DateTime.Now.AddDays(1),
-                    Tags = new List<TagDTO> { new TagDTO { Id = Guid.NewGuid(), Name = "Testing" } }
-                },
-                new TaskDTO
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Update Documentation",
-                    Description = "Update README with setup instructions and architecture overview",
-                    IsCompleted = false,
-                    IsLocked = false,
-                    Priority = TaskPriority.Low.ToString(),
-                    DueDate = DateTime.Now.AddDays(3),
-                    Tags = new List<TagDTO> { new TagDTO { Id = Guid.NewGuid(), Name = "Documentation" } }
-                }
-            };
-
             lock (_lockObject)
             {
-                _tasks.AddRange(mockTasks);
+                _tasks.Clear();
+                _nextTaskId = 13; // Start after the sample data IDs
+                
+                // Add sample tasks from MockTaskData
+                var sampleTasks = MockTaskData.GetSampleTasks();
+                _tasks.AddRange(sampleTasks);
+                
+                _logger.Information("Mock data initialized with {TaskCount} sample tasks", _tasks.Count);
             }
         }
 
-        public async Task<IEnumerable<TaskDTO>> GetAllTasksAsync()
+        public async Task<IEnumerable<TaskDTO>> GetUserTasksAsync(int userId)
         {
-            await Task.Delay(50); // Simulate async operation
+            await Task.Delay(100); // Simulate async operation
             
             lock (_lockObject)
             {
-                _logger.Information("Getting all tasks. Count: {TaskCount}", _tasks.Count);
-                return _tasks.ToList();
+                _logger.Information("Getting tasks for user: {UserId}", userId);
+                var userTasks = _tasks.Where(t => t.UserId == userId).ToList();
+                _logger.Information("Found {TaskCount} tasks for user {UserId}", userTasks.Count, userId);
+                return userTasks;
+            }
+        }
+
+        public async Task<TaskDTO> GetTaskByIdAsync(int taskId)
+        {
+            await Task.Delay(100); // Simulate async operation
+            
+            lock (_lockObject)
+            {
+                _logger.Information("Getting task by ID: {TaskId}", taskId);
+                var task = _tasks.FirstOrDefault(t => t.Id == taskId);
+                if (task == null)
+                {
+                    _logger.Warning("Task not found: {TaskId}", taskId);
+                }
+                return task;
             }
         }
 
@@ -89,15 +78,21 @@ namespace Todos.Server.MockTaskService
             
             lock (_lockObject)
             {
-                _logger.Information("Adding new task: {TaskTitle}", taskDto.Title);
+                _logger.Information("Adding task for user: {UserId}", taskDto.UserId);
                 
-                taskDto.Id = Guid.NewGuid();
+                if (string.IsNullOrWhiteSpace(taskDto.Title))
+                {
+                    _logger.Warning("Task title is empty for user: {UserId}", taskDto.UserId);
+                    throw new ArgumentException("Task title cannot be empty");
+                }
+                
+                taskDto.Id = _nextTaskId++;
                 _tasks.Add(taskDto);
                 
                 // Raise event for real-time updates
                 TaskAdded?.Invoke(taskDto);
                 
-                _logger.Information("Task added successfully: {TaskId}", taskDto.Id);
+                _logger.Information("Task added successfully: {TaskId} for user: {UserId}", taskDto.Id, taskDto.UserId);
                 return taskDto;
             }
         }
@@ -108,13 +103,21 @@ namespace Todos.Server.MockTaskService
             
             lock (_lockObject)
             {
-                _logger.Information("Updating task: {TaskId}", taskDto.Id);
+                _logger.Information("Updating task: {TaskId} for user: {UserId}", taskDto.Id, taskDto.UserId);
                 
                 var existingTask = _tasks.FirstOrDefault(t => t.Id == taskDto.Id);
                 if (existingTask == null)
                 {
                     _logger.Warning("Task not found for update: {TaskId}", taskDto.Id);
                     throw new InvalidOperationException($"Task with ID {taskDto.Id} not found");
+                }
+                
+                // Verify task ownership
+                if (existingTask.UserId != taskDto.UserId)
+                {
+                    _logger.Warning("Unauthorized task update attempt. Task owner: {TaskOwner}, Requesting user: {RequestingUser}", 
+                        existingTask.UserId, taskDto.UserId);
+                    throw new UnauthorizedAccessException("You can only update your own tasks");
                 }
                 
                 // Update properties
@@ -128,12 +131,12 @@ namespace Todos.Server.MockTaskService
                 // Raise event for real-time updates
                 TaskUpdated?.Invoke(existingTask);
                 
-                _logger.Information("Task updated successfully: {TaskId}", existingTask.Id);
+                _logger.Information("Task updated successfully: {TaskId} for user: {UserId}", existingTask.Id, existingTask.UserId);
                 return existingTask;
             }
         }
 
-        public async Task<bool> DeleteTaskAsync(Guid taskId)
+        public async Task<bool> DeleteTaskAsync(int taskId)
         {
             await Task.Delay(100); // Simulate async operation
             
@@ -158,7 +161,7 @@ namespace Todos.Server.MockTaskService
             }
         }
 
-        public async Task<bool> SetTaskCompletionAsync(Guid taskId, bool isCompleted)
+        public async Task<bool> SetTaskCompletionAsync(int taskId, bool isCompleted)
         {
             await Task.Delay(100); // Simulate async operation
             
@@ -183,7 +186,7 @@ namespace Todos.Server.MockTaskService
             }
         }
 
-        public async Task<bool> LockTaskAsync(Guid taskId)
+        public async Task<bool> LockTaskAsync(int taskId)
         {
             await Task.Delay(100); // Simulate async operation
             
@@ -214,7 +217,7 @@ namespace Todos.Server.MockTaskService
             }
         }
 
-        public async Task<bool> UnlockTaskAsync(Guid taskId)
+        public async Task<bool> UnlockTaskAsync(int taskId)
         {
             await Task.Delay(100); // Simulate async operation
             

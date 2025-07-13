@@ -19,20 +19,22 @@ namespace ToDos.Repository
             _logger = logger;
         }
 
-        public async Task<IEnumerable<TaskEntity>> GetAllAsync()
+        public async Task<IEnumerable<TaskEntity>> GetByUserIdAsync(int userId)
         {
             try
             {
-                return await _context.Tasks.ToListAsync();
+                return await _context.Tasks
+                    .Where(t => t.UserId == userId)
+                    .ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Exception in GetAllAsync");
+                _logger.Error(ex, "Exception in GetByUserIdAsync for user: {UserId}", userId);
                 throw;
             }
         }
 
-        public async Task<TaskEntity> GetByIdAsync(Guid id)
+        public async Task<TaskEntity> GetByIdAsync(int id)
         {
             try
             {
@@ -77,7 +79,7 @@ namespace ToDos.Repository
             }
         }
 
-        public async Task<bool> DeleteAsync(Guid taskId)
+        public async Task<bool> DeleteAsync(int taskId)
         {
             try
             {
@@ -96,7 +98,7 @@ namespace ToDos.Repository
             }
         }
 
-        public async Task<bool> SetCompletionAsync(Guid taskId, bool isCompleted)
+        public async Task<bool> SetCompletionAsync(int taskId, bool isCompleted)
         {
             try
             {
@@ -115,7 +117,7 @@ namespace ToDos.Repository
             }
         }
 
-        public async Task<bool> LockTaskAsync(Guid id)
+        public async Task<bool> LockTaskAsync(int id)
         {
             try
             {
@@ -134,7 +136,7 @@ namespace ToDos.Repository
             }
         }
 
-        public async Task<bool> UnlockTaskAsync(Guid id)
+        public async Task<bool> UnlockTaskAsync(int id)
         {
             try
             {
@@ -153,61 +155,6 @@ namespace ToDos.Repository
             }
         }
 
-        public async Task<bool> IsTaskLockedAsync(Guid id)
-        {
-            try
-            {
-                var task = await _context.Tasks.FindAsync(id);
-                return task?.IsLocked ?? false;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Exception in IsTaskLockedAsync (Guid)");
-                throw;
-            }
-        }
-
-        // Locking logic
-        public async Task<bool> LockTaskAsync(int id)
-        {
-            try
-            {
-                var task = await _context.Tasks.FindAsync(id);
-                if (task != null && !task.IsLocked)
-                {
-                    task.IsLocked = true;
-                    await _context.SaveChangesAsync();
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Exception in LockTaskAsync (int)");
-                throw;
-            }
-        }
-
-        public async Task<bool> UnlockTaskAsync(int id)
-        {
-            try
-            {
-                var task = await _context.Tasks.FindAsync(id);
-                if (task != null && task.IsLocked)
-                {
-                    task.IsLocked = false;
-                    await _context.SaveChangesAsync();
-                    return true;
-                }
-                return false;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Exception in UnlockTaskAsync (int)");
-                throw;
-            }
-        }
-
         public async Task<bool> IsTaskLockedAsync(int id)
         {
             try
@@ -217,7 +164,7 @@ namespace ToDos.Repository
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Exception in IsTaskLockedAsync (int)");
+                _logger.Error(ex, "Exception in IsTaskLockedAsync (Guid)");
                 throw;
             }
         }

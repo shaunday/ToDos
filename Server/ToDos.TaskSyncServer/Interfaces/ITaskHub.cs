@@ -7,12 +7,12 @@ namespace ToDos.TaskSyncServer.Interfaces
 {
     public interface ITaskHub
     {
-        Task<IEnumerable<TaskDTO>> GetAllTasks();
         Task<TaskDTO> AddTask(TaskDTO task);
         Task<TaskDTO> UpdateTask(TaskDTO task);
-        Task<bool> DeleteTask(Guid taskId);
-        Task<bool> SetTaskCompletion(Guid taskId, bool isCompleted);
-        Task<bool> LockTask(Guid taskId);
-        Task<bool> UnlockTask(Guid taskId);
+        Task<bool> DeleteTask(int taskId);
+        Task<bool> SetTaskCompletion(int taskId, bool isCompleted);
+        Task<bool> LockTask(int taskId);
+        Task<bool> UnlockTask(int taskId);
+        Task<IEnumerable<TaskDTO>> GetUserTasks(int userId);
     }
 } 

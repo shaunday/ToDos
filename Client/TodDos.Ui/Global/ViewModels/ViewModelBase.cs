@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Todos.Client.Common.Interfaces;
 using Todos.Ui.Services.Navigation;
+using Serilog;
 
 namespace TodDos.Ui.Global.ViewModels
 {
@@ -23,6 +24,7 @@ namespace TodDos.Ui.Global.ViewModels
     {
         protected readonly IMapper _mapper;
         protected readonly ITaskSyncClient _taskSyncClient;
+        protected readonly ILogger _logger;
         public INavigationService Navigation { get; }
 
         public ViewModelBase(INavigationService navigation)
@@ -39,6 +41,13 @@ namespace TodDos.Ui.Global.ViewModels
         {
             _mapper = mapper;
             _taskSyncClient = taskSyncClient;
+        }
+
+        public ViewModelBase(ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation, ILogger logger) : this(navigation)
+        {
+            _mapper = mapper;
+            _taskSyncClient = taskSyncClient;
+            _logger = logger;
         }
 
         public virtual void Init() { }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Serilog;
@@ -18,9 +19,9 @@ namespace ToDos.TaskSyncServer.Services
 
         public event Action<TaskDTO> TaskAdded;
         public event Action<TaskDTO> TaskUpdated;
-        public event Action<Guid> TaskDeleted;
-        public event Action<Guid> TaskLocked;
-        public event Action<Guid> TaskUnlocked;
+        public event Action<int> TaskDeleted;
+        public event Action<int> TaskLocked;
+        public event Action<int> TaskUnlocked;
 
         public TaskService(ITaskRepository taskRepository, IMapper mapper, ILogger logger)
         {
@@ -29,17 +30,32 @@ namespace ToDos.TaskSyncServer.Services
             _logger = logger;
         }
 
-        public async Task<IEnumerable<TaskDTO>> GetAllTasksAsync()
+        public async Task<IEnumerable<TaskDTO>> GetUserTasksAsync(int userId)
         {
             try
             {
-                _logger.Information("Getting all tasks");
-                var tasks = await _taskRepository.GetAllAsync();
+                _logger.Information("Getting tasks for user: {UserId}", userId);
+                var tasks = await _taskRepository.GetByUserIdAsync(userId);
                 return _mapper.Map<IEnumerable<TaskDTO>>(tasks);
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Error getting all tasks");
+                _logger.Error(ex, "Error getting tasks for user: {UserId}", userId);
+                throw;
+            }
+        }
+
+        public async Task<TaskDTO> GetTaskByIdAsync(int taskId)
+        {
+            try
+            {
+                _logger.Information("Getting task by ID: {TaskId}", taskId);
+                var task = await _taskRepository.GetByIdAsync(taskId);
+                return _mapper.Map<TaskDTO>(task);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error getting task by ID: {TaskId}", taskId);
                 throw;
             }
         }
@@ -48,31 +64,22 @@ namespace ToDos.TaskSyncServer.Services
         {
             try
             {
-                // Input validation
-                if (taskDto == null)
-                    throw new ArgumentNullException(nameof(taskDto));
-                
-                if (string.IsNullOrWhiteSpace(taskDto.Title))
-                    throw new ArgumentException("Task title cannot be empty", nameof(taskDto));
-                
-                _logger.Information("Adding new task: {TaskTitle}", taskDto.Title);
+                _logger.Information("Adding task for user: {UserId}", taskDto.UserId);
                 
                 var taskEntity = _mapper.Map<TaskEntity>(taskDto);
-                taskEntity.Id = Guid.NewGuid();
-                
                 await _taskRepository.AddAsync(taskEntity);
                 
-                var result = _mapper.Map<TaskDTO>(taskEntity);
+                var addedTask = _mapper.Map<TaskDTO>(taskEntity);
                 
                 // Raise event for real-time updates
-                TaskAdded?.Invoke(result);
+                TaskAdded?.Invoke(addedTask);
                 
-                _logger.Information("Task added successfully: {TaskId}", result.Id);
-                return result;
+                _logger.Information("Task added successfully: {TaskId}", addedTask.Id);
+                return addedTask;
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Error adding task: {TaskTitle}", taskDto?.Title);
+                _logger.Error(ex, "Error adding task for user: {UserId}", taskDto.UserId);
                 throw;
             }
         }
@@ -81,37 +88,42 @@ namespace ToDos.TaskSyncServer.Services
         {
             try
             {
-                // Input validation
-                if (taskDto == null)
-                    throw new ArgumentNullException(nameof(taskDto));
+                _logger.Information("Updating task: {TaskId} for user: {UserId}", taskDto.Id, taskDto.UserId);
                 
-                if (taskDto.Id == Guid.Empty)
-                    throw new ArgumentException("Task ID cannot be empty", nameof(taskDto));
+                // Verify task ownership
+                var existingTask = await _taskRepository.GetByIdAsync(taskDto.Id);
+                if (existingTask == null)
+                {
+                    _logger.Warning("Task not found for update: {TaskId}", taskDto.Id);
+                    throw new InvalidOperationException($"Task with ID {taskDto.Id} not found");
+                }
                 
-                if (string.IsNullOrWhiteSpace(taskDto.Title))
-                    throw new ArgumentException("Task title cannot be empty", nameof(taskDto));
-                
-                _logger.Information("Updating task: {TaskId}", taskDto.Id);
+                if (existingTask.UserId != taskDto.UserId)
+                {
+                    _logger.Warning("Unauthorized task update attempt. Task owner: {TaskOwner}, Requesting user: {RequestingUser}", 
+                        existingTask.UserId, taskDto.UserId);
+                    throw new UnauthorizedAccessException("You can only update your own tasks");
+                }
                 
                 var taskEntity = _mapper.Map<TaskEntity>(taskDto);
                 await _taskRepository.UpdateAsync(taskEntity);
                 
-                var result = _mapper.Map<TaskDTO>(taskEntity);
+                var updatedTask = _mapper.Map<TaskDTO>(taskEntity);
                 
                 // Raise event for real-time updates
-                TaskUpdated?.Invoke(result);
+                TaskUpdated?.Invoke(updatedTask);
                 
-                _logger.Information("Task updated successfully: {TaskId}", result.Id);
-                return result;
+                _logger.Information("Task updated successfully: {TaskId}", updatedTask.Id);
+                return updatedTask;
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Error updating task: {TaskId}", taskDto?.Id);
+                _logger.Error(ex, "Error updating task: {TaskId}", taskDto.Id);
                 throw;
             }
         }
 
-        public async Task<bool> DeleteTaskAsync(Guid taskId)
+        public async Task<bool> DeleteTaskAsync(int taskId)
         {
             try
             {
@@ -139,7 +151,7 @@ namespace ToDos.TaskSyncServer.Services
             }
         }
 
-        public async Task<bool> SetTaskCompletionAsync(Guid taskId, bool isCompleted)
+        public async Task<bool> SetTaskCompletionAsync(int taskId, bool isCompleted)
         {
             try
             {
@@ -171,7 +183,7 @@ namespace ToDos.TaskSyncServer.Services
             }
         }
 
-        public async Task<bool> LockTaskAsync(Guid taskId)
+        public async Task<bool> LockTaskAsync(int taskId)
         {
             try
             {
@@ -199,7 +211,7 @@ namespace ToDos.TaskSyncServer.Services
             }
         }
 
-        public async Task<bool> UnlockTaskAsync(Guid taskId)
+        public async Task<bool> UnlockTaskAsync(int taskId)
         {
             try
             {

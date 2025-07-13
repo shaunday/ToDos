@@ -1,16 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
+    <RootNamespace>Todos.UserService</RootNamespace>
+    <AssemblyName>Todos.UserService</AssemblyName>
     <LangVersion>8.0</LangVersion>
-    <Nullable>disable</Nullable>
     <OutputPath>..\bin\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
   </ItemGroup>
-
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\ToDos.JwtService\ToDos.JwtService.csproj" />
+  </ItemGroup>
 </Project>

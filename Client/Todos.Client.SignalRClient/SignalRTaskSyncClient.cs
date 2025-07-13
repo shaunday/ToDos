@@ -23,6 +23,7 @@ namespace Todos.Client.SignalRClient
         private readonly string _hubUrl;
         private readonly ILogger _logger;
         private readonly AsyncRetryPolicy _retryPolicy;
+        private string _jwtToken;
 
         private int _reconnectAttempts = 0;
         private const int MaxReconnectAttempts = 5;
@@ -32,9 +33,9 @@ namespace Todos.Client.SignalRClient
 
         public event Action<TaskDTO> TaskAdded;
         public event Action<TaskDTO> TaskUpdated;
-        public event Action<Guid> TaskDeleted;
-        public event Action<Guid> TaskLocked;
-        public event Action<Guid> TaskUnlocked;
+        public event Action<int> TaskDeleted;
+        public event Action<int> TaskLocked;
+        public event Action<int> TaskUnlocked;
 
         // Queue to hold pending hub method calls when disconnected
         private readonly ConcurrentQueue<Func<Task>> _pendingCalls = new ConcurrentQueue<Func<Task>>();
@@ -72,6 +73,21 @@ namespace Todos.Client.SignalRClient
 
         #endregion
 
+        #region JWT Token Management
+
+        public void SetJwtToken(string jwt)
+        {
+            _jwtToken = jwt;
+            _logger.Information("JWT token set for SignalR client");
+        }
+
+        public string GetJwtToken()
+        {
+            return _jwtToken;
+        }
+
+        #endregion
+
         #region Connect / Disconnect
 
         public async Task ConnectAsync()
@@ -90,16 +106,30 @@ namespace Todos.Client.SignalRClient
             try
             {
                 _logger.Information("Connecting to SignalR hub at {HubUrl}...", _hubUrl);
-                _hubConnection = new HubConnection(_hubUrl);
+                
+                // Create connection with query string parameters
+                var queryString = new Dictionary<string, string>();
+                if (!string.IsNullOrEmpty(_jwtToken))
+                {
+                    queryString["token"] = _jwtToken;
+                    _logger.Information("JWT token added to SignalR connection");
+                }
+                else
+                {
+                    _logger.Warning("No JWT token available for SignalR connection");
+                }
+                
+                _hubConnection = new HubConnection(_hubUrl, queryString);
+                
                 SetupReconnect();
 
                 _hubProxy = _hubConnection.CreateHubProxy("TaskHub");
 
                 _hubProxy.On<TaskDTO>(SignalRGlobals.TaskAdded, task => SafeInvoke(() => TaskAdded?.Invoke(task), nameof(TaskAdded)));
                 _hubProxy.On<TaskDTO>(SignalRGlobals.TaskUpdated, task => SafeInvoke(() => TaskUpdated?.Invoke(task), nameof(TaskUpdated)));
-                _hubProxy.On<Guid>(SignalRGlobals.TaskDeleted, id => SafeInvoke(() => TaskDeleted?.Invoke(id), nameof(TaskDeleted)));
-                _hubProxy.On<Guid>(SignalRGlobals.TaskLocked, id => SafeInvoke(() => TaskLocked?.Invoke(id), nameof(TaskLocked)));
-                _hubProxy.On<Guid>(SignalRGlobals.TaskUnlocked, id => SafeInvoke(() => TaskUnlocked?.Invoke(id), nameof(TaskUnlocked)));
+                _hubProxy.On<int>(SignalRGlobals.TaskDeleted, id => SafeInvoke(() => TaskDeleted?.Invoke(id), nameof(TaskDeleted)));
+                _hubProxy.On<int>(SignalRGlobals.TaskLocked, id => SafeInvoke(() => TaskLocked?.Invoke(id), nameof(TaskLocked)));
+                _hubProxy.On<int>(SignalRGlobals.TaskUnlocked, id => SafeInvoke(() => TaskUnlocked?.Invoke(id), nameof(TaskUnlocked)));
 
                 await _hubConnection.Start();
 
@@ -155,6 +185,23 @@ namespace Todos.Client.SignalRClient
                         _logger.Information("Waiting {Delay} before reconnect attempt {Attempt}", delay, _reconnectAttempts);
                         await Task.Delay(delay);
 
+                        // Recreate connection with JWT token for reconnection
+                        var queryString = new Dictionary<string, string>();
+                        if (!string.IsNullOrEmpty(_jwtToken))
+                        {
+                            queryString["token"] = _jwtToken;
+                        }
+                        
+                        _hubConnection = new HubConnection(_hubUrl, queryString);
+                        _hubProxy = _hubConnection.CreateHubProxy("TaskHub");
+                        
+                        // Re-setup event handlers
+                        _hubProxy.On<TaskDTO>(SignalRGlobals.TaskAdded, task => SafeInvoke(() => TaskAdded?.Invoke(task), nameof(TaskAdded)));
+                        _hubProxy.On<TaskDTO>(SignalRGlobals.TaskUpdated, task => SafeInvoke(() => TaskUpdated?.Invoke(task), nameof(TaskUpdated)));
+                        _hubProxy.On<int>(SignalRGlobals.TaskDeleted, id => SafeInvoke(() => TaskDeleted?.Invoke(id), nameof(TaskDeleted)));
+                        _hubProxy.On<int>(SignalRGlobals.TaskLocked, id => SafeInvoke(() => TaskLocked?.Invoke(id), nameof(TaskLocked)));
+                        _hubProxy.On<int>(SignalRGlobals.TaskUnlocked, id => SafeInvoke(() => TaskUnlocked?.Invoke(id), nameof(TaskUnlocked)));
+
                         await _hubConnection.Start();
                         _logger.Information("SignalR reconnected.");
                         SetConnectionStatus(ConnectionStatus.Connected);
@@ -179,6 +226,15 @@ namespace Todos.Client.SignalRClient
             };
         }
 
+        private void SetConnectionStatus(ConnectionStatus status)
+        {
+            if (ConnectionStatus != status)
+            {
+                ConnectionStatus = status;
+                ConnectionStatusChanged?.Invoke(status);
+            }
+        }
+
         private async Task DrainPendingCallsAsync()
         {
             while (_pendingCalls.TryDequeue(out var call))
@@ -198,26 +254,26 @@ namespace Todos.Client.SignalRClient
 
         #region Public API Methods
 
-        public Task<IEnumerable<TaskDTO>> GetAllTasksAsync() =>
-            InvokeWithRetrySafeAsync<IEnumerable<TaskDTO>>(SignalRGlobals.GetAllTasks);
-
         public Task<TaskDTO> AddTaskAsync(TaskDTO task) =>
             InvokeWithRetrySafeAsync<TaskDTO>(SignalRGlobals.AddTask, task);
 
         public Task<TaskDTO> UpdateTaskAsync(TaskDTO task) =>
             InvokeWithRetrySafeAsync<TaskDTO>(SignalRGlobals.UpdateTask, task);
 
-        public Task<bool> DeleteTaskAsync(Guid taskId) =>
+        public Task<bool> DeleteTaskAsync(int taskId) =>
             InvokeWithRetrySafeAsync<bool>(SignalRGlobals.DeleteTask, taskId);
 
-        public Task<bool> SetTaskCompletionAsync(Guid taskId, bool isCompleted) =>
+        public Task<bool> SetTaskCompletionAsync(int taskId, bool isCompleted) =>
             InvokeWithRetrySafeAsync<bool>(SignalRGlobals.SetTaskCompletion, taskId, isCompleted);
 
-        public Task<bool> LockTaskAsync(Guid taskId) =>
+        public Task<bool> LockTaskAsync(int taskId) =>
             InvokeWithRetrySafeAsync<bool>(SignalRGlobals.LockTask, taskId);
 
-        public Task<bool> UnlockTaskAsync(Guid taskId) =>
+        public Task<bool> UnlockTaskAsync(int taskId) =>
             InvokeWithRetrySafeAsync<bool>(SignalRGlobals.UnlockTask, taskId);
+
+        public Task<IEnumerable<TaskDTO>> GetUserTasksAsync(int userId) =>
+            InvokeWithRetrySafeAsync<IEnumerable<TaskDTO>>(SignalRGlobals.GetUserTasks, userId);
 
         #endregion
 
@@ -269,23 +325,6 @@ namespace Todos.Client.SignalRClient
             catch (Exception ex)
             {
                 _logger.Error(ex, "Error in event handler for {Context}", context);
-            }
-        }
-
-        private void SetConnectionStatus(ConnectionStatus newStatus)
-        {
-            if (ConnectionStatus != newStatus)
-            {
-                _logger.Information("Connection status changed from {OldStatus} to {NewStatus}", ConnectionStatus, newStatus);
-                ConnectionStatus = newStatus;
-                try
-                {
-                    ConnectionStatusChanged?.Invoke(newStatus);
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, "Error while raising ConnectionStatusChanged event.");
-                }
             }
         }
 

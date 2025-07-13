@@ -9,6 +9,7 @@ using ToDos.Repository;
 using ToDos.Server.Common.Interfaces;
 using ToDos.TaskSyncServer.Mapping;
 using ToDos.TaskSyncServer.Services;
+using ToDos.JwtService;
 using Unity;
 using Unity.Lifetime;
 
@@ -44,6 +45,9 @@ namespace ToDos.TaskSyncServer
             
             // Register logging
             container.RegisterInstance(Log.Logger);
+            
+            // Register JWT service
+            container.RegisterType<IJwtService, ToDos.JwtService.JwtService>();
             
             // Register database context
             container.RegisterType<TaskDbContext>(new ContainerControlledLifetimeManager());

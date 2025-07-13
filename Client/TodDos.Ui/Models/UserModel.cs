@@ -6,7 +6,7 @@ namespace Todos.Ui.Models
     public partial class UserModel : ObservableObject
     {
         [ObservableProperty]
-        private string id;
+        private int id;
 
         [ObservableProperty]
         private string userName;

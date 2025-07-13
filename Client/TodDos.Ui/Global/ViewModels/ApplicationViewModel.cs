@@ -61,10 +61,10 @@ namespace Todos.Ui.ViewModels
             // When token changes, update the task sync client
             if (!string.IsNullOrEmpty(newToken))
             {
-                // TODO: Uncomment when JWT support is implemented in TaskSyncClient
-                // _taskSyncClient.SetJwtToken(newToken);
+                // Set JWT token in the task sync client
+                _taskSyncClient.SetJwtToken(newToken);
                 
-                // For now, just connect without JWT
+                // Connect to SignalR with JWT authentication
                 try
                 {
                     await _taskSyncClient.ConnectAsync();
@@ -95,7 +95,7 @@ namespace Todos.Ui.ViewModels
         }
 
         [RelayCommand]
-        private async Task ConnectAsync()
+        private async Task LoginAsync()
         {
             try
             {
@@ -115,27 +115,7 @@ namespace Todos.Ui.ViewModels
         }
 
         [RelayCommand]
-        private async Task LoginAsync()
-        {
-            try
-            {
-                // For now, use default credentials - in real app, this would come from login form
-                var authenticated = await _userService.AuthenticateAsync("defaultuser", "1234");
-                if (!authenticated)
-                {
-                    ConnectionStatus = ConnectionStatus.Failed;
-                }
-                // Connection will be handled by HandleTokenChanged
-            }
-            catch (Exception)
-            {
-                // Handle login error
-                ConnectionStatus = ConnectionStatus.Failed;
-            }
-        }
-
-        [RelayCommand]
-        private async Task DisconnectAsync()
+        private async Task LogoutAsync()
         {
             try
             {
@@ -145,21 +125,6 @@ namespace Todos.Ui.ViewModels
             catch (Exception)
             {
                 // Handle disconnection error
-                ConnectionStatus = ConnectionStatus.Failed;
-            }
-        }
-
-        [RelayCommand]
-        private async Task LogoutAsync()
-        {
-            try
-            {
-                await _userService.LogoutAsync();
-                // Navigation will be handled by HandleUserChanged
-            }
-            catch (Exception)
-            {
-                // Handle logout error
                 ConnectionStatus = ConnectionStatus.Failed;
             }
         }

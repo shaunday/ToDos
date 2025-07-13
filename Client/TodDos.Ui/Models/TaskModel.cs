@@ -10,10 +10,10 @@ namespace Todos.Ui.Models
     public partial class TaskModel : ObservableObject
     {
         [ObservableProperty]
-        private Guid id;
+        private int id;
 
         [ObservableProperty]
-        private Guid userId;
+        private int userId;
 
         [ObservableProperty]
         private string title;

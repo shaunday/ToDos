@@ -5,6 +5,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using Todos.Client.Common.Interfaces;
 using ToDos.DotNet.Common;
 using Todos.Ui.Sections.Tasks;
@@ -14,12 +15,16 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Data;
 using TodDos.Ui.Global.ViewModels;
+using Serilog;
+using Todos.Client.UserService.Interfaces;
+using ToDos.JwtService;
 
 namespace Todos.Ui.ViewModels
 {
     public partial class TasksViewModel : ViewModelBase, IInitializable, ICleanable
     {
         #region Fields
+        private readonly IJwtService _jwtService;
 
         [ObservableProperty]
         private TaskModel editingTask;
@@ -55,11 +60,11 @@ namespace Todos.Ui.ViewModels
         #endregion
 
         #region Constructors and Lifecycle
-        public TasksViewModel(ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation)
-            : base(taskSyncClient, mapper, navigation)
+        public TasksViewModel(ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation, ILogger logger, IJwtService jwtService)
+            : base(taskSyncClient, mapper, navigation, logger)
         {
+            _jwtService = jwtService;
             Overview.Refresh(Tasks);
-            LoadTasksAsync();
             FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
             FilteredTasksView.Filter = FilterPredicate;
         }
@@ -71,6 +76,9 @@ namespace Todos.Ui.ViewModels
             _taskSyncClient.TaskDeleted += HandleTaskDeleted;
             Tasks.CollectionChanged += Tasks_CollectionChanged;
             Filter.PropertyChanged += Filter_PropertyChanged;
+            
+            // Load existing tasks for the current user
+            LoadTasksAsync();
         }
 
         public override void Cleanup()
@@ -137,7 +145,7 @@ namespace Todos.Ui.ViewModels
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Failed to add task");
+                _logger.Error(ex, "Failed to add task");
                 ErrorMessage = $"Failed to add task.";
             }
             finally
@@ -166,7 +174,7 @@ namespace Todos.Ui.ViewModels
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Failed to edit task");
+                _logger.Error(ex, "Failed to edit task");
                 ErrorMessage = $"Failed to edit task.";
             }
         }
@@ -194,7 +202,7 @@ namespace Todos.Ui.ViewModels
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Failed to save task");
+                _logger.Error(ex, "Failed to save task");
                 ErrorMessage = $"Failed to save task.";
             }
         }
@@ -214,7 +222,7 @@ namespace Todos.Ui.ViewModels
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Failed to cancel edit");
+                _logger.Error(ex, "Failed to cancel edit");
                 ErrorMessage = $"Failed to cancel edit.";
             }
         }
@@ -240,7 +248,7 @@ namespace Todos.Ui.ViewModels
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Failed to delete task");
+                _logger.Error(ex, "Failed to delete task");
                 ErrorMessage = $"Failed to delete task.";
             }
         }
@@ -260,7 +268,7 @@ namespace Todos.Ui.ViewModels
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Failed to update task completion");
+                _logger.Error(ex, "Failed to update task completion");
                 // Revert the change on error
                 task.IsCompleted = !task.IsCompleted;
                 ErrorMessage = $"Failed to update task completion.";
@@ -287,6 +295,13 @@ namespace Todos.Ui.ViewModels
             return Filter.Apply(new[] { t }).Any();
         }
 
+        private void ChangeTaskEditMode(TaskModel task, bool isEditing)
+        {
+            task.IsEditing = isEditing;
+            EditingTask = isEditing ? task : null;
+            EditingTaskBackup = isEditing ? task.Clone() : null;
+        }
+
         private async void LoadTasksAsync()
         {
             try
@@ -294,18 +309,28 @@ namespace Todos.Ui.ViewModels
                 IsLoading = true;
                 ErrorMessage = string.Empty;
                 
-                var allTaskDtos = await _taskSyncClient!.GetAllTasksAsync();
-                var allTaskModels = allTaskDtos.Select(dto => _mapper!.Map<TaskModel>(dto));
-                Tasks = new ObservableCollection<TaskModel>(allTaskModels);
-                Overview.Refresh(Tasks);
-                // Rebind CollectionView to new Tasks collection
-                FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
-                FilteredTasksView.Filter = FilterPredicate;
-                UpdateFilteredTasks();
+                // Get current user ID from the user service or application context
+                var currentUserId = GetCurrentUserId();
+                if (currentUserId > 0)
+                {
+                    var userTaskDtos = await _taskSyncClient!.GetUserTasksAsync(currentUserId);
+                    var userTaskModels = userTaskDtos.Select(dto => _mapper!.Map<TaskModel>(dto));
+                    Tasks = new ObservableCollection<TaskModel>(userTaskModels);
+                    Overview.Refresh(Tasks);
+                    // Rebind CollectionView to new Tasks collection
+                    FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
+                    FilteredTasksView.Filter = FilterPredicate;
+                    UpdateFilteredTasks();
+                }
+                else
+                {
+                    _logger.Warning("No valid user ID found for loading tasks");
+                    ErrorMessage = "User not authenticated. Please log in.";
+                }
             }
             catch (Exception ex)
             {
-                Serilog.Log.Error(ex, "Failed to load tasks");
+                _logger.Error(ex, "Failed to load tasks");
                 ErrorMessage = $"Failed to load tasks.";
             }
             finally
@@ -314,11 +339,26 @@ namespace Todos.Ui.ViewModels
             }
         }
 
-        private void ChangeTaskEditMode(TaskModel task, bool isEditing)
+        private int GetCurrentUserId()
         {
-            task.IsEditing = isEditing;
-            EditingTask = isEditing ? task : null;
-            EditingTaskBackup = isEditing ? task.Clone() : null;
+            try
+            {
+                // Get the JWT token from the task sync client
+                var jwtToken = _taskSyncClient?.GetJwtToken();
+                if (string.IsNullOrEmpty(jwtToken))
+                {
+                    _logger.Warning("No JWT token available for getting user ID");
+                    return 0;
+                }
+
+                // Use JwtService to extract user ID from token
+                return _jwtService.GetUserIdFromTokenWithoutValidation(jwtToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error extracting user ID from JWT token");
+                return 0;
+            }
         }
         #endregion
 
@@ -350,7 +390,7 @@ namespace Todos.Ui.ViewModels
             }
         }
 
-        private void HandleTaskDeleted(Guid taskId)
+        private void HandleTaskDeleted(int taskId)
         {
             var taskToRemove = Tasks.FirstOrDefault(t => t.Id == taskId);
             if (taskToRemove != null)
