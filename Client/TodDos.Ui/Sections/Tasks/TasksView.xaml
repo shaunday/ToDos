@@ -56,6 +56,11 @@
                     <Setter Property="ToolTip" Value="Currently being edited" />
                 </DataTrigger>
 
+                <!-- Tint completed row very soft yellow -->
+                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                    <Setter Property="Background" Value="#FFFFFCF5" />
+                </DataTrigger>
+
                 <!-- Dim non-editing rows when any row is being edited -->
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
@@ -76,7 +81,7 @@
 
                 <!-- Lock row if IsLocked true -->
                 <DataTrigger Binding="{Binding IsLocked}" Value="True">
-                    <Setter Property="Background" Value="#FFFFF0F0" />
+                    <Setter Property="Background" Value="#FFFDF6F6" />
                     <Setter Property="Opacity" Value="0.6" />
                     <Setter Property="Effect">
                         <Setter.Value>
@@ -144,10 +149,6 @@
                     <Setter Property="Foreground" Value="Gray" />
                     <Setter Property="FontStyle" Value="Italic" />
                 </DataTrigger>
-                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
-                    <Setter Property="TextDecorations" Value="Strikethrough" />
-                    <Setter Property="Foreground" Value="Gray" />
-                </DataTrigger>
             </Style.Triggers>
         </Style>
 
@@ -177,7 +178,6 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-
 
             <!-- DataGrid -->
             <DataGrid Grid.Row="1"

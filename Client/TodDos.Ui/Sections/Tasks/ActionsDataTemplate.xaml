@@ -15,7 +15,7 @@
             <Button Style="{StaticResource MaterialDesignIconButton}"
                     Command="{Binding DataContext.DeleteTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                     CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ContentControl}}"
-                    Foreground="Red">
+                    Foreground="#E57373">
                 <materialDesign:PackIcon Kind="Delete" />
                 <Button.ToolTip>Delete</Button.ToolTip>
             </Button>
