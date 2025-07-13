@@ -8,6 +8,7 @@
              xmlns:DotNetCommon="clr-namespace:ToDos.DotNet.Common;assembly=Todos.DotNet.Common"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:Todos.Ui.Resources.Converters"
+             xmlns:tasks="clr-namespace:Todos.Ui.Sections.Tasks"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="900">
 
@@ -27,9 +28,7 @@
                 </ObjectDataProvider.MethodParameters>
             </ObjectDataProvider>
 
-
-
-        <!-- Row Style -->
+            <!-- Row Style -->
         <Style x:Key="TaskRowStyle" TargetType="DataGridRow">
             <Setter Property="BorderThickness" Value="2" />
             <Setter Property="BorderBrush" Value="Transparent" />
@@ -152,136 +151,21 @@
             </Style.Triggers>
         </Style>
 
-
-
         <!-- Actions Column Cell Style - Always hit test visible -->
-        <Style x:Key="ActionsCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource TaskCellStyle}">
-            <Setter Property="IsHitTestVisible" Value="True"/>
-        </Style>
-
-
-
+            <Style x:Key="ActionsCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource TaskCellStyle}">
+                <Setter Property="IsHitTestVisible" Value="True"/>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
     <Grid Margin="16">
-        <!-- Add Task Form -->
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Add Task Form Panel -->
-        <materialDesign:Card Grid.Row="0" 
-                             Margin="0,0,0,16" 
-                             Padding="16"
-                             Visibility="{Binding IsAddingNewTask, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Form Title -->
-                <TextBlock Grid.Row="0" Grid.Column="0"
-                           Text="Add New Task"
-                           Style="{DynamicResource MaterialDesignHeadline6TextBlock}"
-                           Margin="0,0,0,16"/>
-
-                <!-- Form Fields -->
-                <Grid Grid.Row="1" Grid.Column="0" Margin="0,0,16,0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Title Field -->
-                    <TextBox Grid.Row="0" Grid.Column="0"
-                             Text="{Binding NewTask.Title, UpdateSourceTrigger=PropertyChanged}"
-                             materialDesign:HintAssist.Hint="Task Title *"
-                             Margin="0,0,8,8"
-                             Style="{DynamicResource MaterialDesignOutlinedTextBox}"/>
-
-                    <!-- Description Field -->
-                    <TextBox Grid.Row="0" Grid.Column="1"
-                             Text="{Binding NewTask.Description, UpdateSourceTrigger=PropertyChanged}"
-                             materialDesign:HintAssist.Hint="Description"
-                             Margin="8,0,0,8"
-                             Style="{DynamicResource MaterialDesignOutlinedTextBox}"/>
-
-                    <!-- Priority Field -->
-                    <ComboBox Grid.Row="1" Grid.Column="0"
-                              SelectedItem="{Binding NewTask.Priority}"
-                              ItemsSource="{Binding Source={StaticResource TaskPriorityValues}}"
-                              materialDesign:HintAssist.Hint="Priority"
-                              Margin="0,0,8,8"
-                              Style="{DynamicResource MaterialDesignOutlinedComboBox}"/>
-
-                    <!-- Due Date Field -->
-                    <DatePicker Grid.Row="1" Grid.Column="1"
-                                SelectedDate="{Binding NewTask.DueDate}"
-                                materialDesign:HintAssist.Hint="Due Date"
-                                Margin="8,0,0,8"
-                                Style="{DynamicResource MaterialDesignOutlinedDatePicker}"/>
-                </Grid>
-
-                <!-- Error Message -->
-                <TextBlock Grid.Row="2" Grid.Column="0"
-                           Text="{Binding ErrorMessage}"
-                           Foreground="Red"
-                           Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}"
-                           Margin="0,8,0,0"/>
-
-                <!-- Action Buttons -->
-                <StackPanel Grid.Row="1" Grid.Column="1" 
-                            Grid.RowSpan="2"
-                            Orientation="Horizontal" 
-                            VerticalAlignment="Bottom"
-                            Margin="16,0,0,0">
-
-                    <Button Command="{Binding AddTaskCommand}"
-                            Style="{DynamicResource MaterialDesignRaisedButton}"
-                            Margin="0,0,8,0"
-                            IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Plus" Margin="0,0,8,0"/>
-                            <TextBlock Text="Add Task"/>
-                        </StackPanel>
-                    </Button>
-
-                    <Button Command="{Binding CancelAddTaskCommand}"
-                            Style="{DynamicResource MaterialDesignOutlinedButton}"
-                            IsEnabled="{Binding IsLoading, Converter={StaticResource InverseBooleanConverter}}">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Close" Margin="0,0,8,0"/>
-                            <TextBlock Text="Cancel"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-
-                <!-- Loading Overlay -->
-                <Grid Grid.Row="0" Grid.Column="0" Grid.RowSpan="3"
-                      Background="#80000000"
-                      Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <ProgressBar Style="{DynamicResource MaterialDesignCircularProgressBar}"
-                                 Value="0"
-                                 IsIndeterminate="True"
-                                 HorizontalAlignment="Center"
-                                 VerticalAlignment="Center"/>
-                </Grid>
-            </Grid>
-        </materialDesign:Card>
+        <!-- Add Task Control -->
+        <tasks:AddTaskControl Grid.Row="0" DataContext="{Binding}" />
 
         <!-- Main Content -->
         <Grid Grid.Row="1">
@@ -290,29 +174,6 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Toolbar -->
-            <materialDesign:Card Grid.Row="0" 
-                                 Margin="0,0,0,8" 
-                                 Padding="8">
-                <StackPanel Orientation="Horizontal">
-                    <Button Command="{Binding ShowAddTaskFormCommand}"
-                            Style="{DynamicResource MaterialDesignRaisedButton}"
-                            Margin="0,0,8,0"
-                            Visibility="{Binding IsAddingNewTask, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Plus" Margin="0,0,8,0"/>
-                            <TextBlock Text="Add Task"/>
-                        </StackPanel>
-                    </Button>
-
-                    <!-- Error Message Display -->
-                    <TextBlock Text="{Binding ErrorMessage}"
-                               Foreground="Red"
-                               VerticalAlignment="Center"
-                               Margin="16,0,0,0"
-                               Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}"/>
-                </StackPanel>
-            </materialDesign:Card>
 
             <!-- DataGrid -->
             <DataGrid Grid.Row="1"
