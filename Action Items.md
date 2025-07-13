@@ -1,10 +1,14 @@
----
 
-# Internal TODOs — Scalable Real-Time To-Do App
 
----
+1.	Real-time data synchronization between multiple desktop clients.
+2.	Robust architecture and design pattern usage.
+3.	Performance and scalability awareness.
+4. DB •	Design should be normalized and allow future extensibility
+
+
 
 ## Logging
+
 * Add exception handling and logging middleware
 * Log Thread.ManagedThreadId before and after await calls to demonstrate async thread usage
 * Log thread blocking or starvation events to simulate server pressure
@@ -16,14 +20,12 @@
 
 * JWT
 * You can add cancellation tokens or timeout policies to retry/wait delays.
-* On permanent disconnect, prompt UI to notify the user or retry manually.
 
 ---
 
 ## SignalR HOST
 
 * API Versioning
-* Implement SignalR hub for real-time task updates
   services.AddSignalR().AddHubOptions(opts =>
   {
   opts.KeepAliveInterval = TimeSpan.FromSeconds(30);
@@ -49,17 +51,13 @@
 * Implement memory caching for frequent reads
 * Implement \_taskCommandQueue to throttle DB writes (Single Writer Pattern)
 * Simulate master/slave DB (write to one, read from another with periodic sync)
-
+* Throttle or reject low-priority writes when under heavy load.: backpressure mechanism.
 ---
 
 ## Client-Side (WPF + MVVM)
 
-* set login stuff
-* tags ?
-* Implement service layer for communication with SignalR and REST API
-* Add user-friendly exception handling and error messages
-* Show SignalR connection state in the UI
-* filter by tags
+* Add user-friendly exception handling and error messages ( <materialDesign:Snackbar x:Name="Snackbar" />)
+* On permanent disconnect, prompt UI to notify the user or retry manually.
 * BONUS: Implement UI state persistence (e.g., window size, last selected task)
 ^ Save UI state on Window\.Closing and restore on Window\.Loaded using Properties.Settings.Default or JSON file in %AppData%
 
@@ -72,10 +70,6 @@ Make sure that both client and server validate all inputs (e.g., task titles not
 * Create simulator client, add logging display to orchestrator, add auto login with a user
 * Simulate multiple users editing tasks concurrently to test locking and queues
 * Simulate a large number of clients, throttled writes, and sharded reads
----
-
-## Users
-* Add mock or real user authentication on both client and server
 
 ---
 
@@ -83,6 +77,7 @@ Make sure that both client and server validate all inputs (e.g., task titles not
 
 * Write README.md with setup instructions and architecture overview
 * Document design patterns used and communication protocols (SignalR + REST)
+* Prepare to defend your architecture choices (SignalR, queues, caching, etc.)
 * Explain scalability patterns used:
 
   * Queues buffer write load under stress (throttling)
@@ -96,12 +91,6 @@ Make sure that both client and server validate all inputs (e.g., task titles not
 
 * Check if task is locked or exists before allowing edits or saves
 * Track and simulate connection drops, reconnect logic, slow DB writes, and queue overflow
-* Prepare to defend your architecture choices (SignalR, queues, caching, etc.)
 * Be aware SignalR doesn’t guarantee message delivery, handle edge cases
 
 
----
-
-## Moar
-
-* Throttle or reject low-priority writes when under heavy load.: backpressure mechanism.

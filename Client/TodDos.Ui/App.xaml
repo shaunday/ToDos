@@ -25,6 +25,7 @@
             <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+            <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

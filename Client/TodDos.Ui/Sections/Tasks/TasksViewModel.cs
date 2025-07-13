@@ -11,23 +11,25 @@ using Todos.Ui.Sections.Tasks;
 using Todos.Ui.Services.Navigation;
 using Todos.Ui.Models;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Windows.Data;
 
 namespace Todos.Ui.ViewModels
 {
     public partial class TasksViewModel : ViewModelBase
     {
-        public ObservableCollection<TaskModel> Tasks { get; set; } = new ObservableCollection<TaskModel>();
-
+        #region Fields
         private void Tasks_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             Overview.Refresh(Tasks);
+            UpdateFilteredTasks();
         }
-
-        [ObservableProperty]
-        private TaskModel? editingTask;
 
         // [ObservableProperty]
         // private NewTaskInputModel newTask = new NewTaskInputModel();
+
+        [ObservableProperty]
+        private TaskModel? editingTask;
 
         [ObservableProperty]
         private bool isAddingNewTask = false;
@@ -46,8 +48,24 @@ namespace Todos.Ui.ViewModels
         [ObservableProperty]
         private NewTaskInputModel? newTaskBuffer;
 
-        public TasksOverviewModel Overview { get; } = new TasksOverviewModel();
+        [ObservableProperty]
+        private string selectedPriority = "All";
+        [ObservableProperty]
+        private string tagFilter = string.Empty;
+        [ObservableProperty]
+        private string completedStatus = "All";
 
+        public ICollectionView FilteredTasksView { get; private set; }
+
+        public TasksOverviewModel Overview { get; } = new TasksOverviewModel();
+        public TasksOverviewModel FilteredOverview { get; } = new TasksOverviewModel();
+        #endregion
+
+        #region Properties
+        public ObservableCollection<TaskModel> Tasks { get; set; } = new ObservableCollection<TaskModel>();
+        #endregion
+
+        #region Constructors
         public TasksViewModel(ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation)
             : base(taskSyncClient, mapper, navigation)
         {
@@ -57,33 +75,15 @@ namespace Todos.Ui.ViewModels
             _taskSyncClient.TaskDeleted += HandleTaskDeleted;
             
             Tasks.CollectionChanged += Tasks_CollectionChanged;
+            PropertyChanged += TasksViewModel_PropertyChanged;
             Overview.Refresh(Tasks);
             LoadTasksAsync();
+            FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
+            FilteredTasksView.Filter = FilterPredicate;
         }
+        #endregion
 
-        private async void LoadTasksAsync()
-        {
-            try
-            {
-                IsLoading = true;
-                ErrorMessage = string.Empty;
-                
-                var allTaskDtos = await _taskSyncClient!.GetAllTasksAsync();
-                var allTaskModels = allTaskDtos.Select(dto => _mapper!.Map<TaskModel>(dto));
-                Tasks = new ObservableCollection<TaskModel>(allTaskModels);
-                Tasks.CollectionChanged += Tasks_CollectionChanged;
-                Overview.Refresh(Tasks);
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = $"Failed to load tasks: {ex.Message}";
-            }
-            finally
-            {
-                IsLoading = false;
-            }
-        }
-
+        #region Commands
         [RelayCommand]
         private void ShowAddTaskForm()
         {
@@ -215,13 +215,6 @@ namespace Todos.Ui.ViewModels
             }
         }
 
-        private void ChangeTaskEditMode(TaskModel task, bool isEditing)
-        {
-            task.IsEditing = isEditing;
-            EditingTask = isEditing ? task : null;
-            EditingTaskBackup = isEditing ? task.Clone() : null;
-        }
-
         [RelayCommand]
         private async Task DeleteTaskAsync(TaskModel task)
         {
@@ -247,7 +240,7 @@ namespace Todos.Ui.ViewModels
             }
         }
 
-                [RelayCommand]
+        [RelayCommand]
         private async Task ToggleTaskCompletionAsync(TaskModel task)
         {
             if (task == null) return;
@@ -267,13 +260,87 @@ namespace Todos.Ui.ViewModels
                 ErrorMessage = $"Failed to update task completion: {ex.Message}";
             }
         }
+        #endregion
 
-        // Real-time event handlers
+        #region Public Methods
+        // (none)
+        #endregion
+
+        #region Private Methods
+        private void TasksViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(SelectedPriority) || e.PropertyName == nameof(TagFilter) || e.PropertyName == nameof(CompletedStatus))
+            {
+                UpdateFilteredTasks();
+            }
+        }
+
+        private void UpdateFilteredTasks()
+        {
+            FilteredTasksView.Refresh();
+            // Update filtered overview
+            var filtered = Tasks.Where(t => FilterPredicate(t));
+            FilteredOverview.Refresh(filtered);
+        }
+
+        private bool FilterPredicate(object obj)
+        {
+            var t = obj as TaskModel;
+            if (t == null) return false;
+            if (!string.IsNullOrWhiteSpace(SelectedPriority) && SelectedPriority != "All" && t.Priority.ToString() != SelectedPriority)
+                return false;
+            if (!string.IsNullOrWhiteSpace(TagFilter) && !(t.Tags ?? string.Empty).ToLowerInvariant().Contains(TagFilter.Trim().ToLowerInvariant()))
+                return false;
+            if (!string.IsNullOrWhiteSpace(CompletedStatus) && CompletedStatus != "All")
+            {
+                if (CompletedStatus == "Completed" && !t.IsCompleted) return false;
+                if (CompletedStatus == "Not Completed" && t.IsCompleted) return false;
+            }
+            return true;
+        }
+
+        private async void LoadTasksAsync()
+        {
+            try
+            {
+                IsLoading = true;
+                ErrorMessage = string.Empty;
+                
+                var allTaskDtos = await _taskSyncClient!.GetAllTasksAsync();
+                var allTaskModels = allTaskDtos.Select(dto => _mapper!.Map<TaskModel>(dto));
+                Tasks = new ObservableCollection<TaskModel>(allTaskModels);
+                Tasks.CollectionChanged += Tasks_CollectionChanged;
+                Overview.Refresh(Tasks);
+                // Rebind CollectionView to new Tasks collection
+                FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
+                FilteredTasksView.Filter = FilterPredicate;
+                UpdateFilteredTasks();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Failed to load tasks: {ex.Message}";
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        private void ChangeTaskEditMode(TaskModel task, bool isEditing)
+        {
+            task.IsEditing = isEditing;
+            EditingTask = isEditing ? task : null;
+            EditingTaskBackup = isEditing ? task.Clone() : null;
+        }
+        #endregion
+
+        #region Event Handlers
         private void HandleTaskAdded(TaskDTO taskDto)
         {
             var taskModel = _mapper!.Map<TaskModel>(taskDto);
             Tasks.Add(taskModel);
             Overview.Refresh(Tasks);
+            UpdateFilteredTasks();
         }
 
         private void HandleTaskUpdated(TaskDTO taskDto)
@@ -285,6 +352,7 @@ namespace Todos.Ui.ViewModels
                 var index = Tasks.IndexOf(existingTask);
                 Tasks[index] = taskModel;
                 Overview.Refresh(Tasks);
+                UpdateFilteredTasks();
             }
         }
 
@@ -295,34 +363,10 @@ namespace Todos.Ui.ViewModels
             {
                 Tasks.Remove(taskToRemove);
                 Overview.Refresh(Tasks);
+                UpdateFilteredTasks();
             }
         }
-
- 
-    }
-
-    public class TasksOverviewModel : ObservableObject
-    {
-        private int total;
-        public int Total { get => total; set => SetProperty(ref total, value); }
-        private int locked;
-        public int Locked { get => locked; set => SetProperty(ref locked, value); }
-        private int high;
-        public int High { get => high; set => SetProperty(ref high, value); }
-        private int medium;
-        public int Medium { get => medium; set => SetProperty(ref medium, value); }
-        private int low;
-        public int Low { get => low; set => SetProperty(ref low, value); }
-
-        public void Refresh(IEnumerable<TaskModel> tasks)
-        {
-            var list = tasks.ToList();
-            Total = list.Count;
-            Locked = list.Count(t => t.IsLocked);
-            High = list.Count(t => t.Priority == TaskPriority.High);
-            Medium = list.Count(t => t.Priority == TaskPriority.Medium);
-            Low = list.Count(t => t.Priority == TaskPriority.Low);
-        }
+        #endregion
     }
 }
 

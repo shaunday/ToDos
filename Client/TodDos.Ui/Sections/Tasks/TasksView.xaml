@@ -56,11 +56,6 @@
                     <Setter Property="ToolTip" Value="Currently being edited" />
                 </DataTrigger>
 
-                <!-- Tint completed row very soft yellow -->
-                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
-                    <Setter Property="Background" Value="#FFFFFCF5" />
-                </DataTrigger>
-
                 <!-- Dim non-editing rows when any row is being edited -->
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
@@ -81,7 +76,7 @@
 
                 <!-- Lock row if IsLocked true -->
                 <DataTrigger Binding="{Binding IsLocked}" Value="True">
-                    <Setter Property="Background" Value="#FFFDF6F6" />
+                    <Setter Property="Background" Value="#FFFFF0F0" />
                     <Setter Property="Opacity" Value="0.6" />
                     <Setter Property="Effect">
                         <Setter.Value>
@@ -89,6 +84,9 @@
                         </Setter.Value>
                     </Setter>
                     <Setter Property="ToolTip" Value="Locked due to external reason" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                    <Setter Property="Background" Value="#FFFFFDF6" /> <!-- Much more subtle yellow -->
                 </DataTrigger>
                 </Style.Triggers>
         </Style>
@@ -156,6 +154,12 @@
             <Style x:Key="ActionsCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource TaskCellStyle}">
                 <Setter Property="IsHitTestVisible" Value="True"/>
             </Style>
+
+        <Style x:Key="SubtleColumnHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource CenteredColumnHeaderStyle}">
+            <Setter Property="Background" Value="#FFF8F8F8"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -169,19 +173,24 @@
         <!-- Add Task Control -->
         <tasks:AddTaskControl Grid.Row="0" DataContext="{Binding}" />
 
-        <!-- Tasks Overview Panel (now a separate control) -->
-        <tasks:TaskOverviewControl Grid.Row="1" DataContext="{Binding Overview}" />
+        <!-- Unified Overview Panel (All + Filtered) -->
+        <tasks:TaskOverviewControl Grid.Row="1" All="{Binding Overview}" Filtered="{Binding FilteredOverview}" Margin="0,0,0,12" />
 
         <!-- Main Content -->
         <Grid Grid.Row="2">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/> <!-- Filter row -->
+                <RowDefinition Height="*"/>   <!-- DataGrid row -->
             </Grid.RowDefinitions>
+
+            <tasks:TaskFilterControl Grid.Row="0" Margin="0,0,0,8"
+                Priority="{Binding SelectedPriority, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                TagFilter="{Binding TagFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                CompletedStatus="{Binding CompletedStatus, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
             <!-- DataGrid -->
             <DataGrid Grid.Row="1"
-                      ItemsSource="{Binding Tasks}"
+                      ItemsSource="{Binding FilteredTasksView}"
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
                       CanUserDeleteRows="True"
@@ -192,7 +201,7 @@
                       CellStyle="{StaticResource TaskCellStyle}"
                       materialDesign:DataGridAssist.CellPadding="8"
                       materialDesign:DataGridAssist.ColumnHeaderPadding="12,4"
-                      ColumnHeaderStyle="{StaticResource CenteredColumnHeaderStyle}">
+                      ColumnHeaderStyle="{StaticResource SubtleColumnHeaderStyle}">
 
                 <DataGrid.Columns>
                     <!-- Title Column -->
