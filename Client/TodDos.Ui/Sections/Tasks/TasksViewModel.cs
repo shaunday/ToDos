@@ -10,13 +10,18 @@ using ToDos.DotNet.Common;
 using Todos.Ui.Sections.Tasks;
 using Todos.Ui.Services.Navigation;
 using Todos.Ui.Models;
+using System.Collections.Generic;
 
 namespace Todos.Ui.ViewModels
 {
     public partial class TasksViewModel : ViewModelBase
     {
-        [ObservableProperty]
-        private ObservableCollection<TaskModel> tasks = new ObservableCollection<TaskModel>();
+        public ObservableCollection<TaskModel> Tasks { get; set; } = new ObservableCollection<TaskModel>();
+
+        private void Tasks_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            Overview.Refresh(Tasks);
+        }
 
         [ObservableProperty]
         private TaskModel? editingTask;
@@ -41,6 +46,8 @@ namespace Todos.Ui.ViewModels
         [ObservableProperty]
         private NewTaskInputModel? newTaskBuffer;
 
+        public TasksOverviewModel Overview { get; } = new TasksOverviewModel();
+
         public TasksViewModel(ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation)
             : base(taskSyncClient, mapper, navigation)
         {
@@ -49,6 +56,8 @@ namespace Todos.Ui.ViewModels
             _taskSyncClient.TaskUpdated += HandleTaskUpdated;
             _taskSyncClient.TaskDeleted += HandleTaskDeleted;
             
+            Tasks.CollectionChanged += Tasks_CollectionChanged;
+            Overview.Refresh(Tasks);
             LoadTasksAsync();
         }
 
@@ -62,6 +71,8 @@ namespace Todos.Ui.ViewModels
                 var allTaskDtos = await _taskSyncClient!.GetAllTasksAsync();
                 var allTaskModels = allTaskDtos.Select(dto => _mapper!.Map<TaskModel>(dto));
                 Tasks = new ObservableCollection<TaskModel>(allTaskModels);
+                Tasks.CollectionChanged += Tasks_CollectionChanged;
+                Overview.Refresh(Tasks);
             }
             catch (Exception ex)
             {
@@ -117,10 +128,9 @@ namespace Todos.Ui.ViewModels
 
                 var newTaskDto = _mapper!.Map<TaskDTO>(newTaskModel);
                 var addedTaskDto = await _taskSyncClient!.AddTaskAsync(newTaskDto);
-                var addedTaskModel = _mapper.Map<TaskModel>(addedTaskDto);
-
-                Tasks.Add(addedTaskModel);
-                
+                // Do NOT add to Tasks here; rely on HandleTaskAdded event
+                // var addedTaskModel = _mapper.Map<TaskModel>(addedTaskDto);
+                // Tasks.Add(addedTaskModel);
                 // Reset form
                 IsAddingNewTask = false;
                 NewTaskBuffer = null;
@@ -178,6 +188,7 @@ namespace Todos.Ui.ViewModels
                 await _taskSyncClient!.UpdateTaskAsync(updatedDto);
                 await _taskSyncClient.UnlockTaskAsync(task.Id);
                 ChangeTaskEditMode(task, false);
+                Overview.Refresh(Tasks);
             }
             catch (Exception ex)
             {
@@ -196,6 +207,7 @@ namespace Todos.Ui.ViewModels
                 // Restore original values from backup
                 task.CopyFrom(EditingTaskBackup);
                 ChangeTaskEditMode(task, false);
+                Overview.Refresh(Tasks);
             }
             catch (Exception ex)
             {
@@ -222,6 +234,7 @@ namespace Todos.Ui.ViewModels
                 if (deleted)
                 {
                     Tasks.Remove(task);
+                    Overview.Refresh(Tasks);
                 }
                 else
                 {
@@ -245,6 +258,7 @@ namespace Todos.Ui.ViewModels
                 task.IsCompleted = !task.IsCompleted;
                 var updatedDto = _mapper!.Map<TaskDTO>(task);
                 await _taskSyncClient!.UpdateTaskAsync(updatedDto);
+                Overview.Refresh(Tasks);
             }
             catch (Exception ex)
             {
@@ -259,6 +273,7 @@ namespace Todos.Ui.ViewModels
         {
             var taskModel = _mapper!.Map<TaskModel>(taskDto);
             Tasks.Add(taskModel);
+            Overview.Refresh(Tasks);
         }
 
         private void HandleTaskUpdated(TaskDTO taskDto)
@@ -269,6 +284,7 @@ namespace Todos.Ui.ViewModels
             {
                 var index = Tasks.IndexOf(existingTask);
                 Tasks[index] = taskModel;
+                Overview.Refresh(Tasks);
             }
         }
 
@@ -278,9 +294,35 @@ namespace Todos.Ui.ViewModels
             if (taskToRemove != null)
             {
                 Tasks.Remove(taskToRemove);
+                Overview.Refresh(Tasks);
             }
         }
 
  
     }
+
+    public class TasksOverviewModel : ObservableObject
+    {
+        private int total;
+        public int Total { get => total; set => SetProperty(ref total, value); }
+        private int locked;
+        public int Locked { get => locked; set => SetProperty(ref locked, value); }
+        private int high;
+        public int High { get => high; set => SetProperty(ref high, value); }
+        private int medium;
+        public int Medium { get => medium; set => SetProperty(ref medium, value); }
+        private int low;
+        public int Low { get => low; set => SetProperty(ref low, value); }
+
+        public void Refresh(IEnumerable<TaskModel> tasks)
+        {
+            var list = tasks.ToList();
+            Total = list.Count;
+            Locked = list.Count(t => t.IsLocked);
+            High = list.Count(t => t.Priority == TaskPriority.High);
+            Medium = list.Count(t => t.Priority == TaskPriority.Medium);
+            Low = list.Count(t => t.Priority == TaskPriority.Low);
+        }
+    }
 }
+

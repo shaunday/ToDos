@@ -1,0 +1,59 @@
+<UserControl x:Class="Todos.Ui.Sections.Tasks.TaskOverviewControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="56" d:DesignWidth="700">
+    <Border Margin="0,0,0,8"
+            Padding="16,8"
+            Background="{DynamicResource MaterialDesignPaper}"
+            CornerRadius="10"
+            BorderBrush="#E0E0E0"
+            BorderThickness="1">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <!-- Total -->
+            <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                <TextBlock Text="Total" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Foreground="#AAA" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding Total}" FontSize="16" FontWeight="SemiBold" Foreground="#444" HorizontalAlignment="Center"/>
+            </StackPanel>
+            <!-- Divider -->
+            <Rectangle Grid.Column="1" Width="2" Fill="#EEE" RadiusX="1" RadiusY="1" Height="32" VerticalAlignment="Center"/>
+            <!-- Locked -->
+            <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                <TextBlock Text="Locked" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Foreground="#AAA" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding Locked}" FontSize="16" FontWeight="SemiBold" Foreground="#666" HorizontalAlignment="Center"/>
+            </StackPanel>
+            <Rectangle Grid.Column="3" Width="2" Fill="#EEE" RadiusX="1" RadiusY="1" Height="32" VerticalAlignment="Center"/>
+            <!-- High -->
+            <StackPanel Grid.Column="4" HorizontalAlignment="Center">
+                <TextBlock Text="High" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Foreground="#BCAAAA" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding High}" FontSize="16" FontWeight="SemiBold" Foreground="#BCAAAA" HorizontalAlignment="Center"/>
+            </StackPanel>
+            <Rectangle Grid.Column="5" Width="2" Fill="#EEE" RadiusX="1" RadiusY="1" Height="32" VerticalAlignment="Center"/>
+            <!-- Medium -->
+            <StackPanel Grid.Column="6" HorizontalAlignment="Center">
+                <TextBlock Text="Medium" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Foreground="#BCA980" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding Medium}" FontSize="16" FontWeight="SemiBold" Foreground="#BCA980" HorizontalAlignment="Center"/>
+            </StackPanel>
+            <Rectangle Grid.Column="7" Width="2" Fill="#EEE" RadiusX="1" RadiusY="1" Height="32" VerticalAlignment="Center"/>
+            <!-- Low -->
+            <StackPanel Grid.Column="8" HorizontalAlignment="Center">
+                <TextBlock Text="Low" Style="{DynamicResource MaterialDesignCaptionTextBlock}" Foreground="#AABCA7" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding Low}" FontSize="16" FontWeight="SemiBold" Foreground="#AABCA7" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl> 
