@@ -27,7 +27,8 @@
         <!-- Always-visible Add Task button -->
         <Button Command="{Binding ShowAddTaskFormCommand}"
                 Style="{DynamicResource MaterialDesignRaisedButton}"
-                Margin="0,0,0,16"
+                Margin="0,0,24,16"
+                HorizontalAlignment="Right"
                 Visibility="{Binding IsAddingNewTask, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
             <StackPanel Orientation="Horizontal">
                 <materialDesign:PackIcon Kind="Plus" Margin="0,0,8,0"/>
