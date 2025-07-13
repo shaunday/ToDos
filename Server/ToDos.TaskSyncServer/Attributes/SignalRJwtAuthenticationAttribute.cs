@@ -3,19 +3,19 @@ using Microsoft.AspNet.SignalR.Hubs;
 using System;
 using System.Security.Claims;
 using System.Web;
-using ToDos.JwtService;
+using ToDos.MockAuthService;
 
 namespace ToDos.TaskSyncServer.Attributes
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
     public class SignalRJwtAuthenticationAttribute : AuthorizeAttribute
     {
-        private readonly IJwtService _jwtService;
+        private readonly IAuthService _authService;
 
         public SignalRJwtAuthenticationAttribute()
         {
-            // Get JWT service from dependency resolver
-            _jwtService = GlobalHost.DependencyResolver.GetService(typeof(IJwtService)) as IJwtService;
+            // Get Auth service from dependency resolver
+            _authService = GlobalHost.DependencyResolver.GetService(typeof(IAuthService)) as IAuthService;
         }
 
         public override bool AuthorizeHubConnection(HubDescriptor hubDescriptor, IRequest request)
@@ -30,15 +30,15 @@ namespace ToDos.TaskSyncServer.Attributes
                 }
 
                 // Validate token
-                var principal = _jwtService?.ValidateToken(token);
-                if (principal == null)
+                var isValid = _authService?.ValidateToken(token) ?? false;
+                if (!isValid)
                 {
                     return false;
                 }
 
                 // Store user information in request context for later use
-                request.Environment["UserPrincipal"] = principal;
-                request.Environment["UserId"] = _jwtService.GetUserIdFromToken(token).ToString();
+                var userId = _authService.GetUserIdFromToken(token);
+                request.Environment["UserId"] = userId.ToString();
                 
                 return true;
             }
@@ -54,16 +54,14 @@ namespace ToDos.TaskSyncServer.Attributes
             {
                 // Get user information from request context
                 var request = hubIncomingInvokerContext.Hub.Context.Request;
-                var principal = request.Environment["UserPrincipal"] as ClaimsPrincipal;
                 var userId = request.Environment["UserId"] as string;
 
-                if (principal == null || string.IsNullOrEmpty(userId))
+                if (string.IsNullOrEmpty(userId))
                 {
                     return false;
                 }
 
                 // Store user information in hub context for method access
-                hubIncomingInvokerContext.Hub.Context.Request.Environment["UserPrincipal"] = principal;
                 hubIncomingInvokerContext.Hub.Context.Request.Environment["UserId"] = userId;
                 
                 return true;

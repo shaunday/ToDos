@@ -5,6 +5,9 @@ using Todos.Ui.Services.Navigation;
 using TodDos.Ui.Global.ViewModels;
 using Todos.Ui.ViewModels;
 using AutoMapper;
+using System.Threading.Tasks;
+using System.Windows;
+using System;
 
 namespace Todos.Ui
 {
@@ -17,7 +20,28 @@ namespace Todos.Ui
             : base(mapper, navigation)
         {
             applicationViewModel = new ApplicationViewModel(userService, taskSyncClient, mapper, navigation);
-            Navigation.NavigateTo<TasksViewModel>();
+            
+            // DEV CODE: Auto-login for development/testing
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var result = await userService.AuthenticateAsync("defaultuser", "1234");
+                    if (result)
+                    {
+                        // Navigate to tasks after successful login
+                        await Task.Delay(100); // Small delay to ensure login completes
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            Navigation.NavigateTo<TasksViewModel>();
+                        }));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Handle auto-login failure silently
+                }
+            });
         }
     }
 }

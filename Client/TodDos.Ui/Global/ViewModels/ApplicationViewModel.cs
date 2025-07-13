@@ -49,6 +49,8 @@ namespace Todos.Ui.ViewModels
             // Initialize with current state
             CurrentUser = _mapper!.Map<UserModel>(_userService.CurrentUser);
             UpdateConnectionStatus();
+            
+
         }
 
         private void HandleConnectionStatusChanged(ConnectionStatus newStatus)
@@ -128,6 +130,8 @@ namespace Todos.Ui.ViewModels
                 ConnectionStatus = ConnectionStatus.Failed;
             }
         }
+
+
 
         private void UpdateConnectionStatus()
         {

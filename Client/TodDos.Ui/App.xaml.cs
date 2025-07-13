@@ -17,7 +17,7 @@ using Todos.Ui.ViewModels;
 using Unity;
 using static Todos.Client.Common.TypesGlobal;
 using Todos.Client.UserService;
-using ToDos.JwtService;
+using ToDos.MockAuthService;
 
 namespace Todos.Ui
 {
@@ -71,7 +71,7 @@ namespace Todos.Ui
             Container.RegisterSingleton<INavigationService, NavigationService>();
             Container.RegisterSingleton<IUserService, MockUserService>();
             Container.RegisterSingleton<ITaskSyncClient, MockTaskSyncClient>();
-            Container.RegisterSingleton<IJwtService, JwtService>();
+            Container.RegisterSingleton<IAuthService, MockAuthService>();
             Container.RegisterInstance(Log.Logger);
 
             // Register AutoMapper

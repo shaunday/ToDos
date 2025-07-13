@@ -1,106 +1,85 @@
-using Microsoft.IdentityModel.Tokens;
 using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.Collections.Generic;
 using Serilog;
 using ToDos.DotNet.Common;
 
-namespace ToDos.JwtService
+namespace ToDos.MockAuthService
 {
-    public interface IJwtService
+    public interface IAuthService
     {
         string GenerateToken(int userId, string username);
-        ClaimsPrincipal ValidateToken(string token);
+        bool ValidateToken(string token);
         int GetUserIdFromToken(string token);
         int GetUserIdFromTokenWithoutValidation(string token);
     }
 
-    public class JwtService : IJwtService
+    public class MockAuthService : IAuthService
     {
         private readonly ILogger _logger;
-        private readonly string _secretKey;
-        private readonly string _issuer;
-        private readonly string _audience;
+        private readonly Dictionary<string, TokenInfo> _validTokens = new Dictionary<string, TokenInfo>();
 
-        public JwtService(ILogger logger)
+        public MockAuthService(ILogger logger)
         {
             _logger = logger;
-            
-            // Load JWT configuration from environment variables
-            _secretKey = Environment.GetEnvironmentVariable(Globals.JWT_Token_String_Identifier) ?? "default_secret_key_for_development_only";
-            _issuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "ToDos.Server";
-            _audience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? "ToDos.Client";
-            
-            _logger.Information("JWT Service initialized with issuer: {Issuer}, audience: {Audience}", _issuer, _audience);
+            _logger.Information("Mock Auth Service initialized");
         }
 
         public string GenerateToken(int userId, string username)
         {
             try
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_secretKey);
+                // Create a simple mock token format: "MOCK_{userId}_{username}_{timestamp}"
+                var timestamp = DateTime.UtcNow.Ticks;
+                var token = $"MOCK_{userId}_{username}_{timestamp}";
                 
-                var tokenDescriptor = new SecurityTokenDescriptor
+                // Store token info for validation
+                _validTokens[token] = new TokenInfo
                 {
-                    Subject = new ClaimsIdentity(new[]
-                    {
-                        new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                        new Claim(ClaimTypes.Name, username),
-                        new Claim("userId", userId.ToString()),
-                        new Claim("username", username)
-                    }),
-                    Expires = DateTime.UtcNow.AddHours(24), // 24 hour expiration
-                    Issuer = _issuer,
-                    Audience = _audience,
-                    SigningCredentials = new SigningCredentials(
-                        new SymmetricSecurityKey(key), 
-                        SecurityAlgorithms.HmacSha256Signature)
+                    UserId = userId,
+                    Username = username,
+                    ExpiresAt = DateTime.UtcNow.AddHours(24)
                 };
-
-                var token = tokenHandler.CreateToken(tokenDescriptor);
-                var tokenString = tokenHandler.WriteToken(token);
                 
-                _logger.Information("Generated JWT token for user: {Username} (ID: {UserId})", username, userId);
-                return tokenString;
+                _logger.Information("Generated mock token for user: {Username} (ID: {UserId})", username, userId);
+                return token;
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Error generating JWT token for user: {Username} (ID: {UserId})", username, userId);
+                _logger.Error(ex, "Error generating mock token for user: {Username} (ID: {UserId})", username, userId);
                 throw;
             }
         }
 
-        public ClaimsPrincipal ValidateToken(string token)
+        public bool ValidateToken(string token)
         {
             try
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_secretKey);
-                
-                var validationParameters = new TokenValidationParameters
+                if (string.IsNullOrEmpty(token))
                 {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = true,
-                    ValidIssuer = _issuer,
-                    ValidateAudience = true,
-                    ValidAudience = _audience,
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
-                };
+                    _logger.Warning("No token provided for validation");
+                    return false;
+                }
 
-                var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
-                
-                _logger.Debug("JWT token validated successfully");
-                return principal;
+                if (!_validTokens.TryGetValue(token, out var tokenInfo))
+                {
+                    _logger.Warning("Token not found in valid tokens");
+                    return false;
+                }
+
+                if (DateTime.UtcNow > tokenInfo.ExpiresAt)
+                {
+                    _logger.Warning("Token has expired");
+                    _validTokens.Remove(token);
+                    return false;
+                }
+
+                _logger.Debug("Mock token validated successfully");
+                return true;
             }
             catch (Exception ex)
             {
-                _logger.Warning(ex, "JWT token validation failed");
-                return null;
+                _logger.Warning(ex, "Mock token validation failed");
+                return false;
             }
         }
 
@@ -108,20 +87,21 @@ namespace ToDos.JwtService
         {
             try
             {
-                var principal = ValidateToken(token);
-                if (principal == null) return 0;
-
-                var userIdClaim = principal.FindFirst("userId") ?? principal.FindFirst(ClaimTypes.NameIdentifier);
-                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out var userId))
+                if (!ValidateToken(token))
                 {
-                    return userId;
+                    return 0;
                 }
-                
+
+                if (_validTokens.TryGetValue(token, out var tokenInfo))
+                {
+                    return tokenInfo.UserId;
+                }
+
                 return 0;
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Error extracting user ID from JWT token");
+                _logger.Error(ex, "Error extracting user ID from mock token");
                 return 0;
             }
         }
@@ -132,44 +112,41 @@ namespace ToDos.JwtService
             {
                 if (string.IsNullOrEmpty(token))
                 {
-                    _logger.Warning("No JWT token provided for extracting user ID");
+                    _logger.Warning("No token provided for extracting user ID");
                     return 0;
                 }
 
-                // Extract user ID from JWT token without validation
-                // This is useful for client-side parsing where we don't need to validate the signature
-                var tokenParts = token.Split('.');
-                if (tokenParts.Length >= 2)
+                // Parse mock token format: "MOCK_{userId}_{username}_{timestamp}"
+                if (token.StartsWith("MOCK_"))
                 {
-                    // Decode the payload (second part)
-                    var payload = tokenParts[1];
-                    // Add padding if needed
-                    payload = payload.PadRight(4 * ((payload.Length + 3) / 4), '=');
-                    
-                    // Convert from base64url to base64
-                    payload = payload.Replace('-', '+').Replace('_', '/');
-                    
-                    // Decode
-                    var jsonBytes = Convert.FromBase64String(payload);
-                    var json = System.Text.Encoding.UTF8.GetString(jsonBytes);
-                    
-                    // Simple JSON parsing to get userId
-                    // In a real app, use a proper JSON library
-                    var userIdMatch = System.Text.RegularExpressions.Regex.Match(json, @"""userId"":\s*(\d+)");
-                    if (userIdMatch.Success && int.TryParse(userIdMatch.Groups[1].Value, out var userId))
+                    var parts = token.Split('_');
+                    if (parts.Length >= 3 && int.TryParse(parts[1], out var userId))
                     {
                         return userId;
                     }
                 }
-                
-                _logger.Warning("Could not extract user ID from JWT token");
+
+                // Fallback: try to get from stored tokens
+                if (_validTokens.TryGetValue(token, out var tokenInfo))
+                {
+                    return tokenInfo.UserId;
+                }
+
+                _logger.Warning("Could not extract user ID from mock token");
                 return 0;
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Error extracting user ID from JWT token without validation");
+                _logger.Error(ex, "Error extracting user ID from mock token without validation");
                 return 0;
             }
+        }
+
+        private class TokenInfo
+        {
+            public int UserId { get; set; }
+            public string Username { get; set; }
+            public DateTime ExpiresAt { get; set; }
         }
     }
 } 

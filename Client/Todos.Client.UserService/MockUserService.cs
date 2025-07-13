@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using DotNetEnv;
 using Todos.Client.UserService.Interfaces;
 using Todos.Client.UserService.Models;
-using ToDos.JwtService;
+using ToDos.MockAuthService;
 
 namespace Todos.UserService
 {
@@ -11,7 +11,7 @@ namespace Todos.UserService
     {
         private UserDTO _currentUser;
         private string _jwtToken;
-        private readonly IJwtService _jwtService;
+        private readonly IAuthService _authService;
         
         public UserDTO CurrentUser => _currentUser;
         public string JwtToken => _jwtToken;
@@ -24,8 +24,8 @@ namespace Todos.UserService
             var envPath = System.IO.Path.Combine(AppContext.BaseDirectory, ".env.Global");
             Env.Load(envPath);
             
-            // Initialize JWT service
-            _jwtService = new JwtService(Serilog.Log.Logger);
+            // Initialize Auth service
+            _authService = new MockAuthService(Serilog.Log.Logger);
             
             // Initialize with guest user
             _currentUser = new UserDTO
@@ -69,8 +69,8 @@ namespace Todos.UserService
                     LastLoginTime = DateTime.UtcNow
                 };
                 
-                // Generate proper JWT token using the service
-                var mockToken = _jwtService.GenerateToken(user.Id, user.UserName);
+                // Generate proper mock token using the service
+                var mockToken = _authService.GenerateToken(user.Id, user.UserName);
                 
                 _currentUser = user;
                 _jwtToken = mockToken;
@@ -115,8 +115,8 @@ namespace Todos.UserService
             
             if (_currentUser.IsAuthenticated)
             {
-                // Generate new JWT token using the service
-                var newToken = _jwtService.GenerateToken(_currentUser.Id, _currentUser.UserName);
+                // Generate new mock token using the service
+                var newToken = _authService.GenerateToken(_currentUser.Id, _currentUser.UserName);
                 _jwtToken = newToken;
                 TokenChanged?.Invoke(newToken);
                 return true;

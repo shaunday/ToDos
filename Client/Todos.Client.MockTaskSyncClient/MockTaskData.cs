@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using ToDos.DotNet.Common;
 
-namespace Todos.Server.MockTaskService
+namespace Todos.Client.MockTaskSyncClient
 {
     public static class MockTaskData
     {

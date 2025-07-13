@@ -17,14 +17,14 @@ using System.Windows.Data;
 using TodDos.Ui.Global.ViewModels;
 using Serilog;
 using Todos.Client.UserService.Interfaces;
-using ToDos.JwtService;
+using ToDos.MockAuthService;
 
 namespace Todos.Ui.ViewModels
 {
     public partial class TasksViewModel : ViewModelBase, IInitializable, ICleanable
     {
         #region Fields
-        private readonly IJwtService _jwtService;
+        private readonly IAuthService _authService;
 
         [ObservableProperty]
         private TaskModel editingTask;
@@ -60,10 +60,10 @@ namespace Todos.Ui.ViewModels
         #endregion
 
         #region Constructors and Lifecycle
-        public TasksViewModel(ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation, ILogger logger, IJwtService jwtService)
+        public TasksViewModel(ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation, ILogger logger, IAuthService authService)
             : base(taskSyncClient, mapper, navigation, logger)
         {
-            _jwtService = jwtService;
+            _authService = authService;
             Overview.Refresh(Tasks);
             FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
             FilteredTasksView.Filter = FilterPredicate;
@@ -88,6 +88,8 @@ namespace Todos.Ui.ViewModels
             _taskSyncClient.TaskDeleted -= HandleTaskDeleted;
             Tasks.CollectionChanged -= Tasks_CollectionChanged;
             Filter.PropertyChanged -= Filter_PropertyChanged;
+            
+
         }
         #endregion
 
@@ -311,9 +313,11 @@ namespace Todos.Ui.ViewModels
                 
                 // Get current user ID from the user service or application context
                 var currentUserId = GetCurrentUserId();
+                
                 if (currentUserId > 0)
                 {
                     var userTaskDtos = await _taskSyncClient!.GetUserTasksAsync(currentUserId);
+                    
                     var userTaskModels = userTaskDtos.Select(dto => _mapper!.Map<TaskModel>(dto));
                     Tasks = new ObservableCollection<TaskModel>(userTaskModels);
                     Overview.Refresh(Tasks);
@@ -345,14 +349,16 @@ namespace Todos.Ui.ViewModels
             {
                 // Get the JWT token from the task sync client
                 var jwtToken = _taskSyncClient?.GetJwtToken();
+                
                 if (string.IsNullOrEmpty(jwtToken))
                 {
                     _logger.Warning("No JWT token available for getting user ID");
                     return 0;
                 }
 
-                // Use JwtService to extract user ID from token
-                return _jwtService.GetUserIdFromTokenWithoutValidation(jwtToken);
+                // Use AuthService to extract user ID from token
+                var userId = _authService.GetUserIdFromTokenWithoutValidation(jwtToken);
+                return userId;
             }
             catch (Exception ex)
             {
@@ -405,6 +411,8 @@ namespace Todos.Ui.ViewModels
         {
             UpdateFilteredTasks();
         }
+
+
         #endregion
     }
 }

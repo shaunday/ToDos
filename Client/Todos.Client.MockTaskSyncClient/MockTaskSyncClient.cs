@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 using Todos.Client.Common.Interfaces;
 using ToDos.DotNet.Common;
 using static Todos.Client.Common.TypesGlobal;
@@ -96,8 +97,11 @@ namespace Todos.Client.MockTaskSyncClient
 
         public Task<IEnumerable<TaskDTO>> GetUserTasksAsync(int userId)
         {
-            // Return empty list for mock - in real implementation, this would return user's tasks
-            return Task.FromResult<IEnumerable<TaskDTO>>(new List<TaskDTO>());
+            // Return mock tasks for the specified user using the shared mock data
+            var allMockTasks = MockTaskData.GetSampleTasks();
+            var userTasks = allMockTasks.Where(t => t.UserId == userId).ToList();
+            
+            return Task.FromResult<IEnumerable<TaskDTO>>(userTasks);
         }
     }
 } 

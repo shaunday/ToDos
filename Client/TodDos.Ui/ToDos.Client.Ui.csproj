@@ -28,10 +28,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.7" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.7" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="9.0.7" />
-    <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="8.12.1" />
-    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.12.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="8.12.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.12.1" />
+
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
     <PackageReference Include="Serilog" Version="4.3.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
@@ -55,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Common\ToDos.DotNet.Common\ToDos.DotNet.Common.csproj" />
+    <ProjectReference Include="..\..\Common\ToDos.JwtService\ToDos.JwtService.csproj" />
     <ProjectReference Include="..\Todos.Client.Common\Todos.Client.Common.csproj" />
     <ProjectReference Include="..\Todos.Client.MockTaskSyncClient\Todos.Client.MockTaskSyncClient.csproj" />
     <ProjectReference Include="..\Todos.Client.SignalRClient\Todos.Client.SignalRClient.csproj" />

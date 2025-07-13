@@ -1,16 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
-    <RootNamespace>ToDos.JwtService</RootNamespace>
-    <AssemblyName>ToDos.JwtService</AssemblyName>
+    <RootNamespace>ToDos.MockAuthService</RootNamespace>
+    <AssemblyName>ToDos.MockAuthService</AssemblyName>
     <LangVersion>8.0</LangVersion>
     <OutputPath>..\bin\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.12.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.12.1" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.12.1" />
     <PackageReference Include="Serilog" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>
