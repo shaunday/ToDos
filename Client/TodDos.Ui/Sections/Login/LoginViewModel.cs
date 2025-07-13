@@ -10,12 +10,15 @@ using Todos.Ui.Services.Navigation;
 
 namespace Todos.Ui.ViewModels
 {
-    public partial class LoginViewModel : ViewModelBase
+    public partial class LoginViewModel : ViewModelBase, IInitializable, ICleanable
     {
         public LoginViewModel(IMapper mapper, INavigationService navigation) : base(mapper, navigation)
         {
 
         }
+
+        public override void Init() { }
+        public override void Cleanup() { }
 
         [ObservableProperty]
         private string username;

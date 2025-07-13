@@ -10,7 +10,16 @@ using Todos.Ui.Services.Navigation;
 
 namespace Todos.Ui.ViewModels
 {
-    public class ViewModelBase : ObservableObject
+    public interface IInitializable
+    {
+        void Init();
+    }
+    public interface ICleanable
+    {
+        void Cleanup();
+    }
+
+    public class ViewModelBase : ObservableObject, IInitializable, ICleanable
     {
         protected readonly IMapper _mapper;
         protected readonly ITaskSyncClient _taskSyncClient;
@@ -31,6 +40,9 @@ namespace Todos.Ui.ViewModels
             _mapper = mapper;
             _taskSyncClient = taskSyncClient;
         }
+
+        public virtual void Init() { }
+        public virtual void Cleanup() { }
     }
 
 }

@@ -16,17 +16,9 @@ using System.Windows.Data;
 
 namespace Todos.Ui.ViewModels
 {
-    public partial class TasksViewModel : ViewModelBase
+    public partial class TasksViewModel : ViewModelBase, IInitializable, ICleanable
     {
         #region Fields
-        private void Tasks_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            Overview.Refresh(Tasks);
-            UpdateFilteredTasks();
-        }
-
-        // [ObservableProperty]
-        // private NewTaskInputModel newTask = new NewTaskInputModel();
 
         [ObservableProperty]
         private TaskModel? editingTask;
@@ -61,21 +53,32 @@ namespace Todos.Ui.ViewModels
         public ObservableCollection<TaskModel> Tasks { get; set; } = new ObservableCollection<TaskModel>();
         #endregion
 
-        #region Constructors
+        #region Constructors and Lifecycle
         public TasksViewModel(ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation)
             : base(taskSyncClient, mapper, navigation)
         {
-            // Subscribe to real-time task events
-            _taskSyncClient!.TaskAdded += HandleTaskAdded;
-            _taskSyncClient.TaskUpdated += HandleTaskUpdated;
-            _taskSyncClient.TaskDeleted += HandleTaskDeleted;
-            
-            Tasks.CollectionChanged += Tasks_CollectionChanged;
-            Filter.PropertyChanged += (s, e) => UpdateFilteredTasks();
             Overview.Refresh(Tasks);
             LoadTasksAsync();
             FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
             FilteredTasksView.Filter = FilterPredicate;
+        }
+
+        public override void Init()
+        {
+            _taskSyncClient!.TaskAdded += HandleTaskAdded;
+            _taskSyncClient.TaskUpdated += HandleTaskUpdated;
+            _taskSyncClient.TaskDeleted += HandleTaskDeleted;
+            Tasks.CollectionChanged += Tasks_CollectionChanged;
+            Filter.PropertyChanged += Filter_PropertyChanged;
+        }
+
+        public override void Cleanup()
+        {
+            _taskSyncClient!.TaskAdded -= HandleTaskAdded;
+            _taskSyncClient.TaskUpdated -= HandleTaskUpdated;
+            _taskSyncClient.TaskDeleted -= HandleTaskDeleted;
+            Tasks.CollectionChanged -= Tasks_CollectionChanged;
+            Filter.PropertyChanged -= Filter_PropertyChanged;
         }
         #endregion
 
@@ -259,7 +262,6 @@ namespace Todos.Ui.ViewModels
         #endregion
 
         #region Public Methods
-        // (none)
         #endregion
 
         #region Private Methods
@@ -288,7 +290,6 @@ namespace Todos.Ui.ViewModels
                 var allTaskDtos = await _taskSyncClient!.GetAllTasksAsync();
                 var allTaskModels = allTaskDtos.Select(dto => _mapper!.Map<TaskModel>(dto));
                 Tasks = new ObservableCollection<TaskModel>(allTaskModels);
-                Tasks.CollectionChanged += Tasks_CollectionChanged;
                 Overview.Refresh(Tasks);
                 // Rebind CollectionView to new Tasks collection
                 FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
@@ -314,6 +315,12 @@ namespace Todos.Ui.ViewModels
         #endregion
 
         #region Event Handlers
+        private void Tasks_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            Overview.Refresh(Tasks);
+            UpdateFilteredTasks();
+        }
+
         private void HandleTaskAdded(TaskDTO taskDto)
         {
             var taskModel = _mapper!.Map<TaskModel>(taskDto);
@@ -344,6 +351,11 @@ namespace Todos.Ui.ViewModels
                 Overview.Refresh(Tasks);
                 UpdateFilteredTasks();
             }
+        }
+
+        private void Filter_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            UpdateFilteredTasks();
         }
         #endregion
     }

@@ -27,7 +27,18 @@ namespace Todos.Ui.Services.Navigation
 
         public void NavigateTo<TViewModel>() where TViewModel : ViewModelBase
         {
-            CurrentViewModel = _container.Resolve<TViewModel>();
+            // Call Cleanup on the old viewmodel if it implements ICleanable
+            if (CurrentViewModel is ICleanable cleanable)
+            {
+                cleanable.Cleanup();
+            }
+            var newViewModel = _container.Resolve<TViewModel>();
+            // Call Init on the new viewmodel if it implements IInitializable
+            if (newViewModel is IInitializable initializable)
+            {
+                initializable.Init();
+            }
+            CurrentViewModel = newViewModel;
         }
     }
 
