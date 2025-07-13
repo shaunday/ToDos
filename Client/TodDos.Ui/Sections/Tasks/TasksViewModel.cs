@@ -21,8 +21,8 @@ namespace Todos.Ui.ViewModels
         [ObservableProperty]
         private TaskModel? editingTask;
 
-        [ObservableProperty]
-        private NewTaskInputModel newTask = new NewTaskInputModel();
+        // [ObservableProperty]
+        // private NewTaskInputModel newTask = new NewTaskInputModel();
 
         [ObservableProperty]
         private bool isAddingNewTask = false;
@@ -32,6 +32,14 @@ namespace Todos.Ui.ViewModels
 
         [ObservableProperty]
         private bool isLoading = false;
+
+        // Backup for editing a task
+        [ObservableProperty]
+        private TaskModel? editingTaskBackup;
+
+        // Buffer for adding a new task
+        [ObservableProperty]
+        private NewTaskInputModel? newTaskBuffer;
 
         public TasksViewModel(ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation)
             : base(taskSyncClient, mapper, navigation)
@@ -69,7 +77,7 @@ namespace Todos.Ui.ViewModels
         private void ShowAddTaskForm()
         {
             IsAddingNewTask = true;
-            NewTask = new NewTaskInputModel();
+            NewTaskBuffer = new NewTaskInputModel();
             ErrorMessage = string.Empty;
         }
 
@@ -77,13 +85,14 @@ namespace Todos.Ui.ViewModels
         private void CancelAddTask()
         {
             IsAddingNewTask = false;
+            NewTaskBuffer = null;
             ErrorMessage = string.Empty;
         }
 
         [RelayCommand]
         private async Task AddTaskAsync()
         {
-            if (string.IsNullOrWhiteSpace(NewTask.Title))
+            if (NewTaskBuffer == null || string.IsNullOrWhiteSpace(NewTaskBuffer.Title))
             {
                 ErrorMessage = "Task title is required.";
                 return;
@@ -96,10 +105,10 @@ namespace Todos.Ui.ViewModels
 
                 var newTaskModel = new TaskModel
                 {
-                    Title = NewTask.Title.Trim(),
-                    Description = NewTask.Description?.Trim() ?? string.Empty,
-                    Priority = NewTask.Priority,
-                    DueDate = NewTask.DueDate,
+                    Title = NewTaskBuffer.Title.Trim(),
+                    Description = NewTaskBuffer.Description?.Trim() ?? string.Empty,
+                    Priority = NewTaskBuffer.Priority,
+                    DueDate = NewTaskBuffer.DueDate,
                     IsCompleted = false,
                     IsLocked = false,
                     IsEditing = false,
@@ -114,7 +123,7 @@ namespace Todos.Ui.ViewModels
                 
                 // Reset form
                 IsAddingNewTask = false;
-                NewTask = new NewTaskInputModel();
+                NewTaskBuffer = null;
             }
             catch (Exception ex)
             {
@@ -129,7 +138,7 @@ namespace Todos.Ui.ViewModels
         [RelayCommand]
         private async Task EditTaskAsync(TaskModel task)
         {
-            if (task == null || EditingTask != null) return; // Only one edit at a time
+            if (task == null || EditingTaskBackup != null) return; // Only one edit at a time
 
             try
             {
@@ -153,7 +162,7 @@ namespace Todos.Ui.ViewModels
         [RelayCommand]
         private async Task SaveTaskAsync(TaskModel task)
         {
-            if (task == null || !task.IsEditing) return;
+            if (task == null || !task.IsEditing || EditingTaskBackup == null) return;
 
             if (string.IsNullOrWhiteSpace(task.Title))
             {
@@ -164,6 +173,7 @@ namespace Todos.Ui.ViewModels
             try
             {
                 ErrorMessage = string.Empty;
+                // No need to copy from backup, just save the current task
                 var updatedDto = _mapper!.Map<TaskDTO>(task);
                 await _taskSyncClient!.UpdateTaskAsync(updatedDto);
                 await _taskSyncClient.UnlockTaskAsync(task.Id);
@@ -178,24 +188,13 @@ namespace Todos.Ui.ViewModels
         [RelayCommand]
         private async Task CancelEditAsync(TaskModel task)
         {
-            if (task == null || !task.IsEditing) return;
-            
+            if (task == null || !task.IsEditing || EditingTaskBackup == null) return;
             try
             {
                 ErrorMessage = string.Empty;
                 await _taskSyncClient!.UnlockTaskAsync(task.Id);
-                // Reload the task to get the original data
-                var taskDto = await _taskSyncClient.GetAllTasksAsync();
-                var originalTask = taskDto.FirstOrDefault(t => t.Id == task.Id);
-                if (originalTask != null)
-                {
-                    var originalTaskModel = _mapper!.Map<TaskModel>(originalTask);
-                    var index = Tasks.IndexOf(task);
-                    if (index >= 0)
-                    {
-                        Tasks[index] = originalTaskModel;
-                    }
-                }
+                // Restore original values from backup
+                task.CopyFrom(EditingTaskBackup);
                 ChangeTaskEditMode(task, false);
             }
             catch (Exception ex)
@@ -208,6 +207,7 @@ namespace Todos.Ui.ViewModels
         {
             task.IsEditing = isEditing;
             EditingTask = isEditing ? task : null;
+            EditingTaskBackup = isEditing ? task.Clone() : null;
         }
 
         [RelayCommand]

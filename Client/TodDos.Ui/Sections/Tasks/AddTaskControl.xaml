@@ -72,21 +72,21 @@
 
                     <!-- Title Field -->
                     <TextBox Grid.Row="0" Grid.Column="0"
-                             Text="{Binding NewTask.Title, UpdateSourceTrigger=PropertyChanged}"
+                             Text="{Binding NewTaskBuffer.Title, UpdateSourceTrigger=PropertyChanged}"
                              materialDesign:HintAssist.Hint="Task Title"
                              Margin="0,0,8,8"
                              Style="{DynamicResource MaterialDesignOutlinedTextBox}"/>
 
                     <!-- Description Field -->
                     <TextBox Grid.Row="0" Grid.Column="1"
-                             Text="{Binding NewTask.Description, UpdateSourceTrigger=PropertyChanged}"
+                             Text="{Binding NewTaskBuffer.Description, UpdateSourceTrigger=PropertyChanged}"
                              materialDesign:HintAssist.Hint="Description"
                              Margin="8,0,0,8"
                              Style="{DynamicResource MaterialDesignOutlinedTextBox}"/>
 
                     <!-- Priority Field -->
                     <ComboBox Grid.Row="1" Grid.Column="0"
-                              SelectedItem="{Binding NewTask.Priority}"
+                              SelectedItem="{Binding NewTaskBuffer.Priority}"
                               ItemsSource="{Binding Source={StaticResource TaskPriorityValues}}"
                               materialDesign:HintAssist.Hint="Priority"
                               Margin="0,0,8,8"
@@ -94,7 +94,7 @@
 
                     <!-- Due Date Field -->
                     <DatePicker Grid.Row="1" Grid.Column="1"
-                                SelectedDate="{Binding NewTask.DueDate}"
+                                SelectedDate="{Binding NewTaskBuffer.DueDate}"
                                 materialDesign:HintAssist.Hint="Due Date"
                                 Margin="8,0,0,8"
                                 Style="{DynamicResource MaterialDesignOutlinedDatePicker}"/>

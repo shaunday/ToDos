@@ -60,7 +60,7 @@
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
                         <!-- Some row is being edited -->
-                        <Condition Binding="{Binding DataContext.EditingTask, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource SingleNotEqualConverter}, ConverterParameter={x:Null}}" Value="True" />
+                        <Condition Binding="{Binding DataContext.EditingTaskBackup, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource SingleNotEqualConverter}, ConverterParameter={x:Null}}" Value="True" />
                         <!-- This row is not the editing row -->
                         <Condition Binding="{Binding IsEditing}" Value="False" />
                     </MultiDataTrigger.Conditions>
@@ -120,7 +120,7 @@
                 <MultiDataTrigger>
                     <MultiDataTrigger.Conditions>
                         <!-- Some row is being edited -->
-                        <Condition Binding="{Binding DataContext.EditingTask, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource SingleNotEqualConverter}, ConverterParameter={x:Null}}" Value="True" />
+                        <Condition Binding="{Binding DataContext.EditingTaskBackup, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource SingleNotEqualConverter}, ConverterParameter={x:Null}}" Value="True" />
                         <!-- This row is not the editing row -->
                         <Condition Binding="{Binding IsEditing}" Value="False" />
                     </MultiDataTrigger.Conditions>

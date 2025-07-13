@@ -17,5 +17,20 @@ namespace Todos.Ui.Sections.Tasks
 
         [ObservableProperty]
         private DateTime? dueDate;
+
+        public NewTaskInputModel Clone()
+        {
+            var clone = new NewTaskInputModel();
+            clone.CopyFrom(this);
+            return clone;
+        }
+
+        public void CopyFrom(NewTaskInputModel other)
+        {
+            Title = other.Title;
+            Description = other.Description;
+            Priority = other.Priority;
+            DueDate = other.DueDate;
+        }
     }
 } 
