@@ -49,11 +49,7 @@ namespace Todos.Ui.ViewModels
         private NewTaskInputModel? newTaskBuffer;
 
         [ObservableProperty]
-        private string selectedPriority = "All";
-        [ObservableProperty]
-        private string tagFilter = string.Empty;
-        [ObservableProperty]
-        private string completedStatus = "All";
+        private TaskFilter filter = new TaskFilter();
 
         public ICollectionView FilteredTasksView { get; private set; }
 
@@ -75,7 +71,7 @@ namespace Todos.Ui.ViewModels
             _taskSyncClient.TaskDeleted += HandleTaskDeleted;
             
             Tasks.CollectionChanged += Tasks_CollectionChanged;
-            PropertyChanged += TasksViewModel_PropertyChanged;
+            Filter.PropertyChanged += (s, e) => UpdateFilteredTasks();
             Overview.Refresh(Tasks);
             LoadTasksAsync();
             FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
@@ -267,19 +263,11 @@ namespace Todos.Ui.ViewModels
         #endregion
 
         #region Private Methods
-        private void TasksViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(SelectedPriority) || e.PropertyName == nameof(TagFilter) || e.PropertyName == nameof(CompletedStatus))
-            {
-                UpdateFilteredTasks();
-            }
-        }
-
         private void UpdateFilteredTasks()
         {
             FilteredTasksView.Refresh();
             // Update filtered overview
-            var filtered = Tasks.Where(t => FilterPredicate(t));
+            var filtered = Filter.Apply(Tasks);
             FilteredOverview.Refresh(filtered);
         }
 
@@ -287,16 +275,7 @@ namespace Todos.Ui.ViewModels
         {
             var t = obj as TaskModel;
             if (t == null) return false;
-            if (!string.IsNullOrWhiteSpace(SelectedPriority) && SelectedPriority != "All" && t.Priority.ToString() != SelectedPriority)
-                return false;
-            if (!string.IsNullOrWhiteSpace(TagFilter) && !(t.Tags ?? string.Empty).ToLowerInvariant().Contains(TagFilter.Trim().ToLowerInvariant()))
-                return false;
-            if (!string.IsNullOrWhiteSpace(CompletedStatus) && CompletedStatus != "All")
-            {
-                if (CompletedStatus == "Completed" && !t.IsCompleted) return false;
-                if (CompletedStatus == "Not Completed" && t.IsCompleted) return false;
-            }
-            return true;
+            return Filter.Apply(new[] { t }).Any();
         }
 
         private async void LoadTasksAsync()

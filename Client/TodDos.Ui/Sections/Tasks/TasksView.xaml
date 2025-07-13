@@ -184,9 +184,9 @@
             </Grid.RowDefinitions>
 
             <tasks:TaskFilterControl Grid.Row="0" Margin="0,0,0,8"
-                Priority="{Binding SelectedPriority, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                TagFilter="{Binding TagFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                CompletedStatus="{Binding CompletedStatus, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                Priority="{Binding Filter.SelectedPriority, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                TagFilter="{Binding Filter.TagFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                CompletedStatus="{Binding Filter.CompletedStatus, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
             <!-- DataGrid -->
             <DataGrid Grid.Row="1"
