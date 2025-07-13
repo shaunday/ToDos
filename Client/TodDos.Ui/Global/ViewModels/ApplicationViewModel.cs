@@ -16,10 +16,8 @@ namespace Todos.Ui.ViewModels
     public partial class ApplicationViewModel : ObservableObject
     {
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ConnectionStatusText))]
         private ConnectionStatus connectionStatus;
-
-        [ObservableProperty]
-        private string connectionStatusText = "Disconnected";
 
         [ObservableProperty]
         private UserModel currentUser;
@@ -27,6 +25,15 @@ namespace Todos.Ui.ViewModels
         private readonly IUserService _userService;
         private readonly ITaskSyncClient _taskSyncClient;
         private readonly INavigationService _navigation;
+
+        public string ConnectionStatusText => ConnectionStatus switch
+        {
+            ConnectionStatus.Connected => "Connected",
+            ConnectionStatus.Connecting => "Connecting...",
+            ConnectionStatus.Reconnecting => "Reconnecting...",
+            ConnectionStatus.Failed => "Connection Failed",
+            _ => "Disconnected"
+        };
 
         public ApplicationViewModel(IUserService userService, ITaskSyncClient taskSyncClient, INavigationService navigation) 
         {
@@ -46,7 +53,6 @@ namespace Todos.Ui.ViewModels
         private void HandleConnectionStatusChanged(ConnectionStatus newStatus)
         {
             ConnectionStatus = newStatus;
-            UpdateConnectionStatus();
         }
 
         private async void HandleTokenChanged(string newToken)
@@ -65,7 +71,7 @@ namespace Todos.Ui.ViewModels
                 catch (Exception)
                 {
                     // Handle connection error
-                    ConnectionStatusText = "Connection failed";
+                    ConnectionStatus = ConnectionStatus.Failed;
                 }
             }
             else
@@ -91,14 +97,14 @@ namespace Todos.Ui.ViewModels
                 var authenticated = await _userService.AuthenticateAsync("defaultuser", "1234");
                 if (!authenticated)
                 {
-                    ConnectionStatusText = "Authentication failed";
+                    ConnectionStatus = ConnectionStatus.Failed;
                 }
                 // Connection will be handled by HandleTokenChanged
             }
             catch (Exception)
             {
                 // Handle connection error
-                ConnectionStatusText = "Connection failed";
+                ConnectionStatus = ConnectionStatus.Failed;
             }
         }
 
@@ -111,14 +117,14 @@ namespace Todos.Ui.ViewModels
                 var authenticated = await _userService.AuthenticateAsync("defaultuser", "1234");
                 if (!authenticated)
                 {
-                    ConnectionStatusText = "Authentication failed";
+                    ConnectionStatus = ConnectionStatus.Failed;
                 }
                 // Connection will be handled by HandleTokenChanged
             }
             catch (Exception)
             {
                 // Handle login error
-                ConnectionStatusText = "Login failed";
+                ConnectionStatus = ConnectionStatus.Failed;
             }
         }
 
@@ -133,7 +139,7 @@ namespace Todos.Ui.ViewModels
             catch (Exception)
             {
                 // Handle disconnection error
-                ConnectionStatusText = "Disconnection failed";
+                ConnectionStatus = ConnectionStatus.Failed;
             }
         }
 
@@ -148,21 +154,13 @@ namespace Todos.Ui.ViewModels
             catch (Exception)
             {
                 // Handle logout error
-                ConnectionStatusText = "Logout failed";
+                ConnectionStatus = ConnectionStatus.Failed;
             }
         }
 
         private void UpdateConnectionStatus()
         {
             ConnectionStatus = _taskSyncClient.ConnectionStatus;
-            ConnectionStatusText = ConnectionStatus switch
-            {
-                ConnectionStatus.Connected => "Connected",
-                ConnectionStatus.Connecting => "Connecting...",
-                ConnectionStatus.Reconnecting => "Reconnecting...",
-                ConnectionStatus.Failed => "Connection Failed",
-                _ => "Disconnected"
-            };
         }
     }
 }
