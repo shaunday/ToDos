@@ -28,4 +28,14 @@
         <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
+    <!-- Unified Card Style for Overview and Filter Controls -->
+    <Style x:Key="TaskControlCardStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Effect" Value="{DynamicResource MaterialDesignElevationShadow1}" />
+        <Setter Property="Margin" Value="0,0,0,10" />
+    </Style>
+
 </ResourceDictionary> 

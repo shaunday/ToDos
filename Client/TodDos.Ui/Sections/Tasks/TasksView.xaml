@@ -174,7 +174,7 @@
         <tasks:AddTaskControl Grid.Row="0" DataContext="{Binding}" />
 
         <!-- Unified Overview Panel (All + Filtered) -->
-        <tasks:TaskOverviewControl Grid.Row="1" All="{Binding Overview}" Filtered="{Binding FilteredOverview}" Margin="0,0,0,12" />
+        <tasks:TaskOverviewControl Grid.Row="1" All="{Binding Overview}" Filtered="{Binding FilteredOverview}" />
 
         <!-- Main Content -->
         <Grid Grid.Row="2">
@@ -183,7 +183,7 @@
                 <RowDefinition Height="*"/>   <!-- DataGrid row -->
             </Grid.RowDefinitions>
 
-            <tasks:TaskFilterControl Grid.Row="0" Margin="0,0,0,8"
+            <tasks:TaskFilterControl Grid.Row="0"
                 Priority="{Binding Filter.SelectedPriority, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 TagFilter="{Binding Filter.TagFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 CompletedStatus="{Binding Filter.CompletedStatus, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
