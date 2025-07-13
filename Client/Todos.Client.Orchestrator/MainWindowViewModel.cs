@@ -23,7 +23,7 @@ namespace Todos.Client.Orchestrator.ViewModels
         [ObservableProperty]
         private string filterProcessIdText = string.Empty;
         [ObservableProperty]
-        private ClientModel? selectedClient;
+        private ClientModel selectedClient;
 
         [ObservableProperty]
         private TypesGlobal.ClientType launchClientType = TypesGlobal.ClientType.UiClient;
@@ -110,7 +110,7 @@ namespace Todos.Client.Orchestrator.ViewModels
         }
 
         [RelayCommand]
-        private void KillClient(ClientModel? model)
+        private void KillClient(ClientModel model)
         {
             if (model == null) return;
             _clientService.KillClient(model);
@@ -130,7 +130,7 @@ namespace Todos.Client.Orchestrator.ViewModels
         }
 
         [RelayCommand]
-        private void OpenLog(ClientModel? model)
+        private void OpenLog(ClientModel model)
         {
             if (model == null) return;
             Console.WriteLine($"[DEBUG] Attempting to open log file: {model.LogFilePath}");
@@ -141,7 +141,7 @@ namespace Todos.Client.Orchestrator.ViewModels
         }
 
         [RelayCommand]
-        private void DeleteSelected(System.Collections.IList? selectedItems)
+        private void DeleteSelected(System.Collections.IList selectedItems)
         {
             if (selectedItems == null || selectedItems.Count == 0) return;
             var toDelete = selectedItems.Cast<ClientModel>().ToList();

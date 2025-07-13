@@ -5,23 +5,24 @@ using Serilog.Extensions.Logging;
 using System;
 using System.Diagnostics;
 using System.Windows;
-using Todos.Ui.Services.Mapping;
+using TodDos.Ui.Services.Mapping;
 using Todos.Client.Common.Factories;
 using Todos.Client.Common.Interfaces;
 using Todos.Client.MockTaskSyncClient;
 using Todos.Client.SignalRClient;
-using Todos.Client.UserService;
+using Todos.UserService;
 using Todos.Client.UserService.Interfaces;
 using Todos.Ui.Services.Navigation;
 using Todos.Ui.ViewModels;
 using Unity;
 using static Todos.Client.Common.TypesGlobal;
+using Todos.Client.UserService;
 
 namespace Todos.Ui
 {
     public partial class App : Application
     {
-        public IUnityContainer container { get; private set; }
+        public IUnityContainer Container { get; private set; }
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -63,13 +64,13 @@ namespace Todos.Ui
 
         private void ConfigureContainer()
         {
-            container = new UnityContainer();
+            Container = new UnityContainer();
 
             // Register services
-            container.RegisterSingleton<INavigationService, NavigationService>();
-            container.RegisterSingleton<IUserService, MockUserService>();
-            container.RegisterSingleton<ITaskSyncClient, MockTaskSyncClient>();
-            container.RegisterInstance(Log.Logger);
+            Container.RegisterSingleton<INavigationService, NavigationService>();
+            Container.RegisterSingleton<IUserService, MockUserService>();
+            Container.RegisterSingleton<ITaskSyncClient, MockTaskSyncClient>();
+            Container.RegisterInstance(Log.Logger);
 
             // Register AutoMapper
             var config = new MapperConfiguration(cfg =>
@@ -77,12 +78,12 @@ namespace Todos.Ui
                 cfg.AddProfile<ClientMappingProfile>();
             }, new SerilogLoggerFactory(Log.Logger));
             IMapper mapper = config.CreateMapper();
-            container.RegisterInstance<IMapper>(mapper);
+            Container.RegisterInstance<IMapper>(mapper);
 
             // Register ViewModels
-            container.RegisterType<MainViewModel>();
-            container.RegisterType<LoginViewModel>();
-            container.RegisterType<TasksViewModel>();
+            Container.RegisterType<MainViewModel>();
+            Container.RegisterType<LoginViewModel>();
+            Container.RegisterType<TasksViewModel>();
         }
 
         private void ShowMainWindow()
@@ -91,7 +92,7 @@ namespace Todos.Ui
 
             var window = new MainWindow
             {
-                DataContext = container.Resolve<MainViewModel>(),
+                DataContext = Container.Resolve<MainViewModel>(),
                 Title = $"ToDos Client - PID: {appProcess.Id}"
             };
 

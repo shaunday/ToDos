@@ -1,14 +1,10 @@
 using AutoMapper;
 using Microsoft.AspNet.SignalR;
-using Microsoft.Extensions.DependencyInjection;
 using Owin;
 using Serilog;
 using Serilog.Extensions.Logging;
-using System;
-using System.Configuration;
 using System.Web.Http;
 using Todos.Server.MockTaskService;
-using ToDos.Entities;
 using ToDos.Repository;
 using ToDos.Server.Common.Interfaces;
 using ToDos.TaskSyncServer.Mapping;

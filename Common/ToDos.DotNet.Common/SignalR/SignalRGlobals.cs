@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ToDos.DotNet.Common
+namespace ToDos.DotNet.Common.SignalR
 {
     public static class SignalRGlobals
     {

@@ -12,6 +12,7 @@ using Todos.Client.UserService.Models;
 using Todos.Ui.Models;
 using Todos.Ui.Services.Navigation;
 using static Todos.Client.Common.TypesGlobal;
+using TodDos.Ui.Global.ViewModels;
 
 namespace Todos.Ui.ViewModels
 {

@@ -8,7 +8,7 @@ using ToDos.DotNet.Common;
 using Todos.Ui.Models;
 using Todos.Client.UserService.Models;
 
-namespace Todos.Ui.Services.Mapping
+namespace TodDos.Ui.Services.Mapping
 {
     public class ClientMappingProfile : Profile
     {

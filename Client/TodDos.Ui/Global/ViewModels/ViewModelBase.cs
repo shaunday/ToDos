@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Todos.Client.Common.Interfaces;
 using Todos.Ui.Services.Navigation;
 
-namespace Todos.Ui.ViewModels
+namespace TodDos.Ui.Global.ViewModels
 {
     public interface IInitializable
     {

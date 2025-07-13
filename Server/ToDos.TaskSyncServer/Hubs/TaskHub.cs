@@ -38,7 +38,7 @@ namespace ToDos.TaskSyncServer.Hubs
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                // Log error with performance data
+                Serilog.Log.Error(ex, "Exception in GetAllTasks");
                 throw;
             }
         }
@@ -55,6 +55,7 @@ namespace ToDos.TaskSyncServer.Hubs
             catch (Exception ex)
             {
                 stopwatch.Stop();
+                Serilog.Log.Error(ex, "Exception in AddTask");
                 throw;
             }
         }
@@ -71,6 +72,7 @@ namespace ToDos.TaskSyncServer.Hubs
             catch (Exception ex)
             {
                 stopwatch.Stop();
+                Serilog.Log.Error(ex, "Exception in UpdateTask");
                 throw;
             }
         }
@@ -87,6 +89,7 @@ namespace ToDos.TaskSyncServer.Hubs
             catch (Exception ex)
             {
                 stopwatch.Stop();
+                Serilog.Log.Error(ex, "Exception in DeleteTask");
                 throw;
             }
         }
@@ -103,6 +106,7 @@ namespace ToDos.TaskSyncServer.Hubs
             catch (Exception ex)
             {
                 stopwatch.Stop();
+                Serilog.Log.Error(ex, "Exception in SetTaskCompletion");
                 throw;
             }
         }
@@ -119,6 +123,7 @@ namespace ToDos.TaskSyncServer.Hubs
             catch (Exception ex)
             {
                 stopwatch.Stop();
+                Serilog.Log.Error(ex, "Exception in LockTask");
                 throw;
             }
         }
@@ -135,6 +140,7 @@ namespace ToDos.TaskSyncServer.Hubs
             catch (Exception ex)
             {
                 stopwatch.Stop();
+                Serilog.Log.Error(ex, "Exception in UnlockTask");
                 throw;
             }
         }

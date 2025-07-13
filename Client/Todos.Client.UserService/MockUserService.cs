@@ -4,7 +4,7 @@ using DotNetEnv;
 using Todos.Client.UserService.Interfaces;
 using Todos.Client.UserService.Models;
 
-namespace Todos.Client.UserService
+namespace Todos.UserService
 {
     public class MockUserService : IUserService
     {

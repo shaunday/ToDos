@@ -9,11 +9,11 @@ namespace Todos.Client.Orchestrator.Controls
     public partial class ClientFilterControl : UserControl
     {
         public static readonly DependencyProperty ClientTypeProperty = DependencyProperty.Register(
-            nameof(ClientType), typeof(TypesGlobal.ClientType?), typeof(ClientFilterControl),
+            nameof(ClientType), typeof(TypesGlobal.ClientType), typeof(ClientFilterControl),
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnFilterChanged));
 
         public static readonly DependencyProperty IsAliveProperty = DependencyProperty.Register(
-            nameof(IsAlive), typeof(bool?), typeof(ClientFilterControl),
+            nameof(IsAlive), typeof(bool), typeof(ClientFilterControl),
             new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnFilterChanged));
 
         public static readonly DependencyProperty FilterProcessIdTextProperty = DependencyProperty.Register(
@@ -23,15 +23,15 @@ namespace Todos.Client.Orchestrator.Controls
         public static readonly DependencyProperty ClearFiltersCommandProperty = DependencyProperty.Register(
             nameof(ClearFiltersCommand), typeof(ICommand), typeof(ClientFilterControl), new PropertyMetadata(null));
 
-        public TypesGlobal.ClientType? ClientType
+        public TypesGlobal.ClientType ClientType
         {
-            get => (TypesGlobal.ClientType?)GetValue(ClientTypeProperty);
+            get => (TypesGlobal.ClientType)GetValue(ClientTypeProperty);
             set => SetValue(ClientTypeProperty, value);
         }
 
-        public bool? IsAlive
+        public bool IsAlive
         {
-            get => (bool?)GetValue(IsAliveProperty);
+            get => (bool)GetValue(IsAliveProperty);
             set => SetValue(IsAliveProperty, value);
         }
 
@@ -41,13 +41,13 @@ namespace Todos.Client.Orchestrator.Controls
             set => SetValue(FilterProcessIdTextProperty, value);
         }
 
-        public ICommand? ClearFiltersCommand
+        public ICommand ClearFiltersCommand
         {
-            get => (ICommand?)GetValue(ClearFiltersCommandProperty);
+            get => (ICommand)GetValue(ClearFiltersCommandProperty);
             set => SetValue(ClearFiltersCommandProperty, value);
         }
 
-        public event EventHandler? FilterChanged;
+        public event EventHandler FilterChanged;
 
         public ClientFilterControl()
         {

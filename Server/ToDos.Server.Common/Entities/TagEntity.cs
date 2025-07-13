@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-
 namespace ToDos.Entities
 {
     public class TagEntity

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Todos.Client.Common.Interfaces;
 using ToDos.DotNet.Common;
+using ToDos.DotNet.Common.SignalR;
 using static Todos.Client.Common.TypesGlobal;
 
 namespace Todos.Client.SignalRClient

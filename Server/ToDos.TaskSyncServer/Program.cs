@@ -3,6 +3,7 @@ using Microsoft.Owin.Hosting;
 using Serilog;
 using DotNetEnv;
 using ToDos.DotNet.Common;
+using ToDos.DotNet.Common.SignalR;
 
 namespace ToDos.TaskSyncServer
 {

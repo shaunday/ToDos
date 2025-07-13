@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Serilog;
 using ToDos.DotNet.Common;
-using ToDos.Repository;
 using ToDos.Entities;
+using ToDos.Repository;
 using ToDos.Server.Common.Interfaces;
 
 namespace ToDos.TaskSyncServer.Services

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TodDos.Ui.Global.ViewModels;
 using Todos.Ui.Services.Navigation;
 
 namespace Todos.Ui.ViewModels

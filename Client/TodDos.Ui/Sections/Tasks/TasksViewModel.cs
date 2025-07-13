@@ -13,6 +13,7 @@ using Todos.Ui.Models;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Data;
+using TodDos.Ui.Global.ViewModels;
 
 namespace Todos.Ui.ViewModels
 {
@@ -21,7 +22,7 @@ namespace Todos.Ui.ViewModels
         #region Fields
 
         [ObservableProperty]
-        private TaskModel? editingTask;
+        private TaskModel editingTask;
 
         [ObservableProperty]
         private bool isAddingNewTask = false;
@@ -34,11 +35,11 @@ namespace Todos.Ui.ViewModels
 
         // Backup for editing a task
         [ObservableProperty]
-        private TaskModel? editingTaskBackup;
+        private TaskModel editingTaskBackup;
 
         // Buffer for adding a new task
         [ObservableProperty]
-        private NewTaskInputModel? newTaskBuffer;
+        private NewTaskInputModel newTaskBuffer;
 
         [ObservableProperty]
         private TaskFilter filter = new TaskFilter();
@@ -136,7 +137,8 @@ namespace Todos.Ui.ViewModels
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"Failed to add task: {ex.Message}";
+                Serilog.Log.Error(ex, "Failed to add task");
+                ErrorMessage = $"Failed to add task.";
             }
             finally
             {
@@ -164,7 +166,8 @@ namespace Todos.Ui.ViewModels
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"Failed to edit task: {ex.Message}";
+                Serilog.Log.Error(ex, "Failed to edit task");
+                ErrorMessage = $"Failed to edit task.";
             }
         }
 
@@ -191,7 +194,8 @@ namespace Todos.Ui.ViewModels
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"Failed to save task: {ex.Message}";
+                Serilog.Log.Error(ex, "Failed to save task");
+                ErrorMessage = $"Failed to save task.";
             }
         }
 
@@ -210,7 +214,8 @@ namespace Todos.Ui.ViewModels
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"Failed to cancel edit: {ex.Message}";
+                Serilog.Log.Error(ex, "Failed to cancel edit");
+                ErrorMessage = $"Failed to cancel edit.";
             }
         }
 
@@ -235,7 +240,8 @@ namespace Todos.Ui.ViewModels
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"Failed to delete task: {ex.Message}";
+                Serilog.Log.Error(ex, "Failed to delete task");
+                ErrorMessage = $"Failed to delete task.";
             }
         }
 
@@ -254,9 +260,10 @@ namespace Todos.Ui.ViewModels
             }
             catch (Exception ex)
             {
+                Serilog.Log.Error(ex, "Failed to update task completion");
                 // Revert the change on error
                 task.IsCompleted = !task.IsCompleted;
-                ErrorMessage = $"Failed to update task completion: {ex.Message}";
+                ErrorMessage = $"Failed to update task completion.";
             }
         }
         #endregion
@@ -298,7 +305,8 @@ namespace Todos.Ui.ViewModels
             }
             catch (Exception ex)
             {
-                ErrorMessage = $"Failed to load tasks: {ex.Message}";
+                Serilog.Log.Error(ex, "Failed to load tasks");
+                ErrorMessage = $"Failed to load tasks.";
             }
             finally
             {
@@ -315,7 +323,7 @@ namespace Todos.Ui.ViewModels
         #endregion
 
         #region Event Handlers
-        private void Tasks_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        private void Tasks_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             Overview.Refresh(Tasks);
             UpdateFilteredTasks();
@@ -353,7 +361,7 @@ namespace Todos.Ui.ViewModels
             }
         }
 
-        private void Filter_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        private void Filter_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             UpdateFilteredTasks();
         }

@@ -2,6 +2,7 @@
 using Todos.Client.Common.Interfaces;
 using Todos.Client.UserService.Interfaces;
 using Todos.Ui.Services.Navigation;
+using TodDos.Ui.Global.ViewModels;
 using Todos.Ui.ViewModels;
 using AutoMapper;
 

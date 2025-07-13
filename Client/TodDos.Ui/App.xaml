@@ -4,7 +4,8 @@
              xmlns:local="clr-namespace:Todos.Ui"
              xmlns:converters="clr-namespace:Todos.Ui.Resources.Converters"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:vm="clr-namespace:Todos.Ui.ViewModels"
+             xmlns:vm="clr-namespace:TodDos.Ui.Global.ViewModels"
+             xmlns:viewmodels="clr-namespace:Todos.Ui.ViewModels"
              xmlns:views="clr-namespace:Todos.Ui.Sections">
     <Application.Resources>
         <ResourceDictionary>
@@ -13,10 +14,10 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
                 <ResourceDictionary Source="Resources/StyleOverrides.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <DataTemplate DataType="{x:Type vm:LoginViewModel}">
+            <DataTemplate DataType="{x:Type viewmodels:LoginViewModel}">
                 <views:LoginView />
             </DataTemplate>
-            <DataTemplate DataType="{x:Type vm:TasksViewModel}">
+            <DataTemplate DataType="{x:Type viewmodels:TasksViewModel}">
                 <views:TasksView />
             </DataTemplate>
             <converters:SingleNotEqualConverter x:Key="SingleNotEqualConverter" />
