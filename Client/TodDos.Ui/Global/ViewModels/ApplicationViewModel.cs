@@ -13,7 +13,7 @@ using static Todos.Client.Common.TypesGlobal;
 
 namespace Todos.Ui.ViewModels
 {
-    public partial class ApplicationViewModel : ObservableObject
+    public partial class ApplicationViewModel : ViewModelBase
     {
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ConnectionStatusText))]
@@ -24,7 +24,6 @@ namespace Todos.Ui.ViewModels
 
         private readonly IUserService _userService;
         private readonly ITaskSyncClient _taskSyncClient;
-        private readonly INavigationService _navigation;
 
         public string ConnectionStatusText => ConnectionStatus switch
         {
@@ -35,11 +34,10 @@ namespace Todos.Ui.ViewModels
             _ => "Disconnected"
         };
 
-        public ApplicationViewModel(IUserService userService, ITaskSyncClient taskSyncClient, INavigationService navigation) 
+        public ApplicationViewModel(IUserService userService, ITaskSyncClient taskSyncClient, INavigationService navigation) :base(navigation)
         {
             _userService = userService;
             _taskSyncClient = taskSyncClient;
-            _navigation = navigation;
             
             // Subscribe to events
             _userService.TokenChanged += HandleTokenChanged;
