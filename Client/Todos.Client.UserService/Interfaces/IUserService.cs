@@ -6,9 +6,9 @@ namespace Todos.Client.UserService.Interfaces
 {
     public interface IUserService
     {
-        UserModel CurrentUser { get; }
+        UserDTO CurrentUser { get; }
         string JwtToken { get; }
-        event Action<UserModel> UserChanged;
+        event Action<UserDTO> UserChanged;
         event Action<string> TokenChanged;
         
         Task<bool> AuthenticateAsync(string username, string password);

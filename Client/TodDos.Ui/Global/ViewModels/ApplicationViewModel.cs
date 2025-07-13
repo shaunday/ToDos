@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using AutoMapper;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using Todos.Client.Common.Interfaces;
 using Todos.Client.UserService.Interfaces;
 using Todos.Client.UserService.Models;
+using Todos.Ui.Models;
 using Todos.Ui.Services.Navigation;
 using static Todos.Client.Common.TypesGlobal;
 
@@ -23,7 +25,6 @@ namespace Todos.Ui.ViewModels
         private UserModel currentUser;
 
         private readonly IUserService _userService;
-        private readonly ITaskSyncClient _taskSyncClient;
 
         public string ConnectionStatusText => ConnectionStatus switch
         {
@@ -34,17 +35,18 @@ namespace Todos.Ui.ViewModels
             _ => "Disconnected"
         };
 
-        public ApplicationViewModel(IUserService userService, ITaskSyncClient taskSyncClient, INavigationService navigation) :base(navigation)
+        public ApplicationViewModel(IUserService userService, ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation) 
+            : base(taskSyncClient, mapper, navigation)
         {
             _userService = userService;
-            _taskSyncClient = taskSyncClient;
             
             // Subscribe to events
             _userService.TokenChanged += HandleTokenChanged;
             _taskSyncClient.ConnectionStatusChanged += HandleConnectionStatusChanged;
+            _userService.UserChanged += HandleUserChanged;
             
             // Initialize with current state
-            CurrentUser = _userService.CurrentUser;
+            CurrentUser = _mapper!.Map<UserModel>(_userService.CurrentUser);
             UpdateConnectionStatus();
         }
 
@@ -84,6 +86,11 @@ namespace Todos.Ui.ViewModels
                     // Handle disconnection error
                 }
             }
+        }
+
+        private void HandleUserChanged(UserDTO userDto)
+        {
+            CurrentUser = _mapper!.Map<UserModel>(userDto);
         }
 
         [RelayCommand]

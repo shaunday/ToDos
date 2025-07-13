@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ToDos.DotNet.Common;
 using Todos.Ui.Models;
+using Todos.Client.UserService.Models;
 using static ToDos.DotNet.Common.Globals;
 
 namespace Todos.Ui.Services.Mapping
@@ -22,6 +23,9 @@ namespace Todos.Ui.Services.Mapping
                 .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => src.Priority.ToString()));
 
             CreateMap<TagDTO, TagModel>()
+                .ReverseMap();
+
+            CreateMap<UserDTO, UserModel>()
                 .ReverseMap();
         }
     }

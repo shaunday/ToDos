@@ -14,17 +14,15 @@ namespace Todos.Ui.ViewModels
 {
     public partial class TasksViewModel : ViewModelBase
     {
-        private readonly ITaskSyncClient _taskSyncClient;
-
         [ObservableProperty]
         private ObservableCollection<TaskModel> tasks = new ObservableCollection<TaskModel>();
 
         [ObservableProperty]
         private TaskModel? editingTask;
 
-        public TasksViewModel(ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation) : base(mapper, navigation)
+        public TasksViewModel(ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation)
+            : base(taskSyncClient, mapper, navigation)
         {
-            _taskSyncClient = taskSyncClient;
             LoadTasksAsync();
         }
 

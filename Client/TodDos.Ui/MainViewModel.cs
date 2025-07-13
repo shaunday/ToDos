@@ -3,6 +3,7 @@ using Todos.Client.Common.Interfaces;
 using Todos.Client.UserService.Interfaces;
 using Todos.Ui.Services.Navigation;
 using Todos.Ui.ViewModels;
+using AutoMapper;
 
 namespace Todos.Ui
 {
@@ -11,9 +12,10 @@ namespace Todos.Ui
         [ObservableProperty]
         private ApplicationViewModel applicationViewModel;
 
-        public MainViewModel(INavigationService navigation, IUserService userService, ITaskSyncClient taskSyncClient) : base(navigation)
+        public MainViewModel(INavigationService navigation, IUserService userService, ITaskSyncClient taskSyncClient, IMapper mapper) 
+            : base(mapper, navigation)
         {
-            applicationViewModel = new ApplicationViewModel(userService, taskSyncClient, navigation);
+            applicationViewModel = new ApplicationViewModel(userService, taskSyncClient, mapper, navigation);
             Navigation.NavigateTo<TasksViewModel>();
         }
     }

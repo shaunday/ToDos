@@ -8,13 +8,13 @@ namespace Todos.Client.UserService
 {
     public class MockUserService : IUserService
     {
-        private UserModel _currentUser;
+        private UserDTO _currentUser;
         private string _jwtToken;
         private string _jwtTokenPrefix;
         
-        public UserModel CurrentUser => _currentUser;
+        public UserDTO CurrentUser => _currentUser;
         public string JwtToken => _jwtToken;
-        public event Action<UserModel> UserChanged;
+        public event Action<UserDTO> UserChanged;
         public event Action<string> TokenChanged;
         
         public MockUserService()
@@ -29,8 +29,8 @@ namespace Todos.Client.UserService
                 throw new InvalidOperationException("JWT_TOKEN_PREFIX environment variable not found in .env.Global file");
             }
             
-            // Initialize with guest user (uses the constructor in UserModel)
-            _currentUser = new UserModel();
+            // Initialize with guest user
+            _currentUser = CreateGuestUserDTO();
             _jwtToken = string.Empty;
         }
         
@@ -42,7 +42,7 @@ namespace Todos.Client.UserService
             // Simple mock authentication - accept any non-empty username with password "1234"
             if (!string.IsNullOrWhiteSpace(username) && password == "1234")
             {
-                var user = new UserModel(username);
+                var user = CreateAuthenticatedUserDTO(username);
                 
                 // Generate mock JWT token
                 var mockToken = $"{_jwtTokenPrefix}{username}_{DateTime.Now.Ticks}";
@@ -58,14 +58,12 @@ namespace Todos.Client.UserService
             return false;
         }
 
-
-        
         public async Task LogoutAsync()
         {
             // Simulate async operation
             await Task.Delay(50);
             
-            var guestUser = new UserModel();
+            var guestUser = CreateGuestUserDTO();
             var oldToken = _jwtToken;
             
             _currentUser = guestUser;
@@ -90,6 +88,34 @@ namespace Todos.Client.UserService
             }
             
             return false;
+        }
+
+        private static UserDTO CreateGuestUserDTO()
+        {
+            return new UserDTO
+            {
+                Id = Guid.Empty.ToString(),
+                UserName = "Guest User",
+                Email = "guest@example.com",
+                Role = "Guest",
+                DisplayName = "Guest User",
+                IsAuthenticated = false,
+                LastLoginTime = null
+            };
+        }
+
+        private static UserDTO CreateAuthenticatedUserDTO(string username)
+        {
+            return new UserDTO
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserName = username,
+                Email = $"{username}@example.com",
+                Role = "User",
+                DisplayName = username,
+                IsAuthenticated = true,
+                LastLoginTime = DateTime.Now
+            };
         }
     }
 } 

@@ -13,6 +13,7 @@ namespace Todos.Ui.ViewModels
     public class ViewModelBase : ObservableObject
     {
         protected readonly IMapper _mapper;
+        protected readonly ITaskSyncClient _taskSyncClient;
         public INavigationService Navigation { get; }
 
         public ViewModelBase(INavigationService navigation)
@@ -21,6 +22,11 @@ namespace Todos.Ui.ViewModels
         }
 
         public ViewModelBase(IMapper mapper, INavigationService navigation) : this(navigation)
+        {
+            _mapper = mapper;
+        }
+
+        public ViewModelBase(ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation) : this(navigation)
         {
             _mapper = mapper;
         }
