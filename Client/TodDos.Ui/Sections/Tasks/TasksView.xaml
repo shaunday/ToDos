@@ -155,11 +155,7 @@
                 <Setter Property="IsHitTestVisible" Value="True"/>
             </Style>
 
-        <Style x:Key="SubtleColumnHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource CenteredColumnHeaderStyle}">
-            <Setter Property="Background" Value="#FFF8F8F8"/>
-            <Setter Property="BorderBrush" Value="#E0E0E0"/>
-            <Setter Property="BorderThickness" Value="0,0,0,1"/>
-        </Style>
+
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -201,7 +197,7 @@
                       CellStyle="{StaticResource TaskCellStyle}"
                       materialDesign:DataGridAssist.CellPadding="8"
                       materialDesign:DataGridAssist.ColumnHeaderPadding="12,4"
-                      ColumnHeaderStyle="{StaticResource SubtleColumnHeaderStyle}">
+                      ColumnHeaderStyle="{StaticResource CenteredColumnHeaderStyle}">
 
                 <DataGrid.Columns>
                     <!-- Title Column -->
@@ -215,43 +211,6 @@
                                     Binding="{Binding Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     ElementStyle="{StaticResource TaskTextElementStyle}"
                                     EditingElementStyle="{DynamicResource MaterialDesignOutlinedTextBox}" />
-
-                    <!-- Priority Column -->
-                    <DataGridComboBoxColumn Header="Priority"
-                                       SelectedItemBinding="{Binding Priority, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                       ItemsSource="{Binding Source={StaticResource TaskPriorityValues}}"
-                                       Width="0.75*">
-                        <DataGridComboBoxColumn.ElementStyle>
-                            <Style TargetType="ComboBox" BasedOn="{StaticResource CenteredComboBoxStyle}" />
-                        </DataGridComboBoxColumn.ElementStyle>
-                        <DataGridComboBoxColumn.EditingElementStyle>
-                            <Style TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}" />
-                        </DataGridComboBoxColumn.EditingElementStyle>
-                    </DataGridComboBoxColumn>
-
-                    <!-- Completed Column -->
-                    <DataGridCheckBoxColumn Header="Completed" 
-                                       Binding="{Binding IsCompleted, Mode=TwoWay}" 
-                                       Width="*" />
-
-                    <!-- Due Date Column -->
-                    <DataGridTemplateColumn Header="Due Date" Width="0.75*">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <DatePicker SelectedDate="{Binding DueDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        VerticalAlignment="Center" 
-                                        HorizontalAlignment="Center" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate>
-                                <DatePicker SelectedDate="{Binding DueDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        VerticalAlignment="Center" 
-                                        HorizontalAlignment="Center"
-                                        Style="{DynamicResource MaterialDesignOutlinedDatePicker}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>
-                    </DataGridTemplateColumn>
 
                     <!-- Tags Column -->
                     <DataGridTemplateColumn Header="Tags" Width="1.5*">
@@ -282,6 +241,176 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
+
+                    <!-- Priority Column -->
+                    <DataGridComboBoxColumn Header="Priority"
+                                       SelectedItemBinding="{Binding Priority, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                       ItemsSource="{Binding Source={StaticResource TaskPriorityValues}}"
+                                       Width="0.75*">
+                        <DataGridComboBoxColumn.HeaderStyle>
+                            <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ClickableColumnHeaderStyle}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="DataGridColumnHeader">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0" 
+                                                            Orientation="Horizontal" 
+                                                            HorizontalAlignment="Center" 
+                                                            VerticalAlignment="Center">
+                                                    <TextBlock Text="Priority" 
+                                                               HorizontalAlignment="Center" 
+                                                               VerticalAlignment="Center" />
+                                                    <materialDesign:PackIcon Kind="Sort" 
+                                                                           Width="14" 
+                                                                           Height="14" 
+                                                                           Margin="4,0,0,0"
+                                                                           Foreground="#1976D2" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1" 
+                                                            Orientation="Vertical" 
+                                                            Margin="6,0,0,0">
+                                                    <materialDesign:PackIcon Kind="ChevronUp" 
+                                                                           Width="12" 
+                                                                           Height="12" 
+                                                                           Foreground="{Binding DataContext.SortColumn, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource StringEqualityConverter}, ConverterParameter=Priority, FallbackValue=#CCCCCC}"
+                                                                           Visibility="{Binding DataContext.SortDirection, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=Ascending, FallbackValue=Collapsed}" />
+                                                    <materialDesign:PackIcon Kind="ChevronDown" 
+                                                                           Width="12" 
+                                                                           Height="12" 
+                                                                           Foreground="{Binding DataContext.SortColumn, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource StringEqualityConverter}, ConverterParameter=Priority, FallbackValue=#CCCCCC}"
+                                                                           Visibility="{Binding DataContext.SortDirection, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=Descending, FallbackValue=Collapsed}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <EventSetter Event="Click" Handler="PriorityHeader_Click" />
+                            </Style>
+                        </DataGridComboBoxColumn.HeaderStyle>
+                        <DataGridComboBoxColumn.ElementStyle>
+                            <Style TargetType="ComboBox" BasedOn="{StaticResource CenteredComboBoxStyle}" />
+                        </DataGridComboBoxColumn.ElementStyle>
+                        <DataGridComboBoxColumn.EditingElementStyle>
+                            <Style TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}" />
+                        </DataGridComboBoxColumn.EditingElementStyle>
+                    </DataGridComboBoxColumn>
+
+                    <!-- Due Date Column -->
+                    <DataGridTemplateColumn Header="Due Date" Width="1.2*">
+                        <DataGridTemplateColumn.HeaderStyle>
+                            <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ClickableColumnHeaderStyle}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="DataGridColumnHeader">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0" 
+                                                            Orientation="Horizontal" 
+                                                            HorizontalAlignment="Center" 
+                                                            VerticalAlignment="Center">
+                                                    <TextBlock Text="Due Date" 
+                                                               HorizontalAlignment="Center" 
+                                                               VerticalAlignment="Center" />
+                                                    <materialDesign:PackIcon Kind="Sort" 
+                                                                           Width="14" 
+                                                                           Height="14" 
+                                                                           Margin="4,0,0,0"
+                                                                           Foreground="#1976D2" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1" 
+                                                            Orientation="Vertical" 
+                                                            Margin="6,0,0,0">
+                                                    <materialDesign:PackIcon Kind="ChevronUp" 
+                                                                           Width="12" 
+                                                                           Height="12" 
+                                                                           Foreground="{Binding DataContext.SortColumn, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource StringEqualityConverter}, ConverterParameter=DueDate, FallbackValue=#CCCCCC}"
+                                                                           Visibility="{Binding DataContext.SortDirection, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=Ascending, FallbackValue=Collapsed}" />
+                                                    <materialDesign:PackIcon Kind="ChevronDown" 
+                                                                           Width="12" 
+                                                                           Height="12" 
+                                                                           Foreground="{Binding DataContext.SortColumn, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource StringEqualityConverter}, ConverterParameter=DueDate, FallbackValue=#CCCCCC}"
+                                                                           Visibility="{Binding DataContext.SortDirection, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=Descending, FallbackValue=Collapsed}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <EventSetter Event="Click" Handler="DueDateHeader_Click" />
+                            </Style>
+                        </DataGridTemplateColumn.HeaderStyle>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <DatePicker SelectedDate="{Binding DueDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        VerticalAlignment="Center" 
+                                        HorizontalAlignment="Center" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <DatePicker SelectedDate="{Binding DueDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        VerticalAlignment="Center" 
+                                        HorizontalAlignment="Center"
+                                        Style="{DynamicResource MaterialDesignOutlinedDatePicker}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Completed Column -->
+                    <DataGridCheckBoxColumn Header="Completed" 
+                                       Binding="{Binding IsCompleted, Mode=TwoWay}" 
+                                       Width="*">
+                        <DataGridCheckBoxColumn.HeaderStyle>
+                            <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource ClickableColumnHeaderStyle}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="DataGridColumnHeader">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0" 
+                                                            Orientation="Horizontal" 
+                                                            HorizontalAlignment="Center" 
+                                                            VerticalAlignment="Center">
+                                                    <TextBlock Text="Completed" 
+                                                               HorizontalAlignment="Center" 
+                                                               VerticalAlignment="Center" />
+                                                    <materialDesign:PackIcon Kind="Sort" 
+                                                                           Width="14" 
+                                                                           Height="14" 
+                                                                           Margin="4,0,0,0"
+                                                                           Foreground="#1976D2" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1" 
+                                                            Orientation="Vertical" 
+                                                            Margin="6,0,0,0">
+                                                    <materialDesign:PackIcon Kind="ChevronUp" 
+                                                                           Width="12" 
+                                                                           Height="12" 
+                                                                           Foreground="{Binding DataContext.SortColumn, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource StringEqualityConverter}, ConverterParameter=IsCompleted, FallbackValue=#CCCCCC}"
+                                                                           Visibility="{Binding DataContext.SortDirection, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=Ascending, FallbackValue=Collapsed}" />
+                                                    <materialDesign:PackIcon Kind="ChevronDown" 
+                                                                           Width="12" 
+                                                                           Height="12" 
+                                                                           Foreground="{Binding DataContext.SortColumn, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource StringEqualityConverter}, ConverterParameter=IsCompleted, FallbackValue=#CCCCCC}"
+                                                                           Visibility="{Binding DataContext.SortDirection, RelativeSource={RelativeSource AncestorType=DataGrid}, Converter={StaticResource EnumEqualityConverter}, ConverterParameter=Descending, FallbackValue=Collapsed}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <EventSetter Event="Click" Handler="CompletedHeader_Click" />
+                            </Style>
+                        </DataGridCheckBoxColumn.HeaderStyle>
+                    </DataGridCheckBoxColumn>
 
                     <!-- Status Column -->
                     <DataGridTemplateColumn Header="Status" Width="Auto">

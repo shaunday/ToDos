@@ -27,6 +27,8 @@
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
             <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
             <converters:IntToVisibilityConverter x:Key="IntToVisibilityConverter" />
+            <converters:StringEqualityConverter x:Key="StringEqualityConverter" />
+            <converters:EnumEqualityConverter x:Key="EnumEqualityConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
