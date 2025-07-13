@@ -62,12 +62,11 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Title Field -->
@@ -81,6 +80,13 @@
                     <TextBox Grid.Row="0" Grid.Column="1"
                              Text="{Binding NewTaskBuffer.Description, UpdateSourceTrigger=PropertyChanged}"
                              materialDesign:HintAssist.Hint="Description"
+                             Margin="8,0,8,8"
+                             Style="{DynamicResource MaterialDesignOutlinedTextBox}"/>
+
+                    <!-- Tags Field -->
+                    <TextBox Grid.Row="0" Grid.Column="2"
+                             Text="{Binding NewTaskBuffer.Tags, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="Tags (comma or space separated)"
                              Margin="8,0,0,8"
                              Style="{DynamicResource MaterialDesignOutlinedTextBox}"/>
 
@@ -89,15 +95,17 @@
                               SelectedItem="{Binding NewTaskBuffer.Priority}"
                               ItemsSource="{Binding Source={StaticResource TaskPriorityValues}}"
                               materialDesign:HintAssist.Hint="Priority"
-                              Margin="0,0,8,8"
+                              Margin="0,0,8,0"
                               Style="{DynamicResource MaterialDesignOutlinedComboBox}"/>
 
                     <!-- Due Date Field -->
                     <DatePicker Grid.Row="1" Grid.Column="1"
                                 SelectedDate="{Binding NewTaskBuffer.DueDate}"
                                 materialDesign:HintAssist.Hint="Due Date"
-                                Margin="8,0,0,8"
+                                Margin="8,0,8,0"
                                 Style="{DynamicResource MaterialDesignOutlinedDatePicker}"/>
+
+                    <!-- (Empty third column for alignment) -->
                 </Grid>
 
                 <!-- Error Message -->

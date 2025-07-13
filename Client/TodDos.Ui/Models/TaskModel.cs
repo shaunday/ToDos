@@ -37,7 +37,7 @@ namespace Todos.Ui.Models
         private DateTime? dueDate;
 
         [ObservableProperty]
-        private ObservableCollection<TagModel> tags = new ObservableCollection<TagModel>();
+        private string tags = string.Empty;
 
         public TaskModel Clone()
         {
@@ -57,7 +57,7 @@ namespace Todos.Ui.Models
             IsEditing = other.IsEditing;
             Priority = other.Priority;
             DueDate = other.DueDate;
-            Tags = new ObservableCollection<TagModel>(other.Tags.Select(tag => new TagModel { Name = tag.Name }));
+            Tags = other.Tags;
         }
     }
 }

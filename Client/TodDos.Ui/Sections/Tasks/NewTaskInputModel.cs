@@ -13,6 +13,9 @@ namespace Todos.Ui.Sections.Tasks
         private string description = string.Empty;
 
         [ObservableProperty]
+        private string tags = string.Empty;
+
+        [ObservableProperty]
         private TaskPriority priority = TaskPriority.Medium;
 
         [ObservableProperty]

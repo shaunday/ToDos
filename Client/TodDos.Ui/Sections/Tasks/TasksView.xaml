@@ -248,24 +248,30 @@
                     <DataGridTemplateColumn Header="Tags" Width="1.5*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <ItemsControl ItemsSource="{Binding Tags}" 
-                                          VerticalAlignment="Center" 
-                                          HorizontalAlignment="Center">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <WrapPanel />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Margin="2" Padding="4,2" Background="{DynamicResource MaterialDesignChipBackgroundBrush}" CornerRadius="12">
-                                                <TextBlock Text="{Binding Name}" FontSize="11" />
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
+                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="{Binding Tags}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Tags}" Value="">
+                                                    <Setter Property="Text" Value="No tags"/>
+                                                    <Setter Property="Foreground" Value="#BBB"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Tags}" Value=" ">
+                                                    <Setter Property="Text" Value="No tags"/>
+                                                    <Setter Property="Foreground" Value="#BBB"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
+                        <DataGridTemplateColumn.CellEditingTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding Tags, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" HorizontalAlignment="Center" materialDesign:HintAssist.Hint="Tags (comma or space separated)"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellEditingTemplate>
                     </DataGridTemplateColumn>
 
                     <!-- Status Column -->

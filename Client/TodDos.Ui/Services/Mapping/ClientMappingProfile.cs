@@ -18,8 +18,10 @@ namespace Todos.Ui.Services.Mapping
                 .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => 
                     string.IsNullOrEmpty(src.Priority) ? TaskPriority.Medium : 
                     (TaskPriority)Enum.Parse(typeof(TaskPriority), src.Priority)))
+                .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.Tags == null ? string.Empty : string.Join(", ", src.Tags.Select(t => t.Name))))
                 .ReverseMap()
-                .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => src.Priority.ToString()));
+                .ForMember(dest => dest.Priority, opt => opt.MapFrom(src => src.Priority.ToString()))
+                .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.Tags) ? new List<TagDTO>() : src.Tags.Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries).Select(tag => tag.Trim()).Where(tag => !string.IsNullOrEmpty(tag)).Distinct().Select(tag => new TagDTO { Name = tag }).ToList()));
 
             CreateMap<TagDTO, TagModel>()
                 .ReverseMap();

@@ -7,7 +7,7 @@
              mc:Ignorable="d"
              d:DesignHeight="56" d:DesignWidth="700">
     <Border Margin="0,0,0,8"
-            Padding="16,8"
+            Padding="30,7"
             Background="{DynamicResource MaterialDesignPaper}"
             CornerRadius="10"
             BorderBrush="#E0E0E0"

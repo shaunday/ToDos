@@ -123,7 +123,7 @@ namespace Todos.Ui.ViewModels
                     IsCompleted = false,
                     IsLocked = false,
                     IsEditing = false,
-                    Tags = new ObservableCollection<TagModel>()
+                    Tags = NewTaskBuffer.Tags?.Trim() ?? string.Empty
                 };
 
                 var newTaskDto = _mapper!.Map<TaskDTO>(newTaskModel);
