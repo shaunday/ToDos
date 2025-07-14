@@ -279,7 +279,14 @@ namespace Todos.Ui.ViewModels
         #region Private Methods
         private void UpdateFilteredTasks()
         {
-            WeakReferenceMessenger.Default.Send(new EndEditTransactionMessage());
+            var view = CollectionViewSource.GetDefaultView(FilteredTasksView) as IEditableCollectionView;
+            if (view != null)
+            {
+                if (view.IsAddingNew)
+                    view.CommitNew();
+                if (view.IsEditingItem)
+                    view.CommitEdit();
+            }
             FilteredTasksView.Refresh();
             // Update filtered overview
             var filtered = Filter.Apply(Tasks);
@@ -401,8 +408,5 @@ namespace Todos.Ui.ViewModels
 
         #endregion
     }
-
-    // Messenger message for ending DataGrid edit transaction
-    public class EndEditTransactionMessage { }
 }
 
