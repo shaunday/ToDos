@@ -28,37 +28,6 @@
         <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
-    <!-- Clickable Column Header Style -->
-    <Style x:Key="ClickableColumnHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource CenteredColumnHeaderStyle}">
-        <Setter Property="Background" Value="#E3F2FD" />
-        <Setter Property="BorderBrush" Value="#2196F3" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Padding" Value="12,8" />
-        <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="#1976D2" />
-        <Setter Property="Margin" Value="1" />
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#BBDEFB" />
-                <Setter Property="Foreground" Value="#1565C0" />
-                <Setter Property="BorderBrush" Value="#1976D2" />
-                <Setter Property="BorderThickness" Value="2" />
-                <Setter Property="Effect">
-                    <Setter.Value>
-                        <DropShadowEffect Color="#2196F3" BlurRadius="8" ShadowDepth="2" Opacity="0.3" />
-                    </Setter.Value>
-                </Setter>
-            </Trigger>
-            <Trigger Property="IsPressed" Value="True">
-                <Setter Property="Background" Value="#90CAF9" />
-                <Setter Property="Foreground" Value="#0D47A1" />
-                <Setter Property="BorderBrush" Value="#1565C0" />
-                <Setter Property="BorderThickness" Value="2" />
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
     <!-- Unified Card Style for Overview and Filter Controls -->
     <Style x:Key="TaskControlCardStyle" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}" />

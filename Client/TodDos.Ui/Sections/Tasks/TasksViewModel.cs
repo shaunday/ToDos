@@ -49,12 +49,6 @@ namespace Todos.Ui.ViewModels
         [ObservableProperty]
         private TaskFilter filter = new TaskFilter();
 
-        [ObservableProperty]
-        private string sortColumn = string.Empty;
-
-        [ObservableProperty]
-        private ListSortDirection sortDirection = ListSortDirection.Ascending;
-
         public ICollectionView FilteredTasksView { get; private set; }
 
         public TasksOverviewModel Overview { get; } = new TasksOverviewModel();
@@ -282,51 +276,6 @@ namespace Todos.Ui.ViewModels
                 ErrorMessage = $"Failed to update task completion.";
             }
         }
-
-        [RelayCommand]
-        private void SortByPriority()
-        {
-            if (SortColumn == "Priority")
-            {
-                SortDirection = SortDirection == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
-            }
-            else
-            {
-                SortColumn = "Priority";
-                SortDirection = ListSortDirection.Ascending;
-            }
-            ApplySorting();
-        }
-
-        [RelayCommand]
-        private void SortByCompleted()
-        {
-            if (SortColumn == "IsCompleted")
-            {
-                SortDirection = SortDirection == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
-            }
-            else
-            {
-                SortColumn = "IsCompleted";
-                SortDirection = ListSortDirection.Ascending;
-            }
-            ApplySorting();
-        }
-
-        [RelayCommand]
-        private void SortByDueDate()
-        {
-            if (SortColumn == "DueDate")
-            {
-                SortDirection = SortDirection == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
-            }
-            else
-            {
-                SortColumn = "DueDate";
-                SortDirection = ListSortDirection.Ascending;
-            }
-            ApplySorting();
-        }
         #endregion
 
         #region Public Methods
@@ -339,20 +288,6 @@ namespace Todos.Ui.ViewModels
             // Update filtered overview
             var filtered = Filter.Apply(Tasks);
             FilteredOverview.Refresh(filtered);
-        }
-
-        private void ApplySorting()
-        {
-            if (string.IsNullOrEmpty(SortColumn))
-            {
-                FilteredTasksView.SortDescriptions.Clear();
-                return;
-            }
-
-            FilteredTasksView.SortDescriptions.Clear();
-            
-            var sortDescription = new SortDescription(SortColumn, SortDirection);
-            FilteredTasksView.SortDescriptions.Add(sortDescription);
         }
 
         private bool FilterPredicate(object obj)
