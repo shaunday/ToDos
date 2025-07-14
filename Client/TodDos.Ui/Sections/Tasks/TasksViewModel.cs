@@ -34,7 +34,7 @@ namespace Todos.Ui.ViewModels
         private bool isAddingNewTask = false;
 
         [ObservableProperty]
-        private string errorMessage = string.Empty;
+        private string addTaskErrorMessage = string.Empty;
 
         [ObservableProperty]
         private bool isLoading = false;
@@ -101,7 +101,7 @@ namespace Todos.Ui.ViewModels
         {
             IsAddingNewTask = true;
             NewTaskBuffer = new NewTaskInputModel();
-            ErrorMessage = string.Empty;
+            AddTaskErrorMessage = string.Empty;
         }
 
         [RelayCommand]
@@ -109,7 +109,7 @@ namespace Todos.Ui.ViewModels
         {
             IsAddingNewTask = false;
             NewTaskBuffer = null;
-            ErrorMessage = string.Empty;
+            AddTaskErrorMessage = string.Empty;
         }
 
         [RelayCommand]
@@ -117,12 +117,12 @@ namespace Todos.Ui.ViewModels
         {
             if (NewTaskBuffer == null || string.IsNullOrWhiteSpace(NewTaskBuffer.Title))
             {
-                ErrorMessage = "Task title is required.";
+                AddTaskErrorMessage = "Task title is required.";
                 return;
             }
 
             IsLoading = true;
-            ErrorMessage = string.Empty;
+            AddTaskErrorMessage = string.Empty;
             await RunWithErrorHandlingAsync(async () =>
             {
                 var newTaskModel = new TaskModel
@@ -153,7 +153,7 @@ namespace Todos.Ui.ViewModels
 
             await RunWithErrorHandlingAsync(async () =>
             {
-                ErrorMessage = string.Empty;
+                AddTaskErrorMessage = string.Empty;
                 var locked = await _taskSyncClient!.LockTaskAsync(task.Id);
                 if (locked)
                 {
@@ -161,8 +161,8 @@ namespace Todos.Ui.ViewModels
                 }
                 else
                 {
-                    ErrorMessage = "Task is currently being edited by another user.";
-                    SnackbarMessageQueue.Enqueue(ErrorMessage);
+                    AddTaskErrorMessage = "Task is currently being edited by another user.";
+                    SnackbarMessageQueue.Enqueue(AddTaskErrorMessage);
                 }
             }, "Failed to edit task.", SnackbarMessageQueue);
         }
@@ -174,13 +174,13 @@ namespace Todos.Ui.ViewModels
 
             if (string.IsNullOrWhiteSpace(task.Title))
             {
-                ErrorMessage = "Task title is required.";
+                AddTaskErrorMessage = "Task title is required.";
                 return;
             }
 
             await RunWithErrorHandlingAsync(async () =>
             {
-                ErrorMessage = string.Empty;
+                AddTaskErrorMessage = string.Empty;
                 // No need to copy from backup, just save the current task
                 var updatedDto = _mapper!.Map<TaskDTO>(task);
                 await _taskSyncClient!.UpdateTaskAsync(updatedDto);
@@ -196,7 +196,7 @@ namespace Todos.Ui.ViewModels
             if (task == null || !task.IsEditing || EditingTaskBackup == null) return;
             await RunWithErrorHandlingAsync(async () =>
             {
-                ErrorMessage = string.Empty;
+                AddTaskErrorMessage = string.Empty;
                 await _taskSyncClient!.UnlockTaskAsync(task.Id);
                 // Restore original values from backup
                 task.CopyFrom(EditingTaskBackup);
@@ -212,7 +212,7 @@ namespace Todos.Ui.ViewModels
 
             await RunWithErrorHandlingAsync(async () =>
             {
-                ErrorMessage = string.Empty;
+                AddTaskErrorMessage = string.Empty;
                 var deleted = await _taskSyncClient!.DeleteTaskAsync(task.Id);
                 if (deleted)
                 {
@@ -221,8 +221,8 @@ namespace Todos.Ui.ViewModels
                 }
                 else
                 {
-                    ErrorMessage = "Failed to delete task.";
-                    SnackbarMessageQueue.Enqueue(ErrorMessage);
+                    AddTaskErrorMessage = "Failed to delete task.";
+                    SnackbarMessageQueue.Enqueue(AddTaskErrorMessage);
                 }
             }, "Failed to delete task.", SnackbarMessageQueue);
         }
@@ -234,7 +234,7 @@ namespace Todos.Ui.ViewModels
 
             await RunWithErrorHandlingAsync(async () =>
             {
-                ErrorMessage = string.Empty;
+                AddTaskErrorMessage = string.Empty;
                 task.IsCompleted = !task.IsCompleted;
                 var updatedDto = _mapper!.Map<TaskDTO>(task);
                 await _taskSyncClient!.UpdateTaskAsync(updatedDto);
@@ -272,7 +272,7 @@ namespace Todos.Ui.ViewModels
         private async void LoadTasksAsync()
         {
             IsLoading = true;
-            ErrorMessage = string.Empty;
+            AddTaskErrorMessage = string.Empty;
             await RunWithErrorHandlingAsync(async () =>
             {
                 // Get current user ID from the user service or application context
@@ -293,8 +293,8 @@ namespace Todos.Ui.ViewModels
                 else
                 {
                     _logger.Warning("No valid user ID found for loading tasks");
-                    ErrorMessage = "User not authenticated. Please log in.";
-                    SnackbarMessageQueue.Enqueue(ErrorMessage);
+                    AddTaskErrorMessage = "User not authenticated. Please log in.";
+                    SnackbarMessageQueue.Enqueue(AddTaskErrorMessage);
                 }
             }, "Failed to load tasks.", SnackbarMessageQueue);
             IsLoading = false;
