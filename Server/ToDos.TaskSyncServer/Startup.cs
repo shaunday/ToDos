@@ -14,6 +14,7 @@ using ToDos.TaskSyncServer.Services;
 using Unity;
 using Unity.Lifetime;
 using Unity.Injection;
+using System.Data.Entity;
 
 namespace ToDos.TaskSyncServer
 {
@@ -21,6 +22,9 @@ namespace ToDos.TaskSyncServer
     {
         public void Configuration(IAppBuilder app)
         {
+            // For sharding: ensures that if a per-shard database does not exist, it will be auto-created
+            // by Entity Framework Code First when first accessed. Remove or change for production if you want manual DB control.
+            Database.SetInitializer(new CreateDatabaseIfNotExists<TaskDbContext>());
             // Configure SignalR with dependency injection
             var unityContainer = ConfigureUnityContainer();
 
