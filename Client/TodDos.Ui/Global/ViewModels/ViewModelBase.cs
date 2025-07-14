@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Todos.Client.Common.Interfaces;
 using Todos.Ui.Services.Navigation;
 using Serilog;
+using MaterialDesignThemes.Wpf;
 
 namespace TodDos.Ui.Global.ViewModels
 {
@@ -52,6 +53,31 @@ namespace TodDos.Ui.Global.ViewModels
 
         public virtual void Init() { }
         public virtual void Cleanup() { }
+
+        /// <summary>
+        /// Runs an async action with try-catch, logging, and optional Snackbar error notification.
+        /// </summary>
+        protected async Task RunWithErrorHandlingAsync(Func<Task> action, string errorMessage, SnackbarMessageQueue snackbar = null)
+        {
+            try
+            {
+                await action();
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error(ex, errorMessage);
+                snackbar?.Enqueue(errorMessage);
+            }
+        }
+
+        /// <summary>
+        /// Runs a sync action with try-catch, logging, and optional Snackbar error notification.
+        /// This wraps the async version for consistency.
+        /// </summary>
+        protected void RunWithErrorHandling(Action action, string errorMessage, SnackbarMessageQueue snackbar = null)
+        {
+            RunWithErrorHandlingAsync(() => { action(); return Task.CompletedTask; }, errorMessage, snackbar).GetAwaiter().GetResult();
+        }
     }
 
 }
