@@ -348,8 +348,17 @@ namespace Todos.Ui.ViewModels
         private int GetCurrentUserId()
         {
             _logger?.Information("TasksViewModel: GetCurrentUserId called");
-            var user = ApplicationViewModel?.CurrentUser;
-            return user?.Id ?? 0;
+
+            var jwtToken = _taskSyncClient?.GetJwtToken();
+
+            if (string.IsNullOrEmpty(jwtToken))
+            {
+                _logger.Warning("No JWT token available for getting user ID");
+                throw new InvalidOperationException("No JWT token available for getting user ID");
+            }
+
+            // Use AuthService to extract user ID from token
+            return _authService.GetUserIdFromTokenWithoutValidation(jwtToken);
         }
         #endregion
 

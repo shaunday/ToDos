@@ -11,4 +11,7 @@
     <ProjectReference Include="..\Todos.Client.Common\Todos.Client.Common.csproj" />
     <ProjectReference Include="..\..\Common\ToDos.DotNet.Common\ToDos.DotNet.Common.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="2.12.0" />
+  </ItemGroup>
 </Project>

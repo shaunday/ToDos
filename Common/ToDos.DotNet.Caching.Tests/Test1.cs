@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ToDos.DotNet.Caching;
+using Serilog;
 
 namespace ToDos.DotNet.Caching.Tests
 {
@@ -16,7 +17,7 @@ namespace ToDos.DotNet.Caching.Tests
         public void Setup()
         {
             _log = new List<string>();
-            _cache = new MemoryCacheService<string>("TestCache", msg => _log.Add(msg));
+            _cache = new MemoryCacheService<string>("TestCache", Log.Logger);
         }
 
         [TestMethod]
