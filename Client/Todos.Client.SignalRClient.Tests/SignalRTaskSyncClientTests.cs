@@ -45,5 +45,17 @@ namespace Todos.Client.SignalRClient.Tests
             }
             Assert.IsTrue(true);
         }
+
+        [TestMethod]
+        public void SignalRTaskSyncClient_CanBeCreatedAndDisposed_Parallel()
+        {
+            System.Threading.Tasks.Parallel.For(0, 10, i =>
+            {
+                var client = new SignalRTaskSyncClient(null);
+                if (client is System.IDisposable disposable)
+                    disposable.Dispose();
+            });
+            Assert.IsTrue(true);
+        }
     }
 } 

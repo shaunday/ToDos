@@ -36,5 +36,14 @@ namespace Todos.Client.MockTaskSyncClient.Tests
             var b = new MockTaskSyncClient();
             Assert.AreNotSame(a, b);
         }
+
+        [TestMethod]
+        public void MockTaskSyncClient_CanBeAddedToHashSet()
+        {
+            var set = new System.Collections.Generic.HashSet<MockTaskSyncClient>();
+            var client = new MockTaskSyncClient();
+            set.Add(client);
+            Assert.IsTrue(set.Contains(client));
+        }
     }
 } 

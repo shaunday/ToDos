@@ -36,5 +36,7 @@ namespace ToDos.Repository.Tests
             var b = new TaskRepository(null, null);
             Assert.AreNotSame(a, b);
         }
+
+        // No public methods to test with null input, so skipping for now.
     }
 } 

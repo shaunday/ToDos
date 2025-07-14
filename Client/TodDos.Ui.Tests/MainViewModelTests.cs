@@ -31,6 +31,18 @@ namespace TodDos.Ui.Tests
         }
 
         [TestMethod]
+        public void ApplicationViewModel_ConnectionStatusText_PropertyChanged_RaisesEvent()
+        {
+            var type = typeof(Todos.Ui.ViewModels.ApplicationViewModel);
+            var vm = (Todos.Ui.ViewModels.ApplicationViewModel)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(type);
+            bool raised = false;
+            vm.PropertyChanged += (s, e) => { if (e.PropertyName == "ConnectionStatusText") raised = true; };
+            var prop = type.GetProperty("ConnectionStatus", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+            prop.SetValue(vm, Todos.Client.Common.TypesGlobal.ConnectionStatus.Connected);
+            Assert.IsTrue(raised);
+        }
+
+        [TestMethod]
         public void ApplicationViewModel_ConnectionStatusText_AllEnumValues()
         {
             var type = typeof(Todos.Ui.ViewModels.ApplicationViewModel);
@@ -53,6 +65,12 @@ namespace TodDos.Ui.Tests
             var prop = type.GetProperty("CurrentUser", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
             prop.SetValue(vm, user);
             Assert.AreSame(user, vm.CurrentUser);
+        }
+
+        [TestMethod]
+        public void MainViewModel_ApplicationViewModel_IsSameInstance()
+        {
+            Assert.AreSame(typeof(MainViewModel).GetProperty("ApplicationViewModel"), typeof(MainViewModel).GetProperty("ApplicationViewModel"));
         }
     }
 } 

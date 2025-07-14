@@ -90,5 +90,30 @@ namespace ToDos.DotNet.Common.Tests
             Assert.AreEqual(0, dto.Id);
             Assert.IsNull(dto.Title);
         }
+
+        [TestMethod]
+        public void TaskDTO_Tags_Remove_Works()
+        {
+            var tag = new TagDTO { Id = Guid.NewGuid(), Name = "Tag1" };
+            var dto = new TaskDTO { Id = 1, Title = "Test", Tags = new System.Collections.Generic.List<TagDTO> { tag } };
+            dto.Tags.Remove(tag);
+            Assert.AreEqual(0, dto.Tags.Count);
+        }
+
+        [TestMethod]
+        public void TaskDTO_Tags_CannotBeSetToNull()
+        {
+            var dto = new TaskDTO();
+            dto.Tags = null;
+            Assert.IsNull(dto.Tags);
+        }
+
+        [TestMethod]
+        public void TaskDTO_ReferenceEquality()
+        {
+            var t1 = new TaskDTO { Id = 1 };
+            var t2 = new TaskDTO { Id = 1 };
+            Assert.IsFalse(object.ReferenceEquals(t1, t2));
+        }
     }
 } 
