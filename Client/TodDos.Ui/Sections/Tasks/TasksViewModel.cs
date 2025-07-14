@@ -18,6 +18,7 @@ using TodDos.Ui.Global.ViewModels;
 using Serilog;
 using Todos.Client.UserService.Interfaces;
 using ToDos.MockAuthService;
+using MaterialDesignThemes.Wpf;
 
 namespace Todos.Ui.ViewModels
 {
@@ -53,6 +54,7 @@ namespace Todos.Ui.ViewModels
 
         public TasksOverviewModel Overview { get; } = new TasksOverviewModel();
         public TasksOverviewModel FilteredOverview { get; } = new TasksOverviewModel();
+        public SnackbarMessageQueue SnackbarMessageQueue { get; } = new SnackbarMessageQueue();
         #endregion
 
         #region Properties
@@ -149,6 +151,7 @@ namespace Todos.Ui.ViewModels
             {
                 _logger.Error(ex, "Failed to add task");
                 ErrorMessage = $"Failed to add task.";
+                SnackbarMessageQueue.Enqueue(ErrorMessage);
             }
             finally
             {
@@ -172,12 +175,14 @@ namespace Todos.Ui.ViewModels
                 else
                 {
                     ErrorMessage = "Task is currently being edited by another user.";
+                    SnackbarMessageQueue.Enqueue(ErrorMessage);
                 }
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Failed to edit task");
                 ErrorMessage = $"Failed to edit task.";
+                SnackbarMessageQueue.Enqueue(ErrorMessage);
             }
         }
 
@@ -206,6 +211,7 @@ namespace Todos.Ui.ViewModels
             {
                 _logger.Error(ex, "Failed to save task");
                 ErrorMessage = $"Failed to save task.";
+                SnackbarMessageQueue.Enqueue(ErrorMessage);
             }
         }
 
@@ -226,6 +232,7 @@ namespace Todos.Ui.ViewModels
             {
                 _logger.Error(ex, "Failed to cancel edit");
                 ErrorMessage = $"Failed to cancel edit.";
+                SnackbarMessageQueue.Enqueue(ErrorMessage);
             }
         }
 
@@ -246,12 +253,14 @@ namespace Todos.Ui.ViewModels
                 else
                 {
                     ErrorMessage = "Failed to delete task.";
+                    SnackbarMessageQueue.Enqueue(ErrorMessage);
                 }
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Failed to delete task");
                 ErrorMessage = $"Failed to delete task.";
+                SnackbarMessageQueue.Enqueue(ErrorMessage);
             }
         }
 
@@ -274,6 +283,7 @@ namespace Todos.Ui.ViewModels
                 // Revert the change on error
                 task.IsCompleted = !task.IsCompleted;
                 ErrorMessage = $"Failed to update task completion.";
+                SnackbarMessageQueue.Enqueue(ErrorMessage);
             }
         }
         #endregion
@@ -330,12 +340,14 @@ namespace Todos.Ui.ViewModels
                 {
                     _logger.Warning("No valid user ID found for loading tasks");
                     ErrorMessage = "User not authenticated. Please log in.";
+                    SnackbarMessageQueue.Enqueue(ErrorMessage);
                 }
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Failed to load tasks");
                 ErrorMessage = $"Failed to load tasks.";
+                SnackbarMessageQueue.Enqueue(ErrorMessage);
             }
             finally
             {

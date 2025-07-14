@@ -163,6 +163,14 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        <materialDesign:Snackbar x:Name="Snackbar"
+                                MessageQueue="{Binding SnackbarMessageQueue, Mode=OneWay}"
+                                VerticalAlignment="Bottom"
+                                HorizontalAlignment="Center"
+                                Margin="0,0,0,16"
+                                Height="Auto"
+                                Grid.RowSpan="3"
+                                Panel.ZIndex="100"/>
 
         <!-- Add Task Control -->
         <tasks:AddTaskControl Grid.Row="0" DataContext="{Binding}" />
