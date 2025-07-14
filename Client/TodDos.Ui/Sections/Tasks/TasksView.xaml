@@ -231,7 +231,7 @@
 
                     <!-- Completed Column -->
                     <DataGridCheckBoxColumn Header="Completed" 
-                                       Binding="{Binding IsCompleted, Mode=TwoWay}" 
+                                       Binding="{Binding IsCompleted, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                        Width="*" />
 
                     <!-- Due Date Column -->
