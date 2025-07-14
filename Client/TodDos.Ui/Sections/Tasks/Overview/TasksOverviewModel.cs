@@ -12,9 +12,11 @@ namespace Todos.Ui.Sections.Tasks
         [ObservableProperty] private int medium;
         [ObservableProperty] private int low;
 
-        public void Refresh(IEnumerable<Todos.Ui.Models.TaskModel> tasks)
+        public void Refresh(IEnumerable<Todos.Ui.Models.TaskModel> tasks, Todos.Ui.Models.TaskModel alwaysInclude = null)
         {
             var list = tasks.ToList();
+            if (alwaysInclude != null && !list.Contains(alwaysInclude))
+                list.Add(alwaysInclude);
             Total = list.Count;
             Locked = list.Count(IsLockedTask);
             High = list.Count(IsHighPriority);

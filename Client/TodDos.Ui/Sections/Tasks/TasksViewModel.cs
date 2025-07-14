@@ -289,8 +289,8 @@ namespace Todos.Ui.ViewModels
             }
             FilteredTasksView.Refresh();
             // Update filtered overview
-            var filtered = Filter.Apply(Tasks);
-            FilteredOverview.Refresh(filtered);
+            var filtered = Filter.Apply(Tasks, EditingTask);
+            FilteredOverview.Refresh(filtered, EditingTask);
             Overview.Refresh(Tasks);
         }
 
@@ -298,6 +298,9 @@ namespace Todos.Ui.ViewModels
         {
             var t = obj as TaskModel;
             if (t == null) return false;
+            // Always include the currently edited task
+            if (EditingTask != null && t == EditingTask)
+                return true;
             return Filter.Apply(new[] { t }).Any();
         }
 

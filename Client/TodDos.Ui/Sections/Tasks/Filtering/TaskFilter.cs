@@ -12,7 +12,7 @@ namespace Todos.Ui.Sections.Tasks
         [ObservableProperty] private string tagFilter = string.Empty;
         [ObservableProperty] private string completedStatus = "All";
 
-        public IEnumerable<TaskModel> Apply(IEnumerable<TaskModel> tasks)
+        public IEnumerable<TaskModel> Apply(IEnumerable<TaskModel> tasks, TaskModel alwaysInclude = null)
         {
             var filtered = tasks;
             if (!string.IsNullOrWhiteSpace(SelectedPriority) && SelectedPriority != "All")
@@ -26,7 +26,10 @@ namespace Todos.Ui.Sections.Tasks
                 else if (CompletedStatus == "Not Completed")
                     filtered = filtered.Where(t => !t.IsCompleted);
             }
-            return filtered;
+            var filteredList = filtered.ToList();
+            if (alwaysInclude != null && !filteredList.Contains(alwaysInclude))
+                filteredList.Add(alwaysInclude);
+            return filteredList;
         }
     }
 } 
