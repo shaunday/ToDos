@@ -13,7 +13,7 @@ namespace Todos.Ui.Sections
         {
             if (DataContext is ViewModels.TasksViewModel viewModel)
             {
-                viewModel.SortByPriorityCommand.Execute(null);
+                viewModel.SortableTaskCollection.SortByPriorityCommand.Execute(null);
             }
         }
 
@@ -21,7 +21,7 @@ namespace Todos.Ui.Sections
         {
             if (DataContext is ViewModels.TasksViewModel viewModel)
             {
-                viewModel.SortByCompletedCommand.Execute(null);
+                viewModel.SortableTaskCollection.SortByCompletedCommand.Execute(null);
             }
         }
 
@@ -29,7 +29,7 @@ namespace Todos.Ui.Sections
         {
             if (DataContext is ViewModels.TasksViewModel viewModel)
             {
-                viewModel.SortByDueDateCommand.Execute(null);
+                viewModel.SortableTaskCollection.SortByDueDateCommand.Execute(null);
             }
         }
     }

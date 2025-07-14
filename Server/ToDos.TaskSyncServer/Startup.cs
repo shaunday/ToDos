@@ -4,7 +4,6 @@ using Owin;
 using Serilog;
 using Serilog.Extensions.Logging;
 using System.Web.Http;
-using Todos.Server.MockTaskService;
 using ToDos.Repository;
 using ToDos.Server.Common.Interfaces;
 using ToDos.TaskSyncServer.Mapping;
@@ -62,20 +61,9 @@ namespace ToDos.TaskSyncServer
             
             // Register repository
             container.RegisterType<ITaskRepository, TaskRepository>();
-            
-            // Register services - choose between real and mock
-            var useMockService = System.Configuration.ConfigurationManager.AppSettings["UseMockService"] == "true";
-            
-            if (useMockService)
-            {
-                container.RegisterType<ITaskService, MockTaskService>();
-                Log.Information("Using MockTaskService for development/testing");
-            }
-            else
-            {
-                container.RegisterType<ITaskService, TaskService>();
-                Log.Information("Using TaskService with real database");
-            }
+
+            container.RegisterType<ITaskService, TaskService>();
+            Log.Information("Using TaskService with real database");
 
             // Register AutoMapper
             var config = new MapperConfiguration(cfg =>

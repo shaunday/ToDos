@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using System.Windows.Input;
 using Todos.Client.Common.Interfaces;
 using ToDos.DotNet.Common;
 using Todos.Ui.Sections.Tasks;
@@ -25,6 +26,7 @@ namespace Todos.Ui.ViewModels
     {
         #region Fields
         private readonly IAuthService _authService;
+        public SortableCollectionViewModel<TaskModel> SortableTaskCollection { get; } // Expose as public property
 
         [ObservableProperty]
         private TaskModel editingTask;
@@ -49,20 +51,16 @@ namespace Todos.Ui.ViewModels
         [ObservableProperty]
         private TaskFilter filter = new TaskFilter();
 
-        [ObservableProperty]
-        private string sortColumn = string.Empty;
-
-        [ObservableProperty]
-        private ListSortDirection sortDirection = ListSortDirection.Ascending;
-
-        public ICollectionView FilteredTasksView { get; private set; }
-
         public TasksOverviewModel Overview { get; } = new TasksOverviewModel();
         public TasksOverviewModel FilteredOverview { get; } = new TasksOverviewModel();
         #endregion
 
         #region Properties
-        public ObservableCollection<TaskModel> Tasks { get; set; } = new ObservableCollection<TaskModel>();
+        // Use Items and CollectionView from sortable member
+        public ObservableCollection<TaskModel> Tasks => SortableTaskCollection.Items;
+        public ICollectionView FilteredTasksView => CollectionViewSource.GetDefaultView(Tasks);
+        public string SortProperty => SortableTaskCollection.SortProperty;
+        public System.ComponentModel.ListSortDirection SortDirection => SortableTaskCollection.SortDirection;
         #endregion
 
         #region Constructors and Lifecycle
@@ -70,9 +68,11 @@ namespace Todos.Ui.ViewModels
             : base(taskSyncClient, mapper, navigation, logger)
         {
             _authService = authService;
+            SortableTaskCollection = new SortableCollectionViewModel<TaskModel>();
             Overview.Refresh(Tasks);
-            FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
-            FilteredTasksView.Filter = FilterPredicate;
+            // Rebind CollectionView to new Tasks collection
+            FilteredTasksView.Refresh();
+            UpdateFilteredTasks();
         }
 
         public override void Init()
@@ -94,8 +94,6 @@ namespace Todos.Ui.ViewModels
             _taskSyncClient.TaskDeleted -= HandleTaskDeleted;
             Tasks.CollectionChanged -= Tasks_CollectionChanged;
             Filter.PropertyChanged -= Filter_PropertyChanged;
-            
-
         }
         #endregion
 
@@ -283,50 +281,7 @@ namespace Todos.Ui.ViewModels
             }
         }
 
-        [RelayCommand]
-        private void SortByPriority()
-        {
-            if (SortColumn == "Priority")
-            {
-                SortDirection = SortDirection == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
-            }
-            else
-            {
-                SortColumn = "Priority";
-                SortDirection = ListSortDirection.Ascending;
-            }
-            ApplySorting();
-        }
 
-        [RelayCommand]
-        private void SortByCompleted()
-        {
-            if (SortColumn == "IsCompleted")
-            {
-                SortDirection = SortDirection == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
-            }
-            else
-            {
-                SortColumn = "IsCompleted";
-                SortDirection = ListSortDirection.Ascending;
-            }
-            ApplySorting();
-        }
-
-        [RelayCommand]
-        private void SortByDueDate()
-        {
-            if (SortColumn == "DueDate")
-            {
-                SortDirection = SortDirection == ListSortDirection.Ascending ? ListSortDirection.Descending : ListSortDirection.Ascending;
-            }
-            else
-            {
-                SortColumn = "DueDate";
-                SortDirection = ListSortDirection.Ascending;
-            }
-            ApplySorting();
-        }
         #endregion
 
         #region Public Methods
@@ -339,20 +294,6 @@ namespace Todos.Ui.ViewModels
             // Update filtered overview
             var filtered = Filter.Apply(Tasks);
             FilteredOverview.Refresh(filtered);
-        }
-
-        private void ApplySorting()
-        {
-            if (string.IsNullOrEmpty(SortColumn))
-            {
-                FilteredTasksView.SortDescriptions.Clear();
-                return;
-            }
-
-            FilteredTasksView.SortDescriptions.Clear();
-            
-            var sortDescription = new SortDescription(SortColumn, SortDirection);
-            FilteredTasksView.SortDescriptions.Add(sortDescription);
         }
 
         private bool FilterPredicate(object obj)
@@ -384,11 +325,13 @@ namespace Todos.Ui.ViewModels
                     var userTaskDtos = await _taskSyncClient!.GetUserTasksAsync(currentUserId);
                     
                     var userTaskModels = userTaskDtos.Select(dto => _mapper!.Map<TaskModel>(dto));
-                    Tasks = new ObservableCollection<TaskModel>(userTaskModels);
+                    // Instead of replacing the collection, update it in place:
+                    SortableTaskCollection.Items.Clear();
+                    foreach (var item in userTaskModels)
+                        SortableTaskCollection.Items.Add(item);
                     Overview.Refresh(Tasks);
                     // Rebind CollectionView to new Tasks collection
-                    FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
-                    FilteredTasksView.Filter = FilterPredicate;
+                    FilteredTasksView.Refresh();
                     UpdateFilteredTasks();
                 }
                 else
@@ -476,8 +419,6 @@ namespace Todos.Ui.ViewModels
         {
             UpdateFilteredTasks();
         }
-
-
         #endregion
     }
 }
