@@ -29,7 +29,7 @@ namespace ToDos.Repository
                 {
                     return await context.Tasks
                         .Where(t => t.UserId == userId)
-                        .ToListAsync();
+                        .ToListAsync().ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -46,7 +46,7 @@ namespace ToDos.Repository
                 var connStr = _shardResolver.GetConnectionString(userId);
                 using (var context = new TaskDbContext(connStr))
                 {
-                    return await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+                    return await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -64,7 +64,7 @@ namespace ToDos.Repository
                 using (var context = new TaskDbContext(connStr))
                 {
                     context.Tasks.Add(task);
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -81,11 +81,11 @@ namespace ToDos.Repository
                 var connStr = _shardResolver.GetConnectionString(task.UserId);
                 using (var context = new TaskDbContext(connStr))
                 {
-                    var existing = await context.Tasks.FindAsync(task.Id);
+                    var existing = await context.Tasks.FindAsync(task.Id).ConfigureAwait(false);
                     if (existing != null)
                     {
                         context.Entry(existing).CurrentValues.SetValues(task);
-                        await context.SaveChangesAsync();
+                        await context.SaveChangesAsync().ConfigureAwait(false);
                     }
                 }
             }
@@ -103,12 +103,12 @@ namespace ToDos.Repository
                 var connStr = _shardResolver.GetConnectionString(userId);
                 using (var context = new TaskDbContext(connStr))
                 {
-                    var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId);
+                    var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId).ConfigureAwait(false);
                     if (task == null)
                         return false;
 
                     context.Tasks.Remove(task);
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                     return true;
                 }
             }
@@ -126,12 +126,12 @@ namespace ToDos.Repository
                 var connStr = _shardResolver.GetConnectionString(userId);
                 using (var context = new TaskDbContext(connStr))
                 {
-                    var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId);
+                    var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId).ConfigureAwait(false);
                     if (task == null)
                         return false;
 
                     task.IsCompleted = isCompleted;
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                     return true;
                 }
             }
@@ -149,12 +149,12 @@ namespace ToDos.Repository
                 var connStr = _shardResolver.GetConnectionString(userId);
                 using (var context = new TaskDbContext(connStr))
                 {
-                    var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+                    var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId).ConfigureAwait(false);
                     if (task == null || task.IsLocked)
                         return false;
 
                     task.IsLocked = true;
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                     return true;
                 }
             }
@@ -172,12 +172,12 @@ namespace ToDos.Repository
                 var connStr = _shardResolver.GetConnectionString(userId);
                 using (var context = new TaskDbContext(connStr))
                 {
-                    var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+                    var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId).ConfigureAwait(false);
                     if (task == null || !task.IsLocked)
                         return false;
 
                     task.IsLocked = false;
-                    await context.SaveChangesAsync();
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                     return true;
                 }
             }
@@ -195,7 +195,7 @@ namespace ToDos.Repository
                 var connStr = _shardResolver.GetConnectionString(userId);
                 using (var context = new TaskDbContext(connStr))
                 {
-                    var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+                    var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId).ConfigureAwait(false);
                     return task?.IsLocked ?? false;
                 }
             }

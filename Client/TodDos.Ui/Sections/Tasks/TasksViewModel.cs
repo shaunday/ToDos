@@ -17,6 +17,7 @@ using Serilog;
 using ToDos.MockAuthService;
 using MaterialDesignThemes.Wpf;
 using CommunityToolkit.Mvvm.Messaging;
+using System.Windows;
 
 namespace Todos.Ui.ViewModels
 {
@@ -374,9 +375,11 @@ namespace Todos.Ui.ViewModels
             _logger?.Information("TasksViewModel: HandleTaskAdded called for TaskId {TaskId}", taskDto?.Id);
             if (taskDto == null) return;
             var model = _mapper!.Map<TaskModel>(taskDto);
-            Tasks.Add(model);
-
-            UpdateFilteredTasks();
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Tasks.Add(model);
+                UpdateFilteredTasks();
+            });
         }
 
         private void HandleTaskUpdated(TaskDTO taskDto)
@@ -387,9 +390,12 @@ namespace Todos.Ui.ViewModels
             if (model != null)
             {
                 var index = Tasks.IndexOf(model);
-                Tasks[index] = _mapper!.Map<TaskModel>(taskDto);
-
-                UpdateFilteredTasks();
+                var updatedModel = _mapper!.Map<TaskModel>(taskDto);
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Tasks[index] = updatedModel;
+                    UpdateFilteredTasks();
+                });
             }
         }
 
@@ -399,9 +405,11 @@ namespace Todos.Ui.ViewModels
             var model = Tasks.FirstOrDefault(t => t.Id == taskId);
             if (model != null)
             {
-                Tasks.Remove(model);
-
-                UpdateFilteredTasks();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Tasks.Remove(model);
+                    UpdateFilteredTasks();
+                });
             }
         }
 
