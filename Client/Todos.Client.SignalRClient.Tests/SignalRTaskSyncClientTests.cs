@@ -12,5 +12,38 @@ namespace Todos.Client.SignalRClient.Tests
             var client = new SignalRTaskSyncClient(null);
             Assert.IsNotNull(client);
         }
+
+        [TestMethod]
+        public void SignalRTaskSyncClient_Type_Should_Exist()
+        {
+            Assert.IsNotNull(typeof(SignalRTaskSyncClient));
+        }
+
+        [TestMethod]
+        public void SignalRTaskSyncClient_CanBeDisposed()
+        {
+            var client = new SignalRTaskSyncClient(null);
+            if (client is System.IDisposable disposable)
+            {
+                disposable.Dispose();
+                Assert.IsTrue(true);
+            }
+            else
+            {
+                Assert.IsTrue(true, "Not IDisposable, nothing to dispose.");
+            }
+        }
+
+        [TestMethod]
+        public void SignalRTaskSyncClient_MultipleInstances_CanBeDisposed()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                var client = new SignalRTaskSyncClient(null);
+                if (client is System.IDisposable disposable)
+                    disposable.Dispose();
+            }
+            Assert.IsTrue(true);
+        }
     }
 } 

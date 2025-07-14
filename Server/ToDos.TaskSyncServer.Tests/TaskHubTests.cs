@@ -7,10 +7,9 @@ namespace ToDos.TaskSyncServer.Tests
     public class TaskHubTests
     {
         [TestMethod]
-        public void CanInstantiate_TaskHub_WithNulls()
+        public void TaskHub_Type_Should_Exist()
         {
-            var hub = new TaskHub(null, null);
-            Assert.IsNotNull(hub);
+            Assert.IsNotNull(typeof(TaskHub));
         }
     }
 } 

@@ -12,5 +12,29 @@ namespace Todos.Client.MockTaskSyncClient.Tests
             var client = new MockTaskSyncClient();
             Assert.IsNotNull(client);
         }
+
+        [TestMethod]
+        public void MockTaskSyncClient_Type_Should_Exist()
+        {
+            Assert.IsNotNull(typeof(MockTaskSyncClient));
+        }
+
+        [TestMethod]
+        public void MockTaskSyncClient_CanBeAddedToList()
+        {
+            var list = new System.Collections.Generic.List<MockTaskSyncClient>();
+            var client = new MockTaskSyncClient();
+            list.Add(client);
+            Assert.AreEqual(1, list.Count);
+            Assert.AreSame(client, list[0]);
+        }
+
+        [TestMethod]
+        public void MockTaskSyncClient_ReferenceEquality()
+        {
+            var a = new MockTaskSyncClient();
+            var b = new MockTaskSyncClient();
+            Assert.AreNotSame(a, b);
+        }
     }
 } 
