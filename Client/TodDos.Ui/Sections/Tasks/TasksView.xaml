@@ -97,7 +97,7 @@
             <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}" />
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-            <Setter Property="IsHitTestVisible" Value="False"/>
+            <Setter Property="IsHitTestVisible" Value="True"/>
             <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="Transparent"/>
@@ -134,25 +134,20 @@
         </Style>
 
         <!-- Generic Task Text Element Style -->
-        <Style x:Key="TaskTextElementStyle" TargetType="TextBlock" BasedOn="{StaticResource CenteredTextBlockStyle}">
-            <Setter Property="FontWeight" Value="Normal" />
-            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
-            <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Text}" />
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding IsEditing}" Value="True">
-                    <Setter Property="FontWeight" Value="Bold" />
-                    <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPrimary}" />
-                </DataTrigger>
-                <DataTrigger Binding="{Binding IsLocked}" Value="True">
-                    <Setter Property="Foreground" Value="Gray" />
-                    <Setter Property="FontStyle" Value="Italic" />
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-
-        <!-- Actions Column Cell Style - Always hit test visible -->
-            <Style x:Key="ActionsCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource TaskCellStyle}">
-                <Setter Property="IsHitTestVisible" Value="True"/>
+            <Style x:Key="TaskTextElementStyle" TargetType="TextBlock" BasedOn="{StaticResource CenteredTextBlockStyle}">
+                <Setter Property="FontWeight" Value="Normal" />
+                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Text}" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsEditing}" Value="True">
+                        <Setter Property="FontWeight" Value="Bold" />
+                        <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPrimary}" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding IsLocked}" Value="True">
+                        <Setter Property="Foreground" Value="Gray" />
+                        <Setter Property="FontStyle" Value="Italic" />
+                    </DataTrigger>
+                </Style.Triggers>
             </Style>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -203,7 +198,8 @@
                       CellStyle="{StaticResource TaskCellStyle}"
                       materialDesign:DataGridAssist.CellPadding="8"
                       materialDesign:DataGridAssist.ColumnHeaderPadding="12,4"
-                      ColumnHeaderStyle="{StaticResource CenteredColumnHeaderStyle}">
+                      ColumnHeaderStyle="{StaticResource CenteredColumnHeaderStyle}"
+                      SelectedItem="{Binding EditingTask, Mode=TwoWay}" >
 
                 <DataGrid.Columns>
                     <!-- Title Column -->
@@ -294,9 +290,6 @@
 
                     <!-- Actions Column -->
                     <DataGridTemplateColumn Header="Actions" Width="*">
-                        <DataGridTemplateColumn.CellStyle>
-                            <Style TargetType="DataGridCell" BasedOn="{StaticResource ActionsCellStyle}" />
-                        </DataGridTemplateColumn.CellStyle>
                         <DataGridTemplateColumn.CellTemplate>
                             <StaticResource ResourceKey="ActionsDataTemplate" />
                         </DataGridTemplateColumn.CellTemplate>

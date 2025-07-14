@@ -118,10 +118,10 @@
 
                 <!-- Error Message -->
                 <TextBlock Grid.Row="2" Grid.Column="0"
-                           Text="{Binding ErrorMessage}"
+                           Text="{Binding AddTaskErrorMessage}"
                            Foreground="Red"
                            FontSize="11"
-                           Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}"
+                           Visibility="{Binding AddTaskErrorMessage, Converter={StaticResource StringToVisibilityConverter}}"
                            Margin="0,8,0,0"/>
 
                 <!-- Action Buttons -->

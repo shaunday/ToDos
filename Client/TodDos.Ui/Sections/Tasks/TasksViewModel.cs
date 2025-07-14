@@ -360,6 +360,13 @@ namespace Todos.Ui.ViewModels
             UpdateFilteredTasks();
         }
 
+        partial void OnEditingTaskChanged(TaskModel value)
+        {
+            if (value != null && !value.IsEditing && EditingTask != value)
+            {
+                EditTaskCommand.Execute(value);
+            }
+        }
 
         #endregion
     }
