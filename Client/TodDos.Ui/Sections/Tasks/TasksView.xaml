@@ -154,12 +154,6 @@
             <Style x:Key="ActionsCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource TaskCellStyle}">
                 <Setter Property="IsHitTestVisible" Value="True"/>
             </Style>
-
-        <Style x:Key="SubtleColumnHeaderStyle" TargetType="DataGridColumnHeader" BasedOn="{StaticResource CenteredColumnHeaderStyle}">
-            <Setter Property="Background" Value="#FFF8F8F8"/>
-            <Setter Property="BorderBrush" Value="#E0E0E0"/>
-            <Setter Property="BorderThickness" Value="0,0,0,1"/>
-        </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -201,7 +195,7 @@
                       CellStyle="{StaticResource TaskCellStyle}"
                       materialDesign:DataGridAssist.CellPadding="8"
                       materialDesign:DataGridAssist.ColumnHeaderPadding="12,4"
-                      ColumnHeaderStyle="{StaticResource SubtleColumnHeaderStyle}">
+                      ColumnHeaderStyle="{StaticResource CenteredColumnHeaderStyle}">
 
                 <DataGrid.Columns>
                     <!-- Title Column -->
