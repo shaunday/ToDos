@@ -73,6 +73,7 @@ namespace Todos.Ui.ViewModels
 
         public override async void Init()
         {
+            _logger?.Information("TasksViewModel: Init called");
             _taskSyncClient!.TaskAdded += HandleTaskAdded;
             _taskSyncClient.TaskUpdated += HandleTaskUpdated;
             _taskSyncClient.TaskDeleted += HandleTaskDeleted;
@@ -85,6 +86,7 @@ namespace Todos.Ui.ViewModels
 
         public override void Cleanup()
         {
+            _logger?.Information("TasksViewModel: Cleanup called");
             _taskSyncClient!.TaskAdded -= HandleTaskAdded;
             _taskSyncClient.TaskUpdated -= HandleTaskUpdated;
             _taskSyncClient.TaskDeleted -= HandleTaskDeleted;
@@ -246,6 +248,7 @@ namespace Todos.Ui.ViewModels
         #region Public Methods
         public void ApplyUiState()
         {
+            _logger?.Information("TasksViewModel: ApplyUiState called");
             if (UiState != null)
             {
                 if (Filter != null)
@@ -266,19 +269,19 @@ namespace Todos.Ui.ViewModels
         }
         public void UpdateUiStateFromCurrent()
         {
-            if (UiState != null)
-            {
-                UiState.FilterSelectedPriority = Filter?.SelectedPriority ?? "All";
-                UiState.FilterTag = Filter?.TagFilter ?? string.Empty;
-                UiState.FilterCompletedStatus = Filter?.CompletedStatus ?? "All";
-                UiState.LastSelectedTaskId = EditingTask?.Id;
-            }
+            _logger?.Information("TasksViewModel: UpdateUiStateFromCurrent called");
+            if (UiState == null) return;
+            UiState.FilterSelectedPriority = Filter?.SelectedPriority ?? "All";
+            UiState.FilterTag = Filter?.TagFilter ?? string.Empty;
+            UiState.FilterCompletedStatus = Filter?.CompletedStatus ?? "All";
+            UiState.LastSelectedTaskId = EditingTask?.Id;
         }
         #endregion
 
         #region Private Methods
         private void UpdateFilteredTasks()
         {
+            _logger?.Information("TasksViewModel: UpdateFilteredTasks called");
             var view = CollectionViewSource.GetDefaultView(FilteredTasksView) as IEditableCollectionView;
             if (view != null)
             {
@@ -306,6 +309,7 @@ namespace Todos.Ui.ViewModels
 
         private void ChangeTaskEditMode(TaskModel task, bool isEditing)
         {
+            _logger?.Information("TasksViewModel: ChangeTaskEditMode called for TaskId {TaskId}, isEditing: {IsEditing}", task?.Id, isEditing);
             task.IsEditing = isEditing;
             EditingTask = isEditing ? task : null;
             EditingTaskBackup = isEditing ? task.Clone() : null;
@@ -313,6 +317,7 @@ namespace Todos.Ui.ViewModels
 
         private async Task LoadTasksAsync()
         {
+            _logger?.Information("TasksViewModel: LoadTasksAsync called");
             IsLoading = true;
             AddTaskErrorMessage = string.Empty;
             await RunWithErrorHandlingAsync(async () =>
@@ -332,7 +337,7 @@ namespace Todos.Ui.ViewModels
                 }
                 else
                 {
-                    _logger.Warning("No valid user ID found for loading tasks");
+                    _logger?.Warning("TasksViewModel: No valid user ID found for loading tasks");
                     AddTaskErrorMessage = "User not authenticated. Please log in.";
                     SnackbarMessageQueue.Enqueue(AddTaskErrorMessage);
                 }
@@ -342,42 +347,38 @@ namespace Todos.Ui.ViewModels
 
         private int GetCurrentUserId()
         {
-            // Get the JWT token from the task sync client
-            var jwtToken = _taskSyncClient?.GetJwtToken();
-
-            if (string.IsNullOrEmpty(jwtToken))
-            {
-                _logger.Warning("No JWT token available for getting user ID");
-                throw new InvalidOperationException("No JWT token available for getting user ID");
-            }
-
-            // Use AuthService to extract user ID from token
-            return _authService.GetUserIdFromTokenWithoutValidation(jwtToken);
+            _logger?.Information("TasksViewModel: GetCurrentUserId called");
+            var user = ApplicationViewModel?.CurrentUser;
+            return user?.Id ?? 0;
         }
         #endregion
 
         #region Event Handlers
         private void Tasks_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
+            _logger?.Information("TasksViewModel: Tasks_CollectionChanged called");
             UpdateFilteredTasks();
         }
 
         private void HandleTaskAdded(TaskDTO taskDto)
         {
-            var taskModel = _mapper!.Map<TaskModel>(taskDto);
-            Tasks.Add(taskModel);
+            _logger?.Information("TasksViewModel: HandleTaskAdded called for TaskId {TaskId}", taskDto?.Id);
+            if (taskDto == null) return;
+            var model = _mapper!.Map<TaskModel>(taskDto);
+            Tasks.Add(model);
 
             UpdateFilteredTasks();
         }
 
         private void HandleTaskUpdated(TaskDTO taskDto)
         {
-            var taskModel = _mapper!.Map<TaskModel>(taskDto);
-            var existingTask = Tasks.FirstOrDefault(t => t.Id == taskDto.Id);
-            if (existingTask != null)
+            _logger?.Information("TasksViewModel: HandleTaskUpdated called for TaskId {TaskId}", taskDto?.Id);
+            if (taskDto == null) return;
+            var model = Tasks.FirstOrDefault(t => t.Id == taskDto.Id);
+            if (model != null)
             {
-                var index = Tasks.IndexOf(existingTask);
-                Tasks[index] = taskModel;
+                var index = Tasks.IndexOf(model);
+                Tasks[index] = _mapper!.Map<TaskModel>(taskDto);
 
                 UpdateFilteredTasks();
             }
@@ -385,10 +386,11 @@ namespace Todos.Ui.ViewModels
 
         private void HandleTaskDeleted(int taskId)
         {
-            var taskToRemove = Tasks.FirstOrDefault(t => t.Id == taskId);
-            if (taskToRemove != null)
+            _logger?.Information("TasksViewModel: HandleTaskDeleted called for TaskId {TaskId}", taskId);
+            var model = Tasks.FirstOrDefault(t => t.Id == taskId);
+            if (model != null)
             {
-                Tasks.Remove(taskToRemove);
+                Tasks.Remove(model);
 
                 UpdateFilteredTasks();
             }
@@ -396,12 +398,14 @@ namespace Todos.Ui.ViewModels
 
         private void Filter_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            _logger?.Information("TasksViewModel: Filter_PropertyChanged called for Property {PropertyName}", e?.PropertyName);
             UpdateFilteredTasks();
             UpdateUiStateFromCurrent();
         }
 
         partial void OnEditingTaskChanged(TaskModel value)
         {
+            _logger?.Information("TasksViewModel: OnEditingTaskChanged called for TaskId {TaskId}", value?.Id);
             if (value != null && !value.IsEditing)
             {
                 EditTaskCommand.Execute(value);

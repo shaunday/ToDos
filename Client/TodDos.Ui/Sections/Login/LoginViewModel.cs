@@ -30,7 +30,7 @@ namespace Todos.Ui.ViewModels
         [RelayCommand]
         private void Login()
         {
-            // TODO: Replace with real authentication logic
+            // Authentication is intentionally mocked for this project. Replace with real authentication logic if needed in production.
             if (!string.IsNullOrWhiteSpace(Username) && Password == "1234")
             {
                 Navigation.NavigateTo<TasksViewModel>();

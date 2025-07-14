@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Caching;
 using System.Threading;
+using Serilog;
 
 namespace ToDos.DotNet.Caching
 {
@@ -10,14 +11,14 @@ namespace ToDos.DotNet.Caching
     {
         private readonly MemoryCache _cache;
         private readonly object _lock = new object();
-        private readonly Action<string> _logger;
+        private readonly ILogger _logger;
         private readonly Dictionary<Guid, DateTime> _lastAccess = new Dictionary<Guid, DateTime>();
         private readonly TimeSpan _defaultDuration = TimeSpan.FromMinutes(10);
 
-        public MemoryCacheService(string cacheName, Action<string> logger)
+        public MemoryCacheService(string cacheName, ILogger logger)
         {
             _cache = new MemoryCache(cacheName);
-            _logger = logger ?? (_ => { });
+            _logger = logger ?? Log.Logger;
         }
 
         private string GetCacheKey(Guid userId, string key) => $"{userId}_{key}";
@@ -42,7 +43,7 @@ namespace ToDos.DotNet.Caching
             {
                 _lastAccess[userId] = DateTime.UtcNow;
             }
-            _logger($"Set cache for {cacheKey}");
+            _logger.Information("Set cache for {CacheKey}", cacheKey);
         }
 
         public void Invalidate(Guid userId, string key = null)
@@ -61,7 +62,7 @@ namespace ToDos.DotNet.Caching
                 }
                 _lastAccess.Remove(userId);
             }
-            _logger($"Invalidated cache for user {userId}, key {key}");
+            _logger.Information("Invalidated cache for user {UserId}, key {Key}", userId, key);
         }
 
         public int GetCachedCount(Guid userId, string key)
@@ -82,7 +83,7 @@ namespace ToDos.DotNet.Caching
                     Invalidate(userId);
                 }
             }
-            _logger($"Cleaned up inactive users older than {inactivityThreshold}");
+            _logger.Information("Cleaned up inactive users older than {InactivityThreshold}", inactivityThreshold);
         }
     }
 } 
