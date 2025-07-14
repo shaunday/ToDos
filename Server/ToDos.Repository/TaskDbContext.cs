@@ -6,7 +6,21 @@ namespace ToDos.Repository
     public class TaskDbContext : DbContext
     {
         // Constructor accepting a full connection string
-        public TaskDbContext(string connectionString) : base(connectionString) { }
+        public TaskDbContext(string connectionString) : base(connectionString) 
+        {
+            var connection = this.Database.Connection;
+            connection.StateChange += (sender, args) =>
+            {
+                if (args.CurrentState == System.Data.ConnectionState.Open)
+                {
+                    Serilog.Log.Information("EF connection opened. Thread: {ThreadId}", System.Threading.Thread.CurrentThread.ManagedThreadId);
+                }
+                else if (args.CurrentState == System.Data.ConnectionState.Closed)
+                {
+                    Serilog.Log.Information("EF connection closed. Thread: {ThreadId}", System.Threading.Thread.CurrentThread.ManagedThreadId);
+                }
+            };
+        }
 
         public DbSet<TaskEntity> Tasks { get; set; }
         public DbSet<TagEntity> Tags { get; set; }
