@@ -188,7 +188,7 @@
                 CompletedStatus="{Binding Filter.CompletedStatus, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
             <!-- DataGrid -->
-            <DataGrid Grid.Row="1"
+            <DataGrid x:Name="TasksDataGrid" Grid.Row="1"
                       ItemsSource="{Binding FilteredTasksView}"
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"

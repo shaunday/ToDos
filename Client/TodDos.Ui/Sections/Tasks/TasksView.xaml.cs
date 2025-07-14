@@ -1,6 +1,10 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using Todos.Ui.ViewModels;
+using System;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.Messaging;
+using System.Windows.Threading;
 
 namespace Todos.Ui.Sections
 {
@@ -10,6 +14,21 @@ namespace Todos.Ui.Sections
         {
             InitializeComponent();
             this.PreviewKeyDown += TasksView_PreviewKeyDown;
+            WeakReferenceMessenger.Default.Register<EndEditTransactionMessage>(this, (r, m) =>
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (TasksDataGrid.IsLoaded && TasksDataGrid.IsVisible)
+                    {
+                        try
+                        {
+                            TasksDataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+                            TasksDataGrid.CancelEdit(DataGridEditingUnit.Row);
+                        }
+                        catch { /* Optionally log or ignore */ }
+                    }
+                }), DispatcherPriority.Background);
+            });
         }
 
         private void TasksView_PreviewKeyDown(object sender, KeyEventArgs e)

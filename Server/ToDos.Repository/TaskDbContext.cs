@@ -5,7 +5,8 @@ namespace ToDos.Repository
 {
     public class TaskDbContext : DbContext
     {
-        public TaskDbContext() : base("name=TaskDbContext") { }
+        // Constructor accepting a full connection string
+        public TaskDbContext(string connectionString) : base(connectionString) { }
 
         public DbSet<TaskEntity> Tasks { get; set; }
         public DbSet<TagEntity> Tags { get; set; }

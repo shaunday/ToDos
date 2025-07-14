@@ -5,20 +5,18 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Text.RegularExpressions;
 using Todos.Client.Common.Interfaces;
 using ToDos.DotNet.Common;
 using Todos.Ui.Sections.Tasks;
 using Todos.Ui.Services.Navigation;
 using Todos.Ui.Models;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Data;
 using TodDos.Ui.Global.ViewModels;
 using Serilog;
-using Todos.Client.UserService.Interfaces;
 using ToDos.MockAuthService;
 using MaterialDesignThemes.Wpf;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace Todos.Ui.ViewModels
 {
@@ -68,7 +66,7 @@ namespace Todos.Ui.ViewModels
             : base(taskSyncClient, mapper, navigation, logger)
         {
             _authService = authService;
-            Overview.Refresh(Tasks);
+
             FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
             FilteredTasksView.Filter = FilterPredicate;
         }
@@ -188,8 +186,8 @@ namespace Todos.Ui.ViewModels
                 await _taskSyncClient!.UpdateTaskAsync(updatedDto);
                 await _taskSyncClient.UnlockTaskAsync(task.Id);
                 ChangeTaskEditMode(task, false);
-                Overview.Refresh(Tasks);
-            }, "Failed to save task.", SnackbarMessageQueue);
+                UpdateFilteredTasks();
+            }, "Failed to save task.", SnackbarMessageQueue, () => { ChangeTaskEditMode(task, false); return Task.CompletedTask; });
         }
 
         [RelayCommand]
@@ -203,8 +201,8 @@ namespace Todos.Ui.ViewModels
                 // Restore original values from backup
                 task.CopyFrom(EditingTaskBackup);
                 ChangeTaskEditMode(task, false);
-                Overview.Refresh(Tasks);
-            }, "Failed to cancel edit.", SnackbarMessageQueue);
+                UpdateFilteredTasks();
+            }, "Failed to cancel edit.", SnackbarMessageQueue, () => { ChangeTaskEditMode(task, false); return Task.CompletedTask; });
         }
 
         [RelayCommand]
@@ -281,10 +279,12 @@ namespace Todos.Ui.ViewModels
         #region Private Methods
         private void UpdateFilteredTasks()
         {
+            WeakReferenceMessenger.Default.Send(new EndEditTransactionMessage());
             FilteredTasksView.Refresh();
             // Update filtered overview
             var filtered = Filter.Apply(Tasks);
             FilteredOverview.Refresh(filtered);
+            Overview.Refresh(Tasks);
         }
 
         private bool FilterPredicate(object obj)
@@ -349,7 +349,6 @@ namespace Todos.Ui.ViewModels
         #region Event Handlers
         private void Tasks_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
-            Overview.Refresh(Tasks);
             UpdateFilteredTasks();
         }
 
@@ -357,7 +356,7 @@ namespace Todos.Ui.ViewModels
         {
             var taskModel = _mapper!.Map<TaskModel>(taskDto);
             Tasks.Add(taskModel);
-            Overview.Refresh(Tasks);
+
             UpdateFilteredTasks();
         }
 
@@ -369,7 +368,7 @@ namespace Todos.Ui.ViewModels
             {
                 var index = Tasks.IndexOf(existingTask);
                 Tasks[index] = taskModel;
-                Overview.Refresh(Tasks);
+
                 UpdateFilteredTasks();
             }
         }
@@ -380,7 +379,7 @@ namespace Todos.Ui.ViewModels
             if (taskToRemove != null)
             {
                 Tasks.Remove(taskToRemove);
-                Overview.Refresh(Tasks);
+
                 UpdateFilteredTasks();
             }
         }
@@ -402,5 +401,8 @@ namespace Todos.Ui.ViewModels
 
         #endregion
     }
+
+    // Messenger message for ending DataGrid edit transaction
+    public class EndEditTransactionMessage { }
 }
 

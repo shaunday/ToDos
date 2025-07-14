@@ -3,15 +3,15 @@ using Microsoft.AspNet.SignalR;
 using Owin;
 using Serilog;
 using Serilog.Extensions.Logging;
+using System;
 using System.Web.Http;
+using ToDos.MockAuthService;
 using ToDos.Repository;
 using ToDos.Server.Common.Interfaces;
 using ToDos.TaskSyncServer.Mapping;
 using ToDos.TaskSyncServer.Services;
-using ToDos.MockAuthService;
 using Unity;
 using Unity.Lifetime;
-using System;
 
 namespace ToDos.TaskSyncServer
 {
@@ -21,19 +21,19 @@ namespace ToDos.TaskSyncServer
         {
             // Configure SignalR with dependency injection
             var unityContainer = ConfigureUnityContainer();
-            
+
             // Register SignalR with Unity container
             GlobalHost.DependencyResolver = new UnitySignalRDependencyResolver(unityContainer);
-            
+
             // Configure SignalR with keep-alive and timeout settings
             // KeepAlive: Sends periodic "ping" messages to keep connections alive and detect disconnections
             // ConnectionTimeout: Maximum time to wait for a client to respond before considering it disconnected
             // These settings help with network stability, connection monitoring, and resource management
             GlobalHost.Configuration.KeepAlive = TimeSpan.FromSeconds(30);
             GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(60);
-            
+
             app.MapSignalR();
-            
+
             var config = new HttpConfiguration();
             // Attribute routing
             config.MapHttpAttributeRoutes();
@@ -49,16 +49,23 @@ namespace ToDos.TaskSyncServer
         private IUnityContainer ConfigureUnityContainer()
         {
             var container = new UnityContainer();
-            
+
             // Register logging
             container.RegisterInstance(Log.Logger);
-            
+
             // Register Auth service
             container.RegisterType<IAuthService, ToDos.MockAuthService.MockAuthService>();
-            
-            // Register database context
-            container.RegisterType<TaskDbContext>(new ContainerControlledLifetimeManager());
-            
+
+            container.RegisterFactory<TaskDbContext>(
+                     c =>
+                     {
+                         var connStr = ConnectionStringAccess.GetDbConnectionString();
+                         return new TaskDbContext(connStr);
+                     },
+                     new ContainerControlledLifetimeManager()
+                 );
+
+
             // Register repository
             container.RegisterType<ITaskRepository, TaskRepository>();
 
@@ -110,4 +117,4 @@ namespace ToDos.TaskSyncServer
             }
         }
     }
-} 
+}

@@ -57,7 +57,11 @@ namespace TodDos.Ui.Global.ViewModels
         /// <summary>
         /// Runs an async action with try-catch, logging, and optional Snackbar error notification.
         /// </summary>
-        protected async Task RunWithErrorHandlingAsync(Func<Task> action, string errorMessage, SnackbarMessageQueue snackbar = null)
+        protected async Task RunWithErrorHandlingAsync(
+            Func<Task> action,
+            string errorMessage,
+            SnackbarMessageQueue snackbar = null,
+            Func<Task> recovery = null)
         {
             try
             {
@@ -67,6 +71,10 @@ namespace TodDos.Ui.Global.ViewModels
             {
                 _logger?.Error(ex, errorMessage);
                 snackbar?.Enqueue(errorMessage);
+                if (recovery != null)
+                {
+                    await recovery();
+                }
             }
         }
 

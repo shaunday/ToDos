@@ -18,6 +18,7 @@ using Unity;
 using static Todos.Client.Common.TypesGlobal;
 using Todos.Client.UserService;
 using ToDos.MockAuthService;
+using System.Linq;
 
 namespace Todos.Ui
 {
