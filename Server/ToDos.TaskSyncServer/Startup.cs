@@ -7,11 +7,13 @@ using System;
 using System.Web.Http;
 using ToDos.MockAuthService;
 using ToDos.Repository;
+using ToDos.Repository.Sharding;
 using ToDos.Server.Common.Interfaces;
 using ToDos.TaskSyncServer.Mapping;
 using ToDos.TaskSyncServer.Services;
 using Unity;
 using Unity.Lifetime;
+using Unity.Injection;
 
 namespace ToDos.TaskSyncServer
 {
@@ -56,20 +58,17 @@ namespace ToDos.TaskSyncServer
             // Register Auth service
             container.RegisterType<IAuthService, ToDos.MockAuthService.MockAuthService>();
 
-            container.RegisterFactory<TaskDbContext>(
-                     c =>
-                     {
-                         var connStr = ConnectionStringAccess.GetDbConnectionString();
-                         return new TaskDbContext(connStr);
-                     },
-                     new ContainerControlledLifetimeManager()
-                 );
-
-
             // Register repository
             container.RegisterType<ITaskRepository, TaskRepository>();
 
             container.RegisterType<ITaskService, TaskService>();
+
+            // Register ShardResolver
+            var connStrTemplate = ConnectionStringAccess.GetDbConnectionString();
+            container.RegisterType<IShardResolver, DefaultShardResolver>(
+                new ContainerControlledLifetimeManager(),
+                new InjectionConstructor(connStrTemplate)
+            );
 
             // Register AutoMapper
             var config = new MapperConfiguration(cfg =>

@@ -82,82 +82,74 @@ namespace ToDos.TaskSyncServer.Hubs
             }
         }
 
-        public async Task<bool> DeleteTask(int taskId)
+        public async Task<bool> DeleteTask(int userId, int taskId)
         {
             var stopwatch = Stopwatch.StartNew();
             try
             {
-                var userId = GetCurrentUserId();
                 _logger.Information("Deleting task {TaskId} for user: {UserId}", taskId, userId);
-                
-                var result = await _taskService.DeleteTaskAsync(taskId);
+                var result = await _taskService.DeleteTaskAsync(userId, taskId);
                 stopwatch.Stop();
                 return result;
             }
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                _logger.Error(ex, "Exception in DeleteTask for user: {UserId}", GetCurrentUserId());
+                _logger.Error(ex, "Exception in DeleteTask for user: {UserId}", userId);
                 throw;
             }
         }
 
-        public async Task<bool> SetTaskCompletion(int taskId, bool isCompleted)
+        public async Task<bool> SetTaskCompletion(int userId, int taskId, bool isCompleted)
         {
             var stopwatch = Stopwatch.StartNew();
             try
             {
-                var userId = GetCurrentUserId();
                 _logger.Information("Setting task completion {TaskId} to {IsCompleted} for user: {UserId}", taskId, isCompleted, userId);
-                
-                var result = await _taskService.SetTaskCompletionAsync(taskId, isCompleted);
+                var result = await _taskService.SetTaskCompletionAsync(userId, taskId, isCompleted);
                 stopwatch.Stop();
                 return result;
             }
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                _logger.Error(ex, "Exception in SetTaskCompletion for user: {UserId}", GetCurrentUserId());
+                _logger.Error(ex, "Exception in SetTaskCompletion for user: {UserId}", userId);
                 throw;
             }
         }
 
-        public async Task<bool> LockTask(int taskId)
+        public async Task<bool> LockTask(int userId, int taskId)
         {
             var stopwatch = Stopwatch.StartNew();
             try
             {
-                var userId = GetCurrentUserId();
                 _logger.Information("Locking task {TaskId} for user: {UserId}", taskId, userId);
-                
-                var result = await _taskService.LockTaskAsync(taskId);
+                var result = await _taskService.LockTaskAsync(userId, taskId);
                 stopwatch.Stop();
                 return result;
             }
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                _logger.Error(ex, "Exception in LockTask for user: {UserId}", GetCurrentUserId());
+                _logger.Error(ex, "Exception in LockTask for user: {UserId}", userId);
                 throw;
             }
         }
 
-        public async Task<bool> UnlockTask(int taskId)
+        public async Task<bool> UnlockTask(int userId, int taskId)
         {
             var stopwatch = Stopwatch.StartNew();
             try
             {
-                var userId = GetCurrentUserId();
                 _logger.Information("Unlocking task {TaskId} for user: {UserId}", taskId, userId);
-                
-                var result = await _taskService.UnlockTaskAsync(taskId);
+                var result = await _taskService.UnlockTaskAsync(userId, taskId);
                 stopwatch.Stop();
                 return result;
             }
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                _logger.Error(ex, "Exception in UnlockTask for user: {UserId}", GetCurrentUserId());
+                _logger.Error(ex, "Exception in UnlockTask for user: {UserId}", userId);
                 throw;
             }
         }
@@ -285,9 +277,8 @@ namespace ToDos.TaskSyncServer.Hubs
         {
             try
             {
-                // This is a simplified approach - in a real implementation, you might want to
-                // cache task ownership or pass it along with the event
-                var task = _taskService.GetTaskByIdAsync(taskId).GetAwaiter().GetResult();
+                var userId = GetCurrentUserId();
+                var task = _taskService.GetTaskByIdAsync(userId, taskId).GetAwaiter().GetResult();
                 return task?.UserId ?? 0;
             }
             catch (Exception ex)

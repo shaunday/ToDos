@@ -45,17 +45,17 @@ namespace ToDos.TaskSyncServer.Services
             }
         }
 
-        public async Task<TaskDTO> GetTaskByIdAsync(int taskId)
+        public async Task<TaskDTO> GetTaskByIdAsync(int userId, int taskId)
         {
             try
             {
-                _logger.Information("Getting task by ID: {TaskId}", taskId);
-                var task = await _taskRepository.GetByIdAsync(taskId);
+                _logger.Information("Getting task by ID: {TaskId} for user: {UserId}", taskId, userId);
+                var task = await _taskRepository.GetByIdAsync(userId, taskId);
                 return _mapper.Map<TaskDTO>(task);
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Error getting task by ID: {TaskId}", taskId);
+                _logger.Error(ex, "Error getting task by ID: {TaskId} for user: {UserId}", taskId, userId);
                 throw;
             }
         }
@@ -91,7 +91,7 @@ namespace ToDos.TaskSyncServer.Services
                 _logger.Information("Updating task: {TaskId} for user: {UserId}", taskDto.Id, taskDto.UserId);
                 
                 // Verify task ownership
-                var existingTask = await _taskRepository.GetByIdAsync(taskDto.Id);
+                var existingTask = await _taskRepository.GetByIdAsync(taskDto.UserId, taskDto.Id);
                 if (existingTask == null)
                 {
                     _logger.Warning("Task not found for update: {TaskId}", taskDto.Id);
@@ -123,13 +123,13 @@ namespace ToDos.TaskSyncServer.Services
             }
         }
 
-        public async Task<bool> DeleteTaskAsync(int taskId)
+        public async Task<bool> DeleteTaskAsync(int userId, int taskId)
         {
             try
             {
-                _logger.Information("Deleting task: {TaskId}", taskId);
+                _logger.Information("Deleting task: {TaskId} for user: {UserId}", taskId, userId);
                 
-                var success = await _taskRepository.DeleteAsync(taskId);
+                var success = await _taskRepository.DeleteAsync(userId, taskId);
                 
                 if (success)
                 {
@@ -151,17 +151,17 @@ namespace ToDos.TaskSyncServer.Services
             }
         }
 
-        public async Task<bool> SetTaskCompletionAsync(int taskId, bool isCompleted)
+        public async Task<bool> SetTaskCompletionAsync(int userId, int taskId, bool isCompleted)
         {
             try
             {
-                _logger.Information("Setting task completion: {TaskId}, Completed: {IsCompleted}", taskId, isCompleted);
+                _logger.Information("Setting task completion: {TaskId}, Completed: {IsCompleted} for user: {UserId}", taskId, isCompleted, userId);
                 
-                var success = await _taskRepository.SetCompletionAsync(taskId, isCompleted);
+                var success = await _taskRepository.SetCompletionAsync(userId, taskId, isCompleted);
                 
                 if (success)
                 {
-                    var updatedTask = await _taskRepository.GetByIdAsync(taskId);
+                    var updatedTask = await _taskRepository.GetByIdAsync(userId, taskId);
                     var taskDto = _mapper.Map<TaskDTO>(updatedTask);
                     
                     // Raise event for real-time updates
@@ -183,13 +183,13 @@ namespace ToDos.TaskSyncServer.Services
             }
         }
 
-        public async Task<bool> LockTaskAsync(int taskId)
+        public async Task<bool> LockTaskAsync(int userId, int taskId)
         {
             try
             {
-                _logger.Information("Locking task: {TaskId}", taskId);
+                _logger.Information("Locking task: {TaskId} for user: {UserId}", taskId, userId);
                 
-                var success = await _taskRepository.LockTaskAsync(taskId);
+                var success = await _taskRepository.LockTaskAsync(userId, taskId);
                 
                 if (success)
                 {
@@ -211,13 +211,13 @@ namespace ToDos.TaskSyncServer.Services
             }
         }
 
-        public async Task<bool> UnlockTaskAsync(int taskId)
+        public async Task<bool> UnlockTaskAsync(int userId, int taskId)
         {
             try
             {
-                _logger.Information("Unlocking task: {TaskId}", taskId);
+                _logger.Information("Unlocking task: {TaskId} for user: {UserId}", taskId, userId);
                 
-                var success = await _taskRepository.UnlockTaskAsync(taskId);
+                var success = await _taskRepository.UnlockTaskAsync(userId, taskId);
                 
                 if (success)
                 {

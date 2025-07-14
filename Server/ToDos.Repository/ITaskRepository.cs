@@ -8,15 +8,15 @@ namespace ToDos.Repository
     public interface ITaskRepository
     {
         Task<IEnumerable<TaskEntity>> GetByUserIdAsync(int userId);
-        Task<TaskEntity> GetByIdAsync(int id);
+        Task<TaskEntity> GetByIdAsync(int userId, int id);
         Task AddAsync(TaskEntity task);
         Task UpdateAsync(TaskEntity task);
-        Task<bool> DeleteAsync(int id);
-        Task<bool> SetCompletionAsync(int taskId, bool isCompleted);
+        Task<bool> DeleteAsync(int userId, int id);
+        Task<bool> SetCompletionAsync(int userId, int taskId, bool isCompleted);
 
         // Locking methods
-        Task<bool> LockTaskAsync(int id);
-        Task<bool> UnlockTaskAsync(int id);
-        Task<bool> IsTaskLockedAsync(int id);
+        Task<bool> LockTaskAsync(int userId, int id);
+        Task<bool> UnlockTaskAsync(int userId, int id);
+        Task<bool> IsTaskLockedAsync(int userId, int id);
     }
 } 
