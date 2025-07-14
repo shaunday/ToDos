@@ -5,13 +5,6 @@
 3.	Performance and scalability awareness.
 
 
-## Logging
-
-* Log Thread.ManagedThreadId before and after await calls to demonstrate async thread usage
-* Log thread blocking or starvation events to simulate server pressure
-* Log EF database connection usage (open/used connections) to demonstrate connection pooling awareness
-
----
 
 ## SignalR Client
 can add cancellation tokens or timeout policies to retry/wait delays.
@@ -20,13 +13,8 @@ can add cancellation tokens or timeout policies to retry/wait delays.
 
 ## Entity Framework and Database
 
-* Use async EF methods with ConfigureAwait(false) for scalability
-  await dbContext.SaveChangesAsync().ConfigureAwait(false);
-* Ensure database schema is normalized to 3rd Normal Form (3NF) for extensibility
-Design should be normalized and allow future extensibility
 * Prepare schema and code for CQRS-style read/write separation 
 * partitioning proof?
-* Add ThreadPool.SetMinThreads(...) to show concurrency tuning preparation
 * Implement \_taskCommandQueue to throttle DB writes (Single Writer Pattern)
 * Simulate master/slave DB (write to one, read from another with periodic sync)
 * Throttle or reject low-priority writes when under heavy load.: backpressure mechanism.
@@ -70,3 +58,4 @@ Make sure that both client and server validate all inputs (e.g., task titles not
 nice to have:
 show item editing when filter and its not on
 On permanent disconnect, prompt UI to notify the user or retry manually.
+Log thread blocking or starvation events to simulate server pressure?
