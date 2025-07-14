@@ -55,6 +55,8 @@ namespace Todos.Ui.ViewModels
         public TasksOverviewModel Overview { get; } = new TasksOverviewModel();
         public TasksOverviewModel FilteredOverview { get; } = new TasksOverviewModel();
         public SnackbarMessageQueue SnackbarMessageQueue { get; } = new SnackbarMessageQueue();
+        public static UiStateModel UiState { get; set; }
+        // Removed _lastSelectedTaskId field entirely
         #endregion
 
         #region Properties
@@ -71,7 +73,7 @@ namespace Todos.Ui.ViewModels
             FilteredTasksView.Filter = FilterPredicate;
         }
 
-        public override void Init()
+        public override async void Init()
         {
             _taskSyncClient!.TaskAdded += HandleTaskAdded;
             _taskSyncClient.TaskUpdated += HandleTaskUpdated;
@@ -79,8 +81,8 @@ namespace Todos.Ui.ViewModels
             Tasks.CollectionChanged += Tasks_CollectionChanged;
             Filter.PropertyChanged += Filter_PropertyChanged;
             
-            // Load existing tasks for the current user
-            LoadTasksAsync();
+            await LoadTasksAsync();
+            ApplyUiState();
         }
 
         public override void Cleanup()
@@ -244,6 +246,36 @@ namespace Todos.Ui.ViewModels
         #endregion
 
         #region Public Methods
+        public void ApplyUiState()
+        {
+            if (UiState != null)
+            {
+                if (Filter != null)
+                {
+                    Filter.SelectedPriority = UiState.FilterSelectedPriority ?? "All";
+                    Filter.TagFilter = UiState.FilterTag ?? string.Empty;
+                    Filter.CompletedStatus = UiState.FilterCompletedStatus ?? "All";
+                }
+                if (UiState.LastSelectedTaskId.HasValue)
+                {
+                    var task = Tasks.FirstOrDefault(t => t.Id == UiState.LastSelectedTaskId.Value);
+                    if (task != null)
+                    {
+                        EditingTask = task;
+                    }
+                }
+            }
+        }
+        public void UpdateUiStateFromCurrent()
+        {
+            if (UiState != null)
+            {
+                UiState.FilterSelectedPriority = Filter?.SelectedPriority ?? "All";
+                UiState.FilterTag = Filter?.TagFilter ?? string.Empty;
+                UiState.FilterCompletedStatus = Filter?.CompletedStatus ?? "All";
+                UiState.LastSelectedTaskId = EditingTask?.Id;
+            }
+        }
         #endregion
 
         #region Private Methods
@@ -269,13 +301,12 @@ namespace Todos.Ui.ViewModels
             EditingTaskBackup = isEditing ? task.Clone() : null;
         }
 
-        private async void LoadTasksAsync()
+        private async Task LoadTasksAsync()
         {
             IsLoading = true;
             AddTaskErrorMessage = string.Empty;
             await RunWithErrorHandlingAsync(async () =>
             {
-                // Get current user ID from the user service or application context
                 var currentUserId = GetCurrentUserId();
 
                 if (currentUserId > 0)
@@ -285,7 +316,6 @@ namespace Todos.Ui.ViewModels
                     var userTaskModels = userTaskDtos.Select(dto => _mapper!.Map<TaskModel>(dto));
                     Tasks = new ObservableCollection<TaskModel>(userTaskModels);
                     Overview.Refresh(Tasks);
-                    // Rebind CollectionView to new Tasks collection
                     FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
                     FilteredTasksView.Filter = FilterPredicate;
                     UpdateFilteredTasks();
@@ -358,14 +388,16 @@ namespace Todos.Ui.ViewModels
         private void Filter_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             UpdateFilteredTasks();
+            UpdateUiStateFromCurrent();
         }
 
         partial void OnEditingTaskChanged(TaskModel value)
         {
-            if (value != null && !value.IsEditing && EditingTask != value)
+            if (value != null && !value.IsEditing)
             {
                 EditTaskCommand.Execute(value);
             }
+            UpdateUiStateFromCurrent();
         }
 
         #endregion

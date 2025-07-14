@@ -42,10 +42,8 @@ can add cancellation tokens or timeout policies to retry/wait delays.
 
 ## Client-Side (WPF + MVVM)
 
-* Add user-friendly exception handling and error messages ( <materialDesign:Snackbar x:Name="Snackbar" />)
 * On permanent disconnect, prompt UI to notify the user or retry manually.
-* BONUS: Implement UI state persistence (e.g., window size, last selected task)
-^ Save UI state on Window\.Closing and restore on Window\.Loaded using Properties.Settings.Default or JSON file in %AppData%
+* when edit > filter it might set editing task to invisible.. fix
 
 Make sure that both client and server validate all inputs (e.g., task titles not empty, due dates valid).
 
