@@ -21,7 +21,6 @@ namespace ToDos.Server.Entities.Factory
         {
             var result = new List<TaskEntity>();
             var rand = new Random();
-            int id = 1;
             foreach (var userId in userIds)
             {
                 for (int i = 0; i < tasksPerUser; i++)

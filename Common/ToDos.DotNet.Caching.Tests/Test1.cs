@@ -11,12 +11,10 @@ namespace ToDos.DotNet.Caching.Tests
     public class MemoryCacheServiceTests
     {
         private MemoryCacheService<string> _cache;
-        private List<string> _log;
 
         [TestInitialize]
         public void Setup()
         {
-            _log = new List<string>();
             _cache = new MemoryCacheService<string>("TestCache", Log.Logger);
         }
 
@@ -36,7 +34,7 @@ namespace ToDos.DotNet.Caching.Tests
         {
             var userId = Guid.NewGuid();
             var key = "test";
-            _cache.Set(userId, key, new[] { "x" });
+            _cache.Set(userId, key, ["x"]);
             _cache.Invalidate(userId, key);
             var result = _cache.Get(userId, key);
             Assert.IsNull(result);
@@ -46,7 +44,7 @@ namespace ToDos.DotNet.Caching.Tests
         public void CleanupInactiveUsers_RemovesOldEntries()
         {
             var userId = Guid.NewGuid();
-            _cache.Set(userId, "test", new[] { "1" });
+            _cache.Set(userId, "test", ["1"]);
             // Simulate inactivity by manipulating _lastAccess (reflection for test only)
             var lastAccessField = typeof(MemoryCacheService<string>).GetField("_lastAccess", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var lastAccess = (Dictionary<Guid, DateTime>)lastAccessField.GetValue(_cache);

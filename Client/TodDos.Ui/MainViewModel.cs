@@ -34,7 +34,7 @@ namespace Todos.Ui
                         }));
                     }
                 }
-                catch (Exception ex)
+                catch (Exception )
                 {
                     // Handle auto-login failure silently
                 }
