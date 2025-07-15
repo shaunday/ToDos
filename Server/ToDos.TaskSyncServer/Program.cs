@@ -12,8 +12,9 @@ namespace ToDos.TaskSyncServer
         private const string LogFileName = "ToDos.TaskSyncServer.log";
         static void Main()
         {
+            var logFilePath = System.IO.Path.Combine(AppContext.BaseDirectory, LogFileName);
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.File(LogFileName)
+                .WriteTo.File(logFilePath)
                 .CreateLogger();
             Log.Information("TaskSyncServer started");
 
