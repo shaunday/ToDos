@@ -12,13 +12,14 @@ using ToDos.DotNet.Caching;
 
 namespace ToDos.TaskSyncServer.Services
 {
-    public class TaskService : ITaskService
+    public class TaskService : ITaskService, IDisposable
     {
         private readonly ITaskRepository _taskRepository;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
         // Use int for userId in cache
         private readonly ICacheService<int, TaskDTO> _taskCache = new MemoryCacheService<int, TaskDTO>("TaskCache", Log.Logger);
+        private readonly CacheCleanupService<int, TaskDTO> _cacheCleanupService;
         private const string TaskCacheKey = "tasks";
 
         public event Action<TaskDTO> TaskAdded;
@@ -32,6 +33,8 @@ namespace ToDos.TaskSyncServer.Services
             _taskRepository = taskRepository;
             _mapper = mapper;
             _logger = logger;
+            // Start cache cleanup every 10 minutes, remove users inactive for 30 minutes
+            _cacheCleanupService = new CacheCleanupService<int, TaskDTO>(_taskCache, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(30));
         }
 
         public async Task<IEnumerable<TaskDTO>> GetUserTasksAsync(int userId)
@@ -263,6 +266,11 @@ namespace ToDos.TaskSyncServer.Services
                 _logger.Error(ex, "Error unlocking task: {TaskId}", taskId);
                 throw;
             }
+        }
+
+        public void Dispose()
+        {
+            _cacheCleanupService?.Dispose();
         }
     }
 } 
