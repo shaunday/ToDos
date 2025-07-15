@@ -13,11 +13,15 @@ namespace ToDos.Repository
 {
     public class TaskRepository : ITaskRepository, IDisposable
     {
+        #region Fields
         private readonly IShardResolver _shardResolver;
         private readonly IReadWriteDbRouter _dbRouter;
         private readonly ILogger _logger;
         private readonly IDbSyncService _dbSyncService;
+        private System.Threading.Timer _syncTimer;
+        #endregion
 
+        #region Constructor
         public TaskRepository(IShardResolver shardResolver, IReadWriteDbRouter dbRouter, IDbSyncService dbSyncService, ILogger logger)
         {
             _shardResolver = shardResolver;
@@ -28,14 +32,18 @@ namespace ToDos.Repository
             var envPath = System.IO.Path.Combine(AppContext.BaseDirectory, ".env.Repository");
             Env.Load(envPath);
         }
+        #endregion
 
+        #region Private Helpers
         private string GetConnectionString(int userId, bool isWriteOperation)
         {
             var shardedDbName = _shardResolver.GetDatabaseName(userId);
             var readWriteSwitchDbName = _dbRouter.GetPhysicalDbName(shardedDbName, isWriteOperation);
             return ConnectionStringAccess.GetDbConnectionString(); //using empty instead of passing (physicalDb)
         }
+        #endregion
 
+        #region CRUD Methods
         public async Task<IEnumerable<ToDos.Entities.TaskEntity>> GetByUserIdAsync(int userId)
         {
             try
@@ -145,7 +153,9 @@ namespace ToDos.Repository
                 throw;
             }
         }
+        #endregion
 
+        #region Task Lock Methods
         public async Task<bool> LockTaskAsync(int userId, int id)
         {
             try
@@ -203,7 +213,9 @@ namespace ToDos.Repository
                 throw;
             }
         }
+        #endregion
 
+        #region Static Utilities
         /// <summary>
         /// Clears all tasks and populates the DB with mock data for the given user IDs.
         /// </summary>
@@ -223,9 +235,9 @@ namespace ToDos.Repository
             }));
             context.SaveChanges();
         }
+        #endregion
 
-        private System.Threading.Timer _syncTimer;
-
+        #region Sync Methods
         /// <summary>
         /// Triggers a sync for all logical DBs (if supported by the sync service).
         /// </summary>
@@ -251,11 +263,13 @@ namespace ToDos.Repository
             _syncTimer?.Dispose();
             _syncTimer = null;
         }
+        #endregion
 
-        // IMPORTANT: Call Dispose() or StopPeriodicSync() on shutdown to clean up the timer.
+        #region IDisposable
         public void Dispose()
         {
             StopPeriodicSync();
         }
+        #endregion
     }
 }
