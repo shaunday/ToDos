@@ -1,6 +1,8 @@
+using CommunityToolkit.Mvvm.Messaging;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Todos.Ui.Sections.Tasks;
 
 namespace Todos.Ui.Resources
 {
@@ -38,6 +40,8 @@ namespace Todos.Ui.Resources
                 if (button.Command.CanExecute(button.CommandParameter))
                     button.Command.Execute(button.CommandParameter);
             }
+
+            WeakReferenceMessenger.Default.Send(new CommitAndClearFocusMessage());
         }
     }
 } 

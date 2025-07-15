@@ -8,6 +8,7 @@ using System.Windows.Data;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Todos.Ui.Services;
+using Todos.Ui.Sections.Tasks;
 
 namespace Todos.Ui.Sections
 {
@@ -17,10 +18,8 @@ namespace Todos.Ui.Sections
         {
             InitializeComponent();
             this.PreviewKeyDown += TasksView_PreviewKeyDown;
-
-            // Directly ensure any pending edits are committed when needed (if you want to do this on load or expose a method)
-            // If you want to expose this as a public method, you can add:
-            // public void CommitPendingEdits() { ... }
+            WeakReferenceMessenger.Default.Register<CommitAndClearFocusMessage>(this, (r, m) => CommitAndClearFocus());
+            this.Unloaded += (s, e) => WeakReferenceMessenger.Default.Unregister<CommitAndClearFocusMessage>(this);
         }
 
         private void TasksView_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -36,6 +35,15 @@ namespace Todos.Ui.Sections
                     }
                 }
             }
+        }
+
+        private void CommitAndClearFocus()
+        {
+            TasksDataGrid.CommitEdit(DataGridEditingUnit.Cell, true);
+            TasksDataGrid.CommitEdit(DataGridEditingUnit.Row, true);
+
+            Keyboard.ClearFocus();
+            TasksDataGrid.Focus();
         }
     }
 } 

@@ -303,6 +303,10 @@ namespace Todos.Ui.ViewModels
             UiState.FilterCompletedStatus = Filter?.CompletedStatus ?? "All";
             UiState.LastSelectedTaskId = EditingTask?.Id;
         }
+        public void RequestCommitAndClearFocus()
+        {
+            WeakReferenceMessenger.Default.Send(new CommitAndClearFocusMessage());
+        }
         #endregion
 
         #region Private Methods
