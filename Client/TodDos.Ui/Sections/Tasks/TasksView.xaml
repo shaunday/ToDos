@@ -151,6 +151,11 @@
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
+
+            <!-- Actions Column Cell Style - Always hit test visible -->
+            <Style x:Key="ActionsCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource TaskCellStyle}">
+                <Setter Property="IsHitTestVisible" Value="True"/>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 
@@ -220,7 +225,7 @@
                     <DataGridComboBoxColumn Header="Priority"
                                        SelectedItemBinding="{Binding Priority, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                        ItemsSource="{Binding Source={StaticResource TaskPriorityValues}}"
-                                       Width="0.75*">
+                                       Width="Auto">
                         <DataGridComboBoxColumn.ElementStyle>
                             <Style TargetType="ComboBox" BasedOn="{StaticResource CenteredComboBoxStyle}" />
                         </DataGridComboBoxColumn.ElementStyle>
@@ -235,7 +240,7 @@
                                        Width="*" />
 
                     <!-- Due Date Column -->
-                    <DataGridTemplateColumn Header="Due Date" Width="0.75*">
+                    <DataGridTemplateColumn Header="Due Date" Width="Auto">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <DatePicker SelectedDate="{Binding DueDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -284,14 +289,14 @@
                     </DataGridTemplateColumn>
 
                     <!-- Status Column -->
-                    <DataGridTemplateColumn Header="Status" Width="Auto">
+                    <DataGridTemplateColumn Header="Status" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <StaticResource ResourceKey="StatusDataTemplate" />
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
                     <!-- Actions Column -->
-                    <DataGridTemplateColumn Header="Actions" Width="*">
+                    <DataGridTemplateColumn Header="Actions" Width="Auto">
                         <DataGridTemplateColumn.CellTemplate>
                             <StaticResource ResourceKey="ActionsDataTemplate" />
                         </DataGridTemplateColumn.CellTemplate>

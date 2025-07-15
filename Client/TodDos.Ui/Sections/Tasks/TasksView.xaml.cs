@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Windows.Threading;
 using System.Windows.Data;
 using System.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
+using Todos.Ui.Services;
 
 namespace Todos.Ui.Sections
 {
@@ -15,6 +17,7 @@ namespace Todos.Ui.Sections
         {
             InitializeComponent();
             this.PreviewKeyDown += TasksView_PreviewKeyDown;
+
             // Directly ensure any pending edits are committed when needed (if you want to do this on load or expose a method)
             // If you want to expose this as a public method, you can add:
             // public void CommitPendingEdits() { ... }

@@ -1,29 +1,11 @@
 
 
-Verify
-
-1.	Real-time data synchronization between multiple desktop clients.
-2.	Robust architecture and design pattern usage.
-3.	Performance and scalability awareness.
-
----
 
 ## UI
 
 a bit more ui work on the list
-style to click on delete
 fail to save task
-
----
-
-## Entity Framework and Database
-
-* Prepare schema and code for CQRS-style read/write separation 
-* Implement \_taskCommandQueue to throttle DB writes (Single Writer Pattern)
-* Simulate master/slave DB (write to one, read from another with periodic sync)
-* Throttle or reject low-priority writes when under heavy load.: backpressure mechanism.
-
----
+commit pending methods?
 
 ## Testing and Tooling
 
@@ -36,14 +18,7 @@ fail to save task
 ## Documentation
 
 * Write README.md with setup instructions and architecture overview
-* Document design patterns used and communication protocols (SignalR + REST)
-* Prepare to defend your architecture choices (SignalR, queues, caching, etc.)
-* Explain scalability patterns used:
 
-  * Queues buffer write load under stress (throttling)
-  * Single Writer Pattern prevents data conflicts
-  * Use of ConfigureAwait(false) for freeing up threads
-  * ThreadPool tuning via SetMinThreads(...)
 
 ---
 
