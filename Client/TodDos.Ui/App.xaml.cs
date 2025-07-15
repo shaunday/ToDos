@@ -1,26 +1,25 @@
 ﻿using AutoMapper;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Extensions.Logging;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows;
 using TodDos.Ui.Services.Mapping;
 using Todos.Client.Common.Factories;
 using Todos.Client.Common.Interfaces;
 using Todos.Client.MockTaskSyncClient;
 using Todos.Client.SignalRClient;
-using Todos.UserService;
+using Todos.Client.TaskSyncWithOfflineQueues;
+using Todos.Client.UserService;
 using Todos.Client.UserService.Interfaces;
+using Todos.Ui.Services; // Add this if UserConnectionService is in this namespace
 using Todos.Ui.Services.Navigation;
 using Todos.Ui.ViewModels;
+using Todos.UserService;
+using ToDos.MockAuthService;
 using Unity;
 using static Todos.Client.Common.TypesGlobal;
-using Todos.Client.UserService;
-using ToDos.MockAuthService;
-using System.Linq;
-using Todos.Client.TaskSyncWithOfflineQueues;
-using Todos.Ui.Services; // Add this if UserConnectionService is in this namespace
 
 namespace Todos.Ui
 {
@@ -80,6 +79,8 @@ namespace Todos.Ui
         private void ConfigureContainer()
         {
             Container = new UnityContainer();
+
+            Container.RegisterInstance<ILogger>(Log.Logger);
 
             // Register services
             Container.RegisterSingleton<INavigationService, NavigationService>();

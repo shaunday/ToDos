@@ -30,8 +30,6 @@ namespace ToDos.TaskSyncServer
             TuneThreadPool();
             Database.SetInitializer(new CreateDatabaseIfNotExists<TaskDbContext>());
 
-            Log.Logger.Information("Fallback 1");
-
             IUnityContainer container = ConfigureUnityContainer();
 
             var resolver = new HybridSignalRResolver(container);
@@ -56,7 +54,7 @@ namespace ToDos.TaskSyncServer
                 }
             });
 
-            app.MapSignalR(hubConfig);
+            app.MapSignalR("/signalr", hubConfig);
         }
 
         private void TuneThreadPool()
@@ -71,6 +69,8 @@ namespace ToDos.TaskSyncServer
         private IUnityContainer ConfigureUnityContainer()
         {
             var container = new UnityContainer();
+
+            container.RegisterInstance<ILogger>(Log.Logger);
 
             // Services
             container.RegisterSingleton<IAuthService, MockAuthService.MockAuthService>();
@@ -87,10 +87,16 @@ namespace ToDos.TaskSyncServer
             }, new SerilogLoggerFactory(Log.Logger));
 
             container.RegisterInstance<IMapper>(config.CreateMapper());
+            container.RegisterType<IMarker, Marker>();
+            container.RegisterType<IHub, TaskHub>("TaskHub");
 
-            container.RegisterType<TaskHub>();
+            //var hubTest = container.Resolve<TaskHub>();
+            //Log.Logger.Information("Resolved TaskHub manually: {Hub}", hubTest.GetType().Name);
 
             Log.Logger.Information("Unity container configured successfully");
+
+
+
 
             return container;
         }
