@@ -75,7 +75,7 @@ namespace Todos.Ui
             Container.RegisterSingleton<IUserService, MockUserService>();
             Container.RegisterSingleton<IOfflineQueueService, MemBasedOfflineQueueService>();
             Container.RegisterFactory<ITaskSyncClient>(c =>
-                new TaskSyncWithOfflineQueues(
+                new OfflineQueueTaskSyncClient(
                     new MockTaskSyncClient(Log.Logger),
                     c.Resolve<IOfflineQueueService>()
                 )

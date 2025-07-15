@@ -32,6 +32,12 @@ namespace Todos.Ui.ViewModels
         private readonly new ITaskSyncClient _taskSyncClient;
         private readonly UserConnectionService _userConnectionService;
 
+        private ObservableCollection<TaskModel> Tasks { get; set; } = new ObservableCollection<TaskModel>();
+
+        #endregion
+
+        #region Properties
+
         [ObservableProperty]
         private TaskModel editingTask;
 
@@ -61,11 +67,7 @@ namespace Todos.Ui.ViewModels
         public TasksOverviewModel FilteredOverview { get; } = new TasksOverviewModel();
         public SnackbarMessageQueue SnackbarMessageQueue { get; } = new SnackbarMessageQueue();
         public static UiStateModel UiState { get; set; }
-        // Removed _lastSelectedTaskId field entirely
-        #endregion
 
-        #region Properties
-        public ObservableCollection<TaskModel> Tasks { get; set; } = new ObservableCollection<TaskModel>();
         #endregion
 
         #region Constructors and Lifecycle
@@ -225,33 +227,23 @@ namespace Todos.Ui.ViewModels
             {
                 AddTaskErrorMessage = string.Empty;
                 var deleted = await _taskSyncClient!.DeleteTaskAsync(task.Id);
-                if (deleted)
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    Tasks.Remove(task);
-                    Overview.Refresh(Tasks);
-                }
-                else
-                {
-                    AddTaskErrorMessage = "Failed to delete task.";
-                    SnackbarMessageQueue.Enqueue(AddTaskErrorMessage);
-                }
+                    if (deleted)
+                    {
+                        Tasks.Remove(task);
+                        Overview.Refresh(Tasks);
+                    }
+                    else
+                    {
+                        AddTaskErrorMessage = "Failed to delete task.";
+                        SnackbarMessageQueue.Enqueue(AddTaskErrorMessage);
+                    }
+                });
             }, "Failed to delete task.", SnackbarMessageQueue);
+            _ = _taskSyncClient!.DeleteTaskAsync(task.Id);
         }
 
-        [RelayCommand]
-        private async Task ToggleTaskCompletionAsync(TaskModel task)
-        {
-            if (task == null) return;
-
-            await RunWithErrorHandlingAsync(async () =>
-            {
-                AddTaskErrorMessage = string.Empty;
-                task.IsCompleted = !task.IsCompleted;
-                var updatedDto = _mapper!.Map<TaskDTO>(task);
-                await _taskSyncClient!.UpdateTaskAsync(updatedDto);
-                Overview.Refresh(Tasks);
-            }, "Failed to update task completion.", SnackbarMessageQueue);
-        }
         #endregion
 
         #region Public Methods
@@ -334,13 +326,16 @@ namespace Todos.Ui.ViewModels
                 if (currentUserId > 0)
                 {
                     var userTaskDtos = await _taskSyncClient!.GetUserTasksAsync(currentUserId);
-
                     var userTaskModels = userTaskDtos.Select(dto => _mapper!.Map<TaskModel>(dto));
-                    Tasks = new ObservableCollection<TaskModel>(userTaskModels);
-                    Overview.Refresh(Tasks);
-                    FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
-                    FilteredTasksView.Filter = FilterPredicate;
-                    UpdateFilteredTasks();
+
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        Tasks = new ObservableCollection<TaskModel>(userTaskModels);
+                        Overview.Refresh(Tasks);
+                        FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
+                        FilteredTasksView.Filter = FilterPredicate;
+                        UpdateFilteredTasks();
+                    });
                 }
                 else
                 {
@@ -388,31 +383,31 @@ namespace Todos.Ui.ViewModels
             UpdateFilteredTasks();
         }
 
-        private void HandleTaskAdded(TaskDTO taskDto)
+        private void HandleTaskAdded(TaskDTO task)
         {
-            _logger?.Information("TasksViewModel: HandleTaskAdded called for TaskId {TaskId}", taskDto?.Id);
-            if (taskDto == null) return;
-            var model = _mapper!.Map<TaskModel>(taskDto);
+            _logger?.Information("TasksViewModel: HandleTaskAdded called for TaskId {TaskId}", task?.Id);
+            if (task == null) return;
+            var model = _mapper!.Map<TaskModel>(task);
             Application.Current.Dispatcher.Invoke(() =>
             {
-            Tasks.Add(model);
-            UpdateFilteredTasks();
+                Tasks.Add(model);
+                UpdateFilteredTasks();
             });
         }
 
-        private void HandleTaskUpdated(TaskDTO taskDto)
+        private void HandleTaskUpdated(TaskDTO task)
         {
-            _logger?.Information("TasksViewModel: HandleTaskUpdated called for TaskId {TaskId}", taskDto?.Id);
-            if (taskDto == null) return;
-            var model = Tasks.FirstOrDefault(t => t.Id == taskDto.Id);
+            _logger?.Information("TasksViewModel: HandleTaskUpdated called for TaskId {TaskId}", task?.Id);
+            if (task == null) return;
+            var model = Tasks.FirstOrDefault(t => t.Id == task.Id);
             if (model != null)
             {
                 var index = Tasks.IndexOf(model);
-                var updatedModel = _mapper!.Map<TaskModel>(taskDto);
+                var updatedModel = _mapper!.Map<TaskModel>(task);
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     Tasks[index] = updatedModel;
-                UpdateFilteredTasks();
+                    UpdateFilteredTasks();
                 });
             }
         }
@@ -424,9 +419,9 @@ namespace Todos.Ui.ViewModels
             if (model != null)
             {
                 Application.Current.Dispatcher.Invoke(() =>
-            {
-                Tasks.Remove(model);
-                UpdateFilteredTasks();
+                {
+                    Tasks.Remove(model);
+                    Overview.Refresh(Tasks);
                 });
             }
         }

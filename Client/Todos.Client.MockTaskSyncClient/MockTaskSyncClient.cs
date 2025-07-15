@@ -41,6 +41,7 @@ namespace Todos.Client.MockTaskSyncClient
         public event Action<int> TaskUnlocked;
 
         private string _jwtToken = string.Empty;
+        public string ConnectionId { get; private set; }
 
         public void SetJwtToken(string jwt)
         {
@@ -57,10 +58,12 @@ namespace Todos.Client.MockTaskSyncClient
         {
             _logger?.Information("MockTaskSyncClient: Connecting...");
             ConnectionStatus = ConnectionStatus.Connecting;
+            if (string.IsNullOrEmpty(ConnectionId))
+                ConnectionId = Guid.NewGuid().ToString();
             // Simulate connection delay
             Task.Delay(500).ContinueWith(_ => {
                 ConnectionStatus = ConnectionStatus.Connected;
-                _logger?.Information("MockTaskSyncClient: Connected.");
+                _logger?.Information($"MockTaskSyncClient: Connected. ConnectionId: {ConnectionId}");
             });
             return Task.CompletedTask;
         }
@@ -95,20 +98,12 @@ namespace Todos.Client.MockTaskSyncClient
             return Task.FromResult(true);
         }
 
-        public Task<bool> SetTaskCompletionAsync(int taskId, bool isCompleted)
-        {
-            _logger?.Information("MockTaskSyncClient: SetTaskCompletionAsync for TaskId {TaskId}, IsCompleted: {IsCompleted}", taskId, isCompleted);
-            // For mock, just return true
-            return Task.FromResult(true);
-        }
-
         public Task<bool> LockTaskAsync(int taskId)
         {
             _logger?.Information("MockTaskSyncClient: TaskLocked event for TaskId {TaskId}", taskId);
             TaskLocked?.Invoke(taskId);
             return Task.FromResult(true);
         }
-
         public Task<bool> UnlockTaskAsync(int taskId)
         {
             _logger?.Information("MockTaskSyncClient: TaskUnlocked event for TaskId {TaskId}", taskId);

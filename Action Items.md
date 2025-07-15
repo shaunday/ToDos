@@ -1,11 +1,11 @@
 
 
 
-## UI
-
+signlarr server?
+lock unlock subs on tasksvm
 a bit more ui work on the list
-fail to save task
-commit pending methods?
+caching server, client
+login/ orchestrator > login
 
 ## Testing and Tooling
 
@@ -19,7 +19,6 @@ commit pending methods?
 
 * Write README.md with setup instructions and architecture overview
 
-
 ---
 
 ## Notes and Reminders
@@ -32,3 +31,4 @@ show item editing when filter and its not on
 On permanent disconnect, prompt UI to notify the user or retry manually.
 Log thread blocking or starvation events to simulate server pressure
 can add cancellation tokens or timeout policies to retry/wait delays for signalR client
+commit pending methods?

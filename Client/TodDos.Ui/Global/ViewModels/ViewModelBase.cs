@@ -9,6 +9,7 @@ using Todos.Client.Common.Interfaces;
 using Todos.Ui.Services.Navigation;
 using Serilog;
 using MaterialDesignThemes.Wpf;
+using System.Windows;
 
 namespace TodDos.Ui.Global.ViewModels
 {
@@ -52,12 +53,15 @@ namespace TodDos.Ui.Global.ViewModels
             }
             catch (Exception ex)
             {
-                _logger?.Error(ex, errorMessage);
-                snackbar?.Enqueue(errorMessage);
-                if (recovery != null)
+                _ = Application.Current.Dispatcher.Invoke(async () =>
                 {
-                    await recovery();
-                }
+                    _logger?.Error(ex, errorMessage);
+                    snackbar?.Enqueue(errorMessage);
+                    if (recovery != null)
+                    {
+                        await recovery();
+                    }
+                });
             }
         }
 

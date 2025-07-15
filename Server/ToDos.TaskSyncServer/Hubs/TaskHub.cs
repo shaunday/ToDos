@@ -51,6 +51,8 @@ namespace ToDos.TaskSyncServer.Hubs
                 
                 _logger.Information("Adding task for user: {UserId}", userId);
                 var result = await _taskService.AddTaskAsync(task);
+                // Broadcast to all except sender
+                BroadcastTaskAdded(result, Context.ConnectionId);
                 stopwatch.Stop();
                 return result;
             }
@@ -71,6 +73,8 @@ namespace ToDos.TaskSyncServer.Hubs
                 _logger.Information("Updating task {TaskId} for user: {UserId}", task.Id, userId);
                 
                 var result = await _taskService.UpdateTaskAsync(task);
+                // Broadcast to all except sender
+                BroadcastTaskUpdated(result, Context.ConnectionId);
                 stopwatch.Stop();
                 return result;
             }
@@ -89,6 +93,8 @@ namespace ToDos.TaskSyncServer.Hubs
             {
                 _logger.Information("Deleting task {TaskId} for user: {UserId}", taskId, userId);
                 var result = await _taskService.DeleteTaskAsync(userId, taskId);
+                // Broadcast to all except sender
+                BroadcastTaskDeleted(taskId, userId, Context.ConnectionId);
                 stopwatch.Stop();
                 return result;
             }
@@ -96,24 +102,6 @@ namespace ToDos.TaskSyncServer.Hubs
             {
                 stopwatch.Stop();
                 _logger.Error(ex, "Exception in DeleteTask for user: {UserId}", userId);
-                throw;
-            }
-        }
-
-        public async Task<bool> SetTaskCompletion(int userId, int taskId, bool isCompleted)
-        {
-            var stopwatch = Stopwatch.StartNew();
-            try
-            {
-                _logger.Information("Setting task completion {TaskId} to {IsCompleted} for user: {UserId}", taskId, isCompleted, userId);
-                var result = await _taskService.SetTaskCompletionAsync(userId, taskId, isCompleted);
-                stopwatch.Stop();
-                return result;
-            }
-            catch (Exception ex)
-            {
-                stopwatch.Stop();
-                _logger.Error(ex, "Exception in SetTaskCompletion for user: {UserId}", userId);
                 throw;
             }
         }
@@ -180,6 +168,11 @@ namespace ToDos.TaskSyncServer.Hubs
                 _logger.Error(ex, "Exception in GetUserTasks for user: {UserId}", GetCurrentUserId());
                 throw;
             }
+        }
+
+        public string GetConnectionId()
+        {
+            return Context.ConnectionId;
         }
 
         #region Event Handlers for Real-time Broadcasting
@@ -338,5 +331,34 @@ namespace ToDos.TaskSyncServer.Hubs
         #endregion
 
         public static int GetActiveConnections() => _activeConnections;
+
+        // Helper methods to broadcast with operationId and exceptConnectionId
+        private void BroadcastTaskAdded(TaskDTO task, string exceptConnectionId = null)
+        {
+            var groupName = $"User_{task.UserId}";
+            if (!string.IsNullOrEmpty(exceptConnectionId))
+                Clients.Group(groupName).AllExcept(exceptConnectionId).TaskAdded(task);
+            else
+                Clients.Group(groupName).TaskAdded(task);
+            _logger.Information("Broadcasted TaskAdded to group: {GroupName} except: {ExceptConnectionId}", groupName, exceptConnectionId);
+        }
+        private void BroadcastTaskUpdated(TaskDTO task, string exceptConnectionId = null)
+        {
+            var groupName = $"User_{task.UserId}";
+            if (!string.IsNullOrEmpty(exceptConnectionId))
+                Clients.Group(groupName).AllExcept(exceptConnectionId).TaskUpdated(task);
+            else
+                Clients.Group(groupName).TaskUpdated(task);
+            _logger.Information("Broadcasted TaskUpdated to group: {GroupName} except: {ExceptConnectionId}", groupName, exceptConnectionId);
+        }
+        private void BroadcastTaskDeleted(int taskId, int userId, string exceptConnectionId = null)
+        {
+            var groupName = $"User_{userId}";
+            if (!string.IsNullOrEmpty(exceptConnectionId))
+                Clients.Group(groupName).AllExcept(exceptConnectionId).TaskDeleted(taskId);
+            else
+                Clients.Group(groupName).TaskDeleted(taskId);
+            _logger.Information("Broadcasted TaskDeleted to group: {GroupName} except: {ExceptConnectionId}", groupName, exceptConnectionId);
+        }
     }
 } 

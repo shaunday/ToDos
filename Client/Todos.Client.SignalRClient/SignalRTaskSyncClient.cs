@@ -37,6 +37,8 @@ namespace Todos.Client.SignalRClient
         public event Action<int> TaskLocked;
         public event Action<int> TaskUnlocked;
 
+        public string ConnectionId { get; private set; }
+
         // Queue to hold pending hub method calls when disconnected
         private readonly ConcurrentQueue<Func<Task>> _pendingCalls = new ConcurrentQueue<Func<Task>>();
 
@@ -133,7 +135,16 @@ namespace Todos.Client.SignalRClient
 
                 await _hubConnection.Start();
 
-                _logger.Information("SignalR connection established.");
+                // Retrieve and set ConnectionId from server
+                if (string.IsNullOrEmpty(ConnectionId))
+                {
+                    ConnectionId = await _hubProxy.Invoke<string>("GetConnectionId");
+                    _logger.Information($"SignalR connection established. ConnectionId: {ConnectionId}");
+                }
+                else
+                {
+                    _logger.Information($"SignalR connection established. Existing ConnectionId: {ConnectionId}");
+                }
                 SetConnectionStatus(ConnectionStatus.Connected);
 
                 // Drain pending calls queued while disconnected
@@ -254,26 +265,33 @@ namespace Todos.Client.SignalRClient
 
         #region Public API Methods
 
-        public Task<TaskDTO> AddTaskAsync(TaskDTO task) =>
-            InvokeWithRetrySafeAsync<TaskDTO>(SignalRGlobals.AddTask, task);
+        // Only keep AddTaskAsync, UpdateTaskAsync, DeleteTaskAsync, and the events
+        public Task<TaskDTO> AddTaskAsync(TaskDTO task)
+        {
+            return InvokeWithRetrySafeAsync<TaskDTO>(SignalRGlobals.AddTask, task);
+        }
 
-        public Task<TaskDTO> UpdateTaskAsync(TaskDTO task) =>
-            InvokeWithRetrySafeAsync<TaskDTO>(SignalRGlobals.UpdateTask, task);
+        public Task<TaskDTO> UpdateTaskAsync(TaskDTO task)
+        {
+            return InvokeWithRetrySafeAsync<TaskDTO>(SignalRGlobals.UpdateTask, task);
+        }
 
-        public Task<bool> DeleteTaskAsync(int taskId) =>
-            InvokeWithRetrySafeAsync<bool>(SignalRGlobals.DeleteTask, taskId);
-
-        public Task<bool> SetTaskCompletionAsync(int taskId, bool isCompleted) =>
-            InvokeWithRetrySafeAsync<bool>(SignalRGlobals.SetTaskCompletion, taskId, isCompleted);
-
-        public Task<bool> LockTaskAsync(int taskId) =>
-            InvokeWithRetrySafeAsync<bool>(SignalRGlobals.LockTask, taskId);
-
-        public Task<bool> UnlockTaskAsync(int taskId) =>
-            InvokeWithRetrySafeAsync<bool>(SignalRGlobals.UnlockTask, taskId);
+        public Task<bool> DeleteTaskAsync(int taskId)
+        {
+            return InvokeWithRetrySafeAsync<bool>(SignalRGlobals.DeleteTask, taskId);
+        }
 
         public Task<IEnumerable<TaskDTO>> GetUserTasksAsync(int userId) =>
             InvokeWithRetrySafeAsync<IEnumerable<TaskDTO>>(SignalRGlobals.GetUserTasks, userId);
+
+        public Task<bool> LockTaskAsync(int taskId)
+        {
+            return InvokeWithRetrySafeAsync<bool>(SignalRGlobals.LockTask, taskId);
+        }
+        public Task<bool> UnlockTaskAsync(int taskId)
+        {
+            return InvokeWithRetrySafeAsync<bool>(SignalRGlobals.UnlockTask, taskId);
+        }
 
         #endregion
 

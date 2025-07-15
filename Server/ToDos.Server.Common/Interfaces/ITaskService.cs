@@ -12,7 +12,6 @@ namespace ToDos.Server.Common.Interfaces
         Task<TaskDTO> AddTaskAsync(TaskDTO task);
         Task<TaskDTO> UpdateTaskAsync(TaskDTO task);
         Task<bool> DeleteTaskAsync(int userId, int taskId);
-        Task<bool> SetTaskCompletionAsync(int userId, int taskId, bool isCompleted);
         Task<bool> LockTaskAsync(int userId, int taskId);
         Task<bool> UnlockTaskAsync(int userId, int taskId);
         

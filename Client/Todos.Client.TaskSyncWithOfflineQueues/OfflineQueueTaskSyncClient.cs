@@ -7,13 +7,13 @@ using static Todos.Client.Common.TypesGlobal;
 
 namespace Todos.Client.TaskSyncWithOfflineQueues
 {
-    public class TaskSyncWithOfflineQueues : ITaskSyncClient
+    public class OfflineQueueTaskSyncClient : ITaskSyncClient
     {
         private readonly ITaskSyncClient _innerClient;
         private readonly IOfflineQueueService _queueService;
         private bool _isOnline = true;
 
-        public TaskSyncWithOfflineQueues(ITaskSyncClient innerClient, IOfflineQueueService queueService)
+        public OfflineQueueTaskSyncClient(ITaskSyncClient innerClient, IOfflineQueueService queueService)
         {
             _innerClient = innerClient;
             _queueService = queueService;
@@ -31,6 +31,11 @@ namespace Todos.Client.TaskSyncWithOfflineQueues
 
         public ConnectionStatus ConnectionStatus => _innerClient.ConnectionStatus;
         public event Action<ConnectionStatus> ConnectionStatusChanged;
+
+        // Event forwarding: these simply pass through to the inner client.
+        // This is the cleanest way to expose the same events if you do not need custom logic.
+        // If you want to add custom logic (e.g., filtering, transformation),
+        // use a private backing event and subscribe to _innerClient events manually.
         public event Action<TaskDTO> TaskAdded { add { _innerClient.TaskAdded += value; } remove { _innerClient.TaskAdded -= value; } }
         public event Action<TaskDTO> TaskUpdated { add { _innerClient.TaskUpdated += value; } remove { _innerClient.TaskUpdated -= value; } }
         public event Action<int> TaskDeleted { add { _innerClient.TaskDeleted += value; } remove { _innerClient.TaskDeleted -= value; } }
@@ -79,18 +84,6 @@ namespace Todos.Client.TaskSyncWithOfflineQueues
             }
         }
 
-        public async Task<bool> SetTaskCompletionAsync(int taskId, bool isCompleted)
-        {
-            if (_isOnline)
-                return await _innerClient.SetTaskCompletionAsync(taskId, isCompleted);
-            else
-            {
-                var action = new PendingAction { ActionType = "SetCompletion", Task = new TaskDTO { Id = taskId, IsCompleted = isCompleted }, Timestamp = DateTime.UtcNow };
-                _queueService.Enqueue(action);
-                return true;
-            }
-        }
-
         public async Task<bool> LockTaskAsync(int taskId)
         {
             if (_isOnline)
@@ -102,7 +95,6 @@ namespace Todos.Client.TaskSyncWithOfflineQueues
                 return true;
             }
         }
-
         public async Task<bool> UnlockTaskAsync(int taskId)
         {
             if (_isOnline)
@@ -128,6 +120,7 @@ namespace Todos.Client.TaskSyncWithOfflineQueues
             var actions = _queueService.GetAll();
             foreach (var action in actions)
             {
+                var opId = Guid.NewGuid().ToString();
                 switch (action.ActionType)
                 {
                     case "Add":
@@ -138,15 +131,6 @@ namespace Todos.Client.TaskSyncWithOfflineQueues
                         break;
                     case "Delete":
                         await _innerClient.DeleteTaskAsync(action.Task.Id);
-                        break;
-                    case "SetCompletion":
-                        await _innerClient.SetTaskCompletionAsync(action.Task.Id, action.Task.IsCompleted);
-                        break;
-                    case "Lock":
-                        await _innerClient.LockTaskAsync(action.Task.Id);
-                        break;
-                    case "Unlock":
-                        await _innerClient.UnlockTaskAsync(action.Task.Id);
                         break;
                 }
                 _queueService.Remove(action);

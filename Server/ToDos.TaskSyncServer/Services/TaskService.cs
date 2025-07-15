@@ -151,38 +151,6 @@ namespace ToDos.TaskSyncServer.Services
             }
         }
 
-        public async Task<bool> SetTaskCompletionAsync(int userId, int taskId, bool isCompleted)
-        {
-            try
-            {
-                _logger.Information("Setting task completion: {TaskId}, Completed: {IsCompleted} for user: {UserId}", taskId, isCompleted, userId);
-                
-                var success = await _taskRepository.SetCompletionAsync(userId, taskId, isCompleted);
-                
-                if (success)
-                {
-                    var updatedTask = await _taskRepository.GetByIdAsync(userId, taskId);
-                    var taskDto = _mapper.Map<TaskDTO>(updatedTask);
-                    
-                    // Raise event for real-time updates
-                    TaskUpdated?.Invoke(taskDto);
-                    
-                    _logger.Information("Task completion updated successfully: {TaskId}", taskId);
-                }
-                else
-                {
-                    _logger.Warning("Task not found for completion update: {TaskId}", taskId);
-                }
-                
-                return success;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Error setting task completion: {TaskId}", taskId);
-                throw;
-            }
-        }
-
         public async Task<bool> LockTaskAsync(int userId, int taskId)
         {
             try

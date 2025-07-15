@@ -10,7 +10,6 @@ namespace ToDos.TaskSyncServer.Interfaces
         Task<TaskDTO> AddTask(TaskDTO task);
         Task<TaskDTO> UpdateTask(TaskDTO task);
         Task<bool> DeleteTask(int userId, int taskId);
-        Task<bool> SetTaskCompletion(int userId, int taskId, bool isCompleted);
         Task<bool> LockTask(int userId, int taskId);
         Task<bool> UnlockTask(int userId, int taskId);
         Task<IEnumerable<TaskDTO>> GetUserTasks(int userId);

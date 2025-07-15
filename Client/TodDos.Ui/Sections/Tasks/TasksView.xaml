@@ -152,10 +152,6 @@
                 </Style.Triggers>
             </Style>
 
-            <!-- Actions Column Cell Style - Always hit test visible -->
-            <Style x:Key="ActionsCellStyle" TargetType="DataGridCell" BasedOn="{StaticResource TaskCellStyle}">
-                <Setter Property="IsHitTestVisible" Value="True"/>
-            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
 

@@ -50,7 +50,7 @@
 
     <!-- Actions Column Template -->
     <DataTemplate x:Key="ActionsDataTemplate">
-        <ContentControl>
+        <ContentControl Content="{Binding}">
             <ContentControl.Style>
                 <Style TargetType="ContentControl" BasedOn="{StaticResource CenteredContentControlStyle}">
                     <Setter Property="ContentTemplate" Value="{StaticResource ActionsViewTemplate}" />
