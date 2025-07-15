@@ -6,15 +6,10 @@
 
 
 
-## SignalR Client
-can add cancellation tokens or timeout policies to retry/wait delays.
-
----
 
 ## Entity Framework and Database
 
 * Prepare schema and code for CQRS-style read/write separation 
-* partitioning proof?
 * Implement \_taskCommandQueue to throttle DB writes (Single Writer Pattern)
 * Simulate master/slave DB (write to one, read from another with periodic sync)
 * Throttle or reject low-priority writes when under heavy load.: backpressure mechanism.
@@ -22,7 +17,10 @@ can add cancellation tokens or timeout policies to retry/wait delays.
 
 ## Client-Side (WPF + MVVM)
 
-* flow ? edit > update > unlock? those shold be queued ?
+fix get user id - from appviewmodel
+get all tasks on reconnect
+a bit more ui work on the list
+
 Make sure that both client and server validate all inputs (e.g., task titles not empty, due dates valid).
 
 ---
@@ -52,10 +50,10 @@ Make sure that both client and server validate all inputs (e.g., task titles not
 ## Notes and Reminders
 
 * Track and simulate connection drops, reconnect logic, slow DB writes, and queue overflow
-* Be aware SignalR doesn’t guarantee message delivery, handle edge cases
 
 
 nice to have:
 show item editing when filter and its not on
 On permanent disconnect, prompt UI to notify the user or retry manually.
-Log thread blocking or starvation events to simulate server pressure?
+Log thread blocking or starvation events to simulate server pressure
+can add cancellation tokens or timeout policies to retry/wait delays for signalR client

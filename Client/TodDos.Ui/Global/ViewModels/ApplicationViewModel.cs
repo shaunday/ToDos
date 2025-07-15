@@ -26,6 +26,7 @@ namespace Todos.Ui.ViewModels
         private UserModel currentUser;
 
         private readonly IUserService _userService;
+        private readonly IOfflineQueueService _offlineQueueService;
 
         public string ConnectionStatusText => ConnectionStatus switch
         {
@@ -36,10 +37,11 @@ namespace Todos.Ui.ViewModels
             _ => "Disconnected"
         };
 
-        public ApplicationViewModel(IUserService userService, ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation) 
+        public ApplicationViewModel(IUserService userService, ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation, IOfflineQueueService offlineQueueService) 
             : base(taskSyncClient, mapper, navigation)
         {
             _userService = userService;
+            _offlineQueueService = offlineQueueService;
             
             // Subscribe to events
             _userService.TokenChanged += HandleTokenChanged;
@@ -122,6 +124,7 @@ namespace Todos.Ui.ViewModels
             try
             {
                 await _userService.LogoutAsync();
+                _offlineQueueService.Clear(); // Clear offline queue on logout
                 // Disconnection will be handled by HandleTokenChanged
             }
             catch (Exception)

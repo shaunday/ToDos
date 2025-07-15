@@ -19,6 +19,7 @@ using static Todos.Client.Common.TypesGlobal;
 using Todos.Client.UserService;
 using ToDos.MockAuthService;
 using System.Linq;
+using Todos.Client.TaskSyncWithOfflineQueues;
 
 namespace Todos.Ui
 {
@@ -71,7 +72,13 @@ namespace Todos.Ui
             // Register services
             Container.RegisterSingleton<INavigationService, NavigationService>();
             Container.RegisterSingleton<IUserService, MockUserService>();
-            Container.RegisterSingleton<ITaskSyncClient, MockTaskSyncClient>();
+            Container.RegisterSingleton<IOfflineQueueService, MemBasedOfflineQueueService>();
+            Container.RegisterFactory<ITaskSyncClient>(c =>
+                new TaskSyncWithOfflineQueues(
+                    new MockTaskSyncClient(Log.Logger),
+                    c.Resolve<IOfflineQueueService>()
+                )
+            );
             Container.RegisterSingleton<IAuthService, MockAuthService>();
             Container.RegisterInstance(Log.Logger);
 

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>Todos.Client.TaskSyncWithOfflineQueues</RootNamespace>
+    <AssemblyName>Todos.Client.TaskSyncWithOfflineQueues</AssemblyName>
+    <LangVersion>8.0</LangVersion>
+    <OutputPath>..\bin\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\ToDos.DotNet.Common\ToDos.DotNet.Common.csproj" />
+    <ProjectReference Include="..\Todos.Client.Common\Todos.Client.Common.csproj" />
+  </ItemGroup>
+</Project> 
