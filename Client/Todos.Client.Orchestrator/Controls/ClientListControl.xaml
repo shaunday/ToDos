@@ -17,10 +17,10 @@
         <Style x:Key="CenterCellButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="HorizontalAlignment" Value="Center" />
-            <Setter Property="Width" Value="120" />
-            <Setter Property="Height" Value="36" />
-            <Setter Property="FontSize" Value="15" />
-            <Setter Property="Margin" Value="0,0,12,0" />
+            <Setter Property="Width" Value="70" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Margin" Value="0,0,6,0" />
         </Style>
         <Style x:Key="CenterCellCheckBox" TargetType="CheckBox">
             <Setter Property="VerticalAlignment" Value="Center" />
@@ -49,7 +49,7 @@
                       ItemsSource="{Binding FilteredClientsView}"
                       SelectedItem="{Binding SelectedClient, Mode=TwoWay}"
                       SelectionMode="Extended"
-                      Margin="0,0,0,0" Height="500"
+                      Margin="0,0,0,0" 
                       ScrollViewer.VerticalScrollBarVisibility="Auto">
                 <ListView.View>
                     <GridView>
@@ -92,7 +92,7 @@
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Button Content="Open Log" Command="{Binding DataContext.OpenLogCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Style="{StaticResource CenterCellButton}" />
+                                        <Button Content="Open Log" Command="{Binding DataContext.OpenLogCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Style="{StaticResource CenterCellButton}" Width="110" />
                                         <Button Content="Kill" Command="{Binding DataContext.KillClientCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Style="{StaticResource CenterCellButton}" IsEnabled="{Binding IsAlive}" />
                                     </StackPanel>
                                 </DataTemplate>

@@ -191,7 +191,6 @@ namespace Todos.Client.Orchestrator.ViewModels
             // Remove client and refresh view
             App.Current.Dispatcher.Invoke(() =>
             {
-                _clientService.RemoveClient(client);
                 FilteredClientsView.Refresh();
                 NotifyClientCountsChanged();
             });

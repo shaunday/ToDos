@@ -8,6 +8,7 @@
         xmlns:common="clr-namespace:Todos.Client.Common;assembly=Todos.Client.Common"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
+        Padding="5"
         Title="Orchestrator" Height="800" Width="1600" 
         MinHeight="600" MinWidth="1200"
         WindowStartupLocation="CenterScreen">
@@ -33,91 +34,94 @@
     </Window.Resources>
     <Grid Background="{DynamicResource MaterialDesignPaper}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" MinWidth="600" />
-            <ColumnDefinition Width="2" />
-            <ColumnDefinition Width="*" MinWidth="600" />
+            <ColumnDefinition Width="250"/> <!-- Sidebar for controls -->
+            <ColumnDefinition Width="700"/> <!-- Client list, constant width -->
+            <ColumnDefinition Width="*"/>   <!-- Log viewer, takes remaining space -->
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Unified vertical stack for title and groups -->
-        <StackPanel Grid.Column="0" Grid.Row="0" Orientation="Vertical" Margin="24,24,24,24" VerticalAlignment="Top" HorizontalAlignment="Stretch" >
-            <StackPanel.Resources>
-                <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBoxBase}">
-                    <Setter Property="Margin" Value="0,0,25,0" />
-                    <Setter Property="VerticalAlignment" Value="Center" />
-                    <Setter Property="FontWeight" Value="Normal" />
-                    <Setter Property="FontSize" Value="14" />
-                    <Setter Property="Width" Value="120" />
-                </Style>
-                <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignSubtitle1TextBlock}">
-                    <Setter Property="Margin" Value="0,0,16,0" />
-                    <Setter Property="VerticalAlignment" Value="Center" />
-                </Style>
-                <Style TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignComboBox}">
-                    <Setter Property="Margin" Value="0,0,25,0" />
-                    <Setter Property="VerticalAlignment" Value="Center" />
-                    <Setter Property="FontWeight" Value="Normal" />
-                    <Setter Property="FontSize" Value="15" />
-                    <Setter Property="Width" Value="120" />
-                </Style>
-                <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
-                    <Setter Property="Margin" Value="0,0,16,0" />
-                    <Setter Property="VerticalAlignment" Value="Center" />
-                    <Setter Property="FontWeight" Value="SemiBold" />
-                    <Setter Property="FontSize" Value="15" />
-                    <Setter Property="MinWidth" Value="100" />
-                    <Setter Property="Height" Value="32" />
-                </Style>
-                <Style TargetType="CheckBox" BasedOn="{StaticResource MaterialDesignDarkCheckBox}">
-                    <Setter Property="Margin" Value="0,0,25,0" />
-                    <Setter Property="VerticalAlignment" Value="Center" />
-                </Style>
-            </StackPanel.Resources>
-            <TextBlock Text="Orchestrator Launcher" Style="{StaticResource HeaderTextStyle}"/>
-            <GroupBox Header="Client Launcher">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock Text="Client Type:" />
-                    <ComboBox x:Name="ClientTypeComboBox" SelectedItem="{Binding LaunchClientType, Mode=TwoWay}" ItemsSource="{Binding Source={StaticResource ClientTypeValues}}" SelectedIndex="0" />
-                    <TextBlock Text="Count:" />
-                    <TextBox x:Name="ClientCountTextBox" Text="{Binding LaunchClientCount, Mode=TwoWay}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" />
-                    <Button Content="Launch Client" Style="{StaticResource MaterialDesignRaisedButton}" Command="{Binding LaunchClientCommand}" HorizontalAlignment="Center" Margin="0" />
+        <!-- Sidebar Controls -->
+        <StackPanel Grid.Column="0" Margin="4,8,0,8" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
+            <materialDesign:Card Padding="8" Margin="0,0,0,8" materialDesign:ElevationAssist.Elevation="Dp1">
+                <StackPanel>
+                    <TextBlock Text="Orchestrator Launcher" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Margin="0,0,0,16"/>
+                    <!-- Client Launcher controls in a Grid for alignment -->
+                    <Grid Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Client Type:" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="ClientTypeComboBox" Grid.Column="1" SelectedItem="{Binding LaunchClientType, Mode=TwoWay}" ItemsSource="{Binding Source={StaticResource ClientTypeValues}}" SelectedIndex="0" Margin="8,0,0,0"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Count:" VerticalAlignment="Center"/>
+                        <TextBox x:Name="ClientCountTextBox" Grid.Column="1" Text="{Binding LaunchClientCount, Mode=TwoWay}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="8,0,0,0"/>
+                    </Grid>
+                    <Button Content="Launch Client(s)" Style="{StaticResource MaterialDesignRaisedButton}" Command="{Binding LaunchClientCommand}" HorizontalAlignment="Stretch" Margin="0,4,0,0"/>
                 </StackPanel>
-            </GroupBox>
-            <GroupBox Header="Simulator Controls">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock Text="Simulator PID:" />
-                    <ComboBox x:Name="SimulatorPidComboBox" ItemsSource="{Binding SimulatorPids}" SelectedItem="{Binding SelectedSimulatorPid, Mode=TwoWay}" />
-                    <TextBlock Text="Command:" />
-                    <ComboBox x:Name="SimulatorCommandComboBox" ItemsSource="{Binding SimulatorCommands}" SelectedItem="{Binding SelectedSimulatorCommand, Mode=TwoWay}" />
-                    <Button Content="Simulate" Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding SimulateCommand}" HorizontalAlignment="Center" Margin="0" />
+            </materialDesign:Card>
+            <materialDesign:Card Padding="8" Margin="0,0,0,8" materialDesign:ElevationAssist.Elevation="Dp1">
+                <StackPanel>
+                    <TextBlock Text="Simulator Controls" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Margin="0,0,0,8"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Simulator PID:" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="SimulatorPidComboBox" Grid.Column="1" ItemsSource="{Binding SimulatorPids}" SelectedItem="{Binding SelectedSimulatorPid, Mode=TwoWay}" Margin="8,0,0,0"/>
+                    </Grid>
+                    <Grid Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Command:" VerticalAlignment="Center"/>
+                        <ComboBox x:Name="SimulatorCommandComboBox" Grid.Column="1" ItemsSource="{Binding SimulatorCommands}" SelectedItem="{Binding SelectedSimulatorCommand, Mode=TwoWay}" Margin="8,0,0,0"/>
+                    </Grid>
+                    <Button Content="Simulate" Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding SimulateCommand}" HorizontalAlignment="Stretch" Margin="0,4,0,0"/>
                 </StackPanel>
-            </GroupBox>
-            <GroupBox Header="Filtering" Margin="0">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock Text="Client Type:" />
-                    <ComboBox x:Name="ClientTypeCombo"
-                              ItemsSource="{Binding Source={StaticResource ClientTypeValues}}"
-                              SelectedItem="{Binding FilterClientType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              IsEditable="False" />
-                    <CheckBox x:Name="IsAliveCheck" Content="Alive Only" IsChecked="{Binding FilterIsAlive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    <TextBlock Text="PID:" />
-                    <TextBox Text="{Binding FilterProcessIdText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" />
-                    <Button Content="Clear All Filters" Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding ClearFiltersCommand}" Margin="0" />
+            </materialDesign:Card>
+            <materialDesign:Card Padding="8" materialDesign:ElevationAssist.Elevation="Dp1">
+                <StackPanel>
+                    <TextBlock Text="Filtering" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Margin="0,0,0,8"/>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <!-- Client Type Filter -->
+                        <TextBlock Text="Client Type:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0"/>
+                        <ComboBox x:Name="ClientTypeCombo" Grid.Row="0" Grid.Column="1" ItemsSource="{Binding Source={StaticResource ClientTypeValues}}" SelectedItem="{Binding FilterClientType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEditable="False" Margin="8,0,0,0"/>
+                        <!-- IsAliveCheck centered in its own row -->
+                        <CheckBox x:Name="IsAliveCheck" Content="Alive Only" IsChecked="{Binding FilterIsAlive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <!-- PID Filter -->
+                        <TextBlock Text="PID:" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                        <TextBox Text="{Binding FilterProcessIdText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" VerticalContentAlignment="Center" Margin="60,0,0,0"/>
+                    </Grid>
+                    <Button Content="Clear All Filters" Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding ClearFiltersCommand}" HorizontalAlignment="Stretch" Margin="0,4,0,0"/>
                 </StackPanel>
-            </GroupBox>
+            </materialDesign:Card>
         </StackPanel>
 
-        <!-- Client List and Actions -->
-        <controls:ClientListControl Grid.Column="0" Grid.Row="1" Margin="24,0,24,24" />
+        <!-- Client List: remains large and central -->
+        <controls:ClientListControl Grid.Column="1" Margin="4,8,4,8" />
 
-        <!-- Combined Log Viewer -->
-        <materialDesign:Card Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" Margin="24,24,24,24" Padding="24" materialDesign:ElevationAssist.Elevation="Dp2">
-            <controls:LogViewerControl x:Name="LogViewer"
-                                      Margin="0"
-                                      Height="700"/>
+        <!-- Log Viewer: now on the far right, takes remaining space, reduced margin -->
+        <materialDesign:Card Grid.Column="2" Margin="4,8,4,8" Padding="8" materialDesign:ElevationAssist.Elevation="Dp2" VerticalAlignment="Stretch">
+            <controls:LogViewerControl x:Name="LogViewer"/>
         </materialDesign:Card>
     </Grid>
 </Window>
