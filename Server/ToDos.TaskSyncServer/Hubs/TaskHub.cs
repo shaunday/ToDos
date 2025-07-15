@@ -8,6 +8,7 @@ using ToDos.TaskSyncServer.Interfaces;
 using ToDos.TaskSyncServer.Attributes;
 using Serilog;
 using System.Collections.Generic;
+using ToDos.DotNet.Common.SignalR;
 
 namespace ToDos.TaskSyncServer.Hubs
 {
@@ -64,17 +65,18 @@ namespace ToDos.TaskSyncServer.Hubs
             }
         }
 
-        public async Task<TaskDTO> UpdateTask(TaskDTO task)
+        public async Task<bool> UpdateTask(TaskDTO task)
         {
             var stopwatch = Stopwatch.StartNew();
             try
             {
                 var userId = GetCurrentUserId();
                 _logger.Information("Updating task {TaskId} for user: {UserId}", task.Id, userId);
-                
                 var result = await _taskService.UpdateTaskAsync(task);
-                // Broadcast to all except sender
-                BroadcastTaskUpdated(result, Context.ConnectionId);
+                if (result)
+                {
+                    BroadcastTaskUpdated(task, Context.ConnectionId);
+                }
                 stopwatch.Stop();
                 return result;
             }
@@ -183,7 +185,7 @@ namespace ToDos.TaskSyncServer.Hubs
             {
                 // Broadcast only to the user who owns the task
                 var groupName = $"User_{task.UserId}";
-                Clients.Group(groupName).TaskAdded(task);
+                BroadcastTaskAdded(task);
                 _logger.Information("Broadcasted TaskAdded to group: {GroupName}", groupName);
             }
             catch (Exception ex)
@@ -198,7 +200,7 @@ namespace ToDos.TaskSyncServer.Hubs
             {
                 // Broadcast only to the user who owns the task
                 var groupName = $"User_{task.UserId}";
-                Clients.Group(groupName).TaskUpdated(task);
+                BroadcastTaskUpdated(task);
                 _logger.Information("Broadcasted TaskUpdated to group: {GroupName}", groupName);
             }
             catch (Exception ex)
@@ -211,9 +213,6 @@ namespace ToDos.TaskSyncServer.Hubs
         {
             try
             {
-                // For task deletion, we need to get the task owner from the service
-                // This is a simplified approach - in a real implementation, you might want to
-                // pass the userId along with the taskId in the event
                 var userId = GetTaskOwnerFromService(taskId);
                 if (userId > 0)
                 {
@@ -232,7 +231,6 @@ namespace ToDos.TaskSyncServer.Hubs
         {
             try
             {
-                // For task locking, we need to get the task owner from the service
                 var userId = GetTaskOwnerFromService(taskId);
                 if (userId > 0)
                 {
@@ -251,7 +249,6 @@ namespace ToDos.TaskSyncServer.Hubs
         {
             try
             {
-                // For task unlocking, we need to get the task owner from the service
                 var userId = GetTaskOwnerFromService(taskId);
                 if (userId > 0)
                 {
@@ -359,6 +356,24 @@ namespace ToDos.TaskSyncServer.Hubs
             else
                 Clients.Group(groupName).TaskDeleted(taskId);
             _logger.Information("Broadcasted TaskDeleted to group: {GroupName} except: {ExceptConnectionId}", groupName, exceptConnectionId);
+        }
+        private void BroadcastTaskLocked(int taskId, int userId, string exceptConnectionId = null)
+        {
+            var groupName = $"User_{userId}";
+            if (!string.IsNullOrEmpty(exceptConnectionId))
+                Clients.Group(groupName).AllExcept(exceptConnectionId).TaskLocked(taskId);
+            else
+                Clients.Group(groupName).TaskLocked(taskId);
+            _logger.Information("Broadcasted TaskLocked to group: {GroupName} except: {ExceptConnectionId}", groupName, exceptConnectionId);
+        }
+        private void BroadcastTaskUnlocked(int taskId, int userId, string exceptConnectionId = null)
+        {
+            var groupName = $"User_{userId}";
+            if (!string.IsNullOrEmpty(exceptConnectionId))
+                Clients.Group(groupName).AllExcept(exceptConnectionId).TaskUnlocked(taskId);
+            else
+                Clients.Group(groupName).TaskUnlocked(taskId);
+            _logger.Information("Broadcasted TaskUnlocked to group: {GroupName} except: {ExceptConnectionId}", groupName, exceptConnectionId);
         }
     }
 } 

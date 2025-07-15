@@ -155,10 +155,17 @@ namespace Todos.Ui.ViewModels
                 };
 
                 var newTaskDto = _mapper!.Map<TaskDTO>(newTaskModel);
-                var addedTaskDto = await _taskSyncClient!.AddTaskAsync(newTaskDto);
-                // Do NOT add to Tasks here; rely on HandleTaskAdded event
-                IsAddingNewTask = false;
-                NewTaskBuffer = null;
+                var res = await _taskSyncClient!.AddTaskAsync(newTaskDto);
+
+                if (res)
+                {
+                    IsAddingNewTask = false;
+                    NewTaskBuffer = null;
+                }
+                else
+                {
+                    //todo
+                }
             }, "Failed to add task.", SnackbarMessageQueue);
             IsLoading = false;
         }
@@ -195,15 +202,26 @@ namespace Todos.Ui.ViewModels
                 return;
             }
 
-            await RunWithErrorHandlingAsync(async () =>
+            await RunWithErrorHandlingAsync(() =>
             {
                 AddTaskErrorMessage = string.Empty;
                 // No need to copy from backup, just save the current task
                 var updatedDto = _mapper!.Map<TaskDTO>(task);
-                await _taskSyncClient!.UpdateTaskAsync(updatedDto);
-                await _taskSyncClient.UnlockTaskAsync(task.Id);
-                ChangeTaskEditMode(task, false);
-                UpdateFilteredTasks();
+                _ = Application.Current.Dispatcher.Invoke(async () =>
+                {
+                    var updateRes = await _taskSyncClient!.UpdateTaskAsync(updatedDto);
+                    if (updateRes)
+                    {
+                        bool unlockRes = await _taskSyncClient.UnlockTaskAsync(task.Id);
+                        ChangeTaskEditMode(task, false);
+                        UpdateFilteredTasks();
+                    }
+                    else
+                    {
+                        //todo
+                    }
+                });
+                return Task.CompletedTask;
             }, "Failed to save task.", SnackbarMessageQueue, () => { ChangeTaskEditMode(task, false); return Task.CompletedTask; });
         }
 
@@ -298,7 +316,7 @@ namespace Todos.Ui.ViewModels
             // Update filtered overview
             var filtered = Filter.Apply(Tasks, EditingTask);
             FilteredOverview.Refresh(filtered, EditingTask);
-            Overview.Refresh(Tasks);
+          Overview.Refresh(Tasks);
         }
 
         private bool FilterPredicate(object obj)

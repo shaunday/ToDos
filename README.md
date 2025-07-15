@@ -73,6 +73,8 @@ ASP.Net.Web > Interface for Communication > Implementation
 Automapping: DB Entity <> DTO
 
 
+write apis/interfaces for all access points / services
+
 Packages Used:
 CommunityToolkit.Mvvm (8.4.0) — Modern MVVM helpers and source generators for .NET UI apps.
 DotNetEnv (3.1.1) — Loads environment variables from .env files for configuration.

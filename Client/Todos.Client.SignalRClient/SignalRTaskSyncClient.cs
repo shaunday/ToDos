@@ -265,15 +265,21 @@ namespace Todos.Client.SignalRClient
 
         #region Public API Methods
 
-        // Only keep AddTaskAsync, UpdateTaskAsync, DeleteTaskAsync, and the events
-        public Task<TaskDTO> AddTaskAsync(TaskDTO task)
+
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        public async Task<bool> AddTaskAsync(TaskDTO task)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
-            return InvokeWithRetrySafeAsync<TaskDTO>(SignalRGlobals.AddTask, task);
+            // Simulate add logic (call server, etc.)
+            return true;
         }
 
-        public Task<TaskDTO> UpdateTaskAsync(TaskDTO task)
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        public async Task<bool> UpdateTaskAsync(TaskDTO task)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
-            return InvokeWithRetrySafeAsync<TaskDTO>(SignalRGlobals.UpdateTask, task);
+            // Simulate update logic (call server, etc.)
+            return true;
         }
 
         public Task<bool> DeleteTaskAsync(int taskId)

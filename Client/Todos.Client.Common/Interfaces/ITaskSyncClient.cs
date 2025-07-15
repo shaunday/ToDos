@@ -23,8 +23,8 @@ namespace Todos.Client.Common.Interfaces
         Task DisconnectAsync();
 
         // CRUD operations
-        Task<TaskDTO> AddTaskAsync(TaskDTO task);
-        Task<TaskDTO> UpdateTaskAsync(TaskDTO task);
+        Task<bool> AddTaskAsync(TaskDTO task);
+        Task<bool> UpdateTaskAsync(TaskDTO task);
         Task<bool> DeleteTaskAsync(int taskId);
         Task<bool> LockTaskAsync(int taskId);
         Task<bool> UnlockTaskAsync(int taskId);

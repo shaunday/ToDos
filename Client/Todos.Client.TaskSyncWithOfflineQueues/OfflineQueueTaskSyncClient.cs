@@ -48,7 +48,7 @@ namespace Todos.Client.TaskSyncWithOfflineQueues
         public Task ConnectAsync() => _innerClient.ConnectAsync();
         public Task DisconnectAsync() => _innerClient.DisconnectAsync();
 
-        public async Task<TaskDTO> AddTaskAsync(TaskDTO task)
+        public async Task<bool> AddTaskAsync(TaskDTO task)
         {
             if (_isOnline)
                 return await _innerClient.AddTaskAsync(task);
@@ -56,11 +56,11 @@ namespace Todos.Client.TaskSyncWithOfflineQueues
             {
                 var action = new PendingAction { ActionType = "Add", Task = task, UserId = task.UserId, Timestamp = DateTime.UtcNow };
                 _queueService.Enqueue(action);
-                return task;
+                return true;
             }
         }
 
-        public async Task<TaskDTO> UpdateTaskAsync(TaskDTO task)
+        public async Task<bool> UpdateTaskAsync(TaskDTO task)
         {
             if (_isOnline)
                 return await _innerClient.UpdateTaskAsync(task);
@@ -68,7 +68,7 @@ namespace Todos.Client.TaskSyncWithOfflineQueues
             {
                 var action = new PendingAction { ActionType = "Update", Task = task, UserId = task.UserId, Timestamp = DateTime.UtcNow };
                 _queueService.Enqueue(action);
-                return task;
+                return true;
             }
         }
 
@@ -120,7 +120,6 @@ namespace Todos.Client.TaskSyncWithOfflineQueues
             var actions = _queueService.GetAll();
             foreach (var action in actions)
             {
-                var opId = Guid.NewGuid().ToString();
                 switch (action.ActionType)
                 {
                     case "Add":

@@ -25,12 +25,10 @@ namespace ToDos.TaskSyncServer
         public void Configuration(IAppBuilder app)
         {
             // ThreadPool tuning for concurrency 
-            int oldMinWorker, oldMinIOC;
-            ThreadPool.GetMinThreads(out oldMinWorker, out oldMinIOC);
+            ThreadPool.GetMinThreads(out int oldMinWorker, out int oldMinIOC);
             Log.Logger.Information("Default ThreadPool min worker threads: {MinWorker}, min IO threads: {MinIOC}", oldMinWorker, oldMinIOC);
             ThreadPool.SetMinThreads(100, oldMinIOC); // Set min worker threads to 100
-            int newMinWorker, newMinIOC;
-            ThreadPool.GetMinThreads(out newMinWorker, out newMinIOC);
+            ThreadPool.GetMinThreads(out int newMinWorker, out int newMinIOC);
             Log.Logger.Information("ThreadPool min worker threads changed to: {MinWorker}, min IO threads: {MinIOC}", newMinWorker, newMinIOC);
             // For sharding: ensures that if a per-shard database does not exist, it will be auto-created
             // by Entity Framework Code First when first accessed. Remove or change for production if you want manual DB control.

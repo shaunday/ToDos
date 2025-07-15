@@ -84,7 +84,7 @@ namespace ToDos.TaskSyncServer.Services
             }
         }
 
-        public async Task<TaskDTO> UpdateTaskAsync(TaskDTO taskDto)
+        public async Task<bool> UpdateTaskAsync(TaskDTO taskDto)
         {
             try
             {
@@ -114,7 +114,7 @@ namespace ToDos.TaskSyncServer.Services
                 TaskUpdated?.Invoke(updatedTask);
                 
                 _logger.Information("Task updated successfully: {TaskId}", updatedTask.Id);
-                return updatedTask;
+                return true;
             }
             catch (Exception ex)
             {

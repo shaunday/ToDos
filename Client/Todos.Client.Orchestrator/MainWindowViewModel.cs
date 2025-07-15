@@ -89,8 +89,7 @@ namespace Todos.Client.Orchestrator.ViewModels
 
         private bool FilterClientPredicate(object obj)
         {
-            var c = obj as ClientModel;
-            if (c == null) return false;
+            if (!(obj is ClientModel c)) return false;
             if (FilterClientType.HasValue && c.ClientType != FilterClientType.Value) return false;
             if (FilterIsAlive.HasValue && c.IsAlive != FilterIsAlive.Value) return false;
             if (!string.IsNullOrWhiteSpace(FilterProcessIdText) && !c.ProcessId.ToString().Contains(FilterProcessIdText)) return false;
@@ -192,7 +191,9 @@ namespace Todos.Client.Orchestrator.ViewModels
             FilteredClientsView.Refresh();
         }
 
+#pragma warning disable IDE0060 // Remove unused parameter
         private void OnClientProcessExited(ClientModel client)
+#pragma warning restore IDE0060 // Remove unused parameter
         {
             // Remove client and refresh view
             App.Current.Dispatcher.Invoke(() =>

@@ -10,7 +10,7 @@ namespace ToDos.Server.Common.Interfaces
         Task<IEnumerable<TaskDTO>> GetUserTasksAsync(int userId);
         Task<TaskDTO> GetTaskByIdAsync(int userId, int taskId);
         Task<TaskDTO> AddTaskAsync(TaskDTO task);
-        Task<TaskDTO> UpdateTaskAsync(TaskDTO task);
+        Task<bool> UpdateTaskAsync(TaskDTO task);
         Task<bool> DeleteTaskAsync(int userId, int taskId);
         Task<bool> LockTaskAsync(int userId, int taskId);
         Task<bool> UnlockTaskAsync(int userId, int taskId);

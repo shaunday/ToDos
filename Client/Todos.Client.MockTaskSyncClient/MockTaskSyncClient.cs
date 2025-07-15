@@ -76,38 +76,32 @@ namespace Todos.Client.MockTaskSyncClient
             return Task.CompletedTask;
         }
 
-        public Task<TaskDTO> AddTaskAsync(TaskDTO task)
+        public Task<bool> AddTaskAsync(TaskDTO task)
         {
-            task.Id = new Random().Next(1, 10000); // Simple random ID for mock
-            _logger?.Information("MockTaskSyncClient: TaskAdded event for TaskId {TaskId}", task.Id);
-            TaskAdded?.Invoke(task);
-            return Task.FromResult(task);
+            // Simulate add logic
+            return Task.FromResult(true);
         }
 
-        public Task<TaskDTO> UpdateTaskAsync(TaskDTO task)
+        public Task<bool> UpdateTaskAsync(TaskDTO task)
         {
             _logger?.Information("MockTaskSyncClient: TaskUpdated event for TaskId {TaskId}", task.Id);
-            TaskUpdated?.Invoke(task);
-            return Task.FromResult(task);
+            return Task.FromResult(true);
         }
 
         public Task<bool> DeleteTaskAsync(int taskId)
         {
             _logger?.Information("MockTaskSyncClient: TaskDeleted event for TaskId {TaskId}", taskId);
-            TaskDeleted?.Invoke(taskId);
             return Task.FromResult(true);
         }
 
         public Task<bool> LockTaskAsync(int taskId)
         {
             _logger?.Information("MockTaskSyncClient: TaskLocked event for TaskId {TaskId}", taskId);
-            TaskLocked?.Invoke(taskId);
             return Task.FromResult(true);
         }
         public Task<bool> UnlockTaskAsync(int taskId)
         {
             _logger?.Information("MockTaskSyncClient: TaskUnlocked event for TaskId {TaskId}", taskId);
-            TaskUnlocked?.Invoke(taskId);
             return Task.FromResult(true);
         }
 
