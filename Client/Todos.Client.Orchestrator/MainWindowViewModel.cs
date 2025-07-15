@@ -40,13 +40,21 @@ namespace Todos.Client.Orchestrator.ViewModels
         [ObservableProperty]
         private string selectedSimulatorCommand;
 
-        public ObservableCollection<ClientModel> FilteredClients { get; } = new ObservableCollection<ClientModel>();
         public ICollectionView FilteredClientsView { get; }
 
         public MainWindowViewModel()
         {
             FilteredClientsView = CollectionViewSource.GetDefaultView(_clientService.Clients);
             FilteredClientsView.Filter = FilterClientPredicate;
+            // Subscribe to process Exited for all existing clients
+            foreach (var client in _clientService.Clients)
+            {
+                if (client.Process != null)
+                {
+                    client.Process.EnableRaisingEvents = true;
+                    client.Process.Exited += (s, e) => OnClientProcessExited(client);
+                }
+            }
             // Initial filter
             FilteredClientsView.Refresh();
         }
@@ -96,7 +104,7 @@ namespace Todos.Client.Orchestrator.ViewModels
                 {
                     _clientService.AddClient(TypesGlobal.ClientType.UiClient, proc);
                     proc.EnableRaisingEvents = true;
-                    proc.Exited += (s, e) => System.Windows.Application.Current?.Dispatcher.Invoke(() => FilteredClientsView.Refresh());
+                    proc.Exited += (s, e) => OnClientProcessExited(_clientService.Clients.FirstOrDefault(c => c.Process == proc));
                 }
             }
             FilteredClientsView.Refresh();
@@ -154,6 +162,16 @@ namespace Todos.Client.Orchestrator.ViewModels
         public void OnFilterChanged()
         {
             FilteredClientsView.Refresh();
+        }
+
+        private void OnClientProcessExited(ClientModel client)
+        {
+            // Remove client and refresh view
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                _clientService.RemoveClient(client);
+                FilteredClientsView.Refresh();
+            });
         }
     }
 } 

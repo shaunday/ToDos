@@ -30,7 +30,6 @@ namespace Todos.Client.Orchestrator
             // Also update after every filter refresh (for filter property changes)
             vm.FilteredClientsView.CurrentChanged += (s, e) => UpdateLogViewerFromFilteredClientsView(vm);
            
-
             // Handle window closing event
             Closing += MainWindow_Closing;
         }
@@ -51,11 +50,11 @@ namespace Todos.Client.Orchestrator
         {
             if (DataContext is MainWindowViewModel viewModel)
             {
-                var allClientsCount = viewModel.FilteredClients.Cast<object>().Count();
+                var allClientsCount = viewModel.FilteredClientsView.Cast<object>().Count();
                 if (allClientsCount > 0)
                 {
                     var result = MessageBox.Show(
-                        $"You have {viewModel.FilteredClients.Count} client(s) running. Do you want to close all clients and exit?",
+                        $"You have {allClientsCount} client(s) running. Do you want to close all clients and exit?",
                         "Confirm Exit",
                         MessageBoxButton.YesNoCancel,
                         MessageBoxImage.Question);

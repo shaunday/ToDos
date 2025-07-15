@@ -3,45 +3,72 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
              d:DesignHeight="400" d:DesignWidth="600">
     <UserControl.Resources>
         <Style x:Key="LogViewerStyle" TargetType="ItemsControl">
             <Setter Property="Background" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#DDD"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="VerticalAlignment" Value="Stretch"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>
             <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Visible"/>
             <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
-            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Margin" Value="0,8,0,0"/>
+        </Style>
+        <Style x:Key="RoundedButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+            <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="20"/>
         </Style>
     </UserControl.Resources>
-    <DockPanel>
-        <StackPanel Orientation="Horizontal" DockPanel.Dock="Top" Margin="5">
-            <TextBox Width="200" Margin="0,0,5,0" VerticalAlignment="Center"
-                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
-                     ToolTip="Search/filter log lines..."/>
-            <Button Content="Clear" Command="{Binding ClearCommand}" Width="60"/>
+    <DockPanel LastChildFill="True" Background="Transparent">
+        <StackPanel Orientation="Vertical" DockPanel.Dock="Top" Margin="0,0,0,12">
+            <TextBlock Text="Aggregated Log(s) Viewer" FontSize="20" FontWeight="Bold" Foreground="#222" Margin="0,0,0,8"/>
+            <Grid Margin="0,0,0,8" Height="44">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="120"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Background="#F5F5F7" CornerRadius="18" Padding="8,4" Height="40" VerticalAlignment="Center">
+                    <DockPanel LastChildFill="True">
+                        <materialDesign:PackIcon Kind="Magnify" Width="22" Height="22" Foreground="#888" Margin="4,0,8,0" VerticalAlignment="Center"/>
+                        <TextBox Width="320" Margin="0" VerticalAlignment="Center"
+                                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
+                                 ToolTip="Search/filter log lines..."
+                                 Style="{DynamicResource MaterialDesignOutlinedTextBox}"
+                                 BorderThickness="0"
+                                 Background="Transparent"
+                                 Padding="0,0,0,0"
+                                 FontSize="14"/>
+                    </DockPanel>
+                </Border>
+                <Button Grid.Column="2" Content="Clear" Command="{Binding ClearCommand}" MinWidth="100" Height="40"
+                        Style="{StaticResource RoundedButtonStyle}"
+                        Margin="16,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+            </Grid>
         </StackPanel>
-        <ItemsControl ItemsSource="{Binding FilteredLogLines}" Style="{StaticResource LogViewerStyle}">
-            <ItemsControl.Template>
-                <ControlTemplate>
-                    <ScrollViewer CanContentScroll="True">
-                        <ItemsPresenter/>
-                    </ScrollViewer>
-                </ControlTemplate>
-            </ItemsControl.Template>
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <VirtualizingStackPanel IsItemsHost="True"/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding Display}" FontFamily="Consolas" FontSize="12"/>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <Border CornerRadius="6" BorderBrush="#DDD" BorderThickness="1" Background="White" Padding="0" Margin="0,0,0,0">
+            <ItemsControl ItemsSource="{Binding FilteredLogLines}" Style="{StaticResource LogViewerStyle}">
+                <ItemsControl.Template>
+                    <ControlTemplate>
+                        <ScrollViewer CanContentScroll="True">
+                            <ItemsPresenter/>
+                        </ScrollViewer>
+                    </ControlTemplate>
+                </ItemsControl.Template>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <VirtualizingStackPanel IsItemsHost="True"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Display}" FontFamily="Consolas" FontSize="13" Foreground="#222" Padding="2,0,2,0"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Border>
     </DockPanel>
 </UserControl> 

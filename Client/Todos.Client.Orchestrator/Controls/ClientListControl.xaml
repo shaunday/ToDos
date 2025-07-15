@@ -33,7 +33,7 @@
             <Button Content="Kill All" Style="{StaticResource MaterialDesignOutlinedButton}" Width="220" Height="30" FontSize="16" Command="{Binding KillAllClientsCommand}" DockPanel.Dock="Top" />
             <!-- Client List -->
             <ListView x:Name="ClientListView"
-                      ItemsSource="{Binding FilteredClients}"
+                      ItemsSource="{Binding FilteredClientsView}"
                       SelectedItem="{Binding SelectedClient, Mode=TwoWay}"
                       SelectionMode="Extended"
                       Margin="0,0,0,0" Height="500"

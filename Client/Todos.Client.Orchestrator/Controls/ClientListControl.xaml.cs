@@ -14,9 +14,9 @@ namespace Todos.Client.Orchestrator.Controls
 
         private void ClientListControl_Loaded(object sender, RoutedEventArgs e)
         {
-            // Subscribe to FilteredClients changes if DataContext is set
+            // Subscribe to FilteredClientsView changes if DataContext is set
             var vm = DataContext;
-            var prop = vm?.GetType().GetProperty("FilteredClients");
+            var prop = vm?.GetType().GetProperty("FilteredClientsView");
             if (prop != null)
             {
                 if (prop.GetValue(vm) is INotifyCollectionChanged filteredClients)

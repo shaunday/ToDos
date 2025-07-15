@@ -12,8 +12,16 @@ Verify
 
 a bit more ui work on the list
 style to click on delete
+fail to save task
 
 ---
+
+## Orchestrator
+
+first launch doesnt show logs
+manual kill doesnt adjust logs
+---
+
 
 ## Entity Framework and Database
 
