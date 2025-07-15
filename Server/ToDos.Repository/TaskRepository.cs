@@ -43,12 +43,10 @@ namespace ToDos.Repository
             try
             {
                 var connStr = GetConnectionString(userId, false);
-                using (var context = new TaskDbContext(connStr))
-                {
-                    return await context.Tasks
-                    .Where(t => t.UserId == userId)
-                        .ToListAsync().ConfigureAwait(false);
-                }
+                using var context = new TaskDbContext(connStr);
+                return await context.Tasks
+                .Where(t => t.UserId == userId)
+                    .ToListAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -62,10 +60,8 @@ namespace ToDos.Repository
             try
             {
                 var connStr = GetConnectionString(userId, false);
-                using (var context = new TaskDbContext(connStr))
-                {
-                    return await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId).ConfigureAwait(false);
-                }
+                using var context = new TaskDbContext(connStr);
+                return await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -79,11 +75,9 @@ namespace ToDos.Repository
             try
             {
                 var connStr = GetConnectionString(task.UserId, true);
-                using (var context = new TaskDbContext(connStr))
-                {
-                    context.Tasks.Add(task);
-                    await context.SaveChangesAsync().ConfigureAwait(false);
-                }
+                using var context = new TaskDbContext(connStr);
+                context.Tasks.Add(task);
+                await context.SaveChangesAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -97,14 +91,12 @@ namespace ToDos.Repository
             try
             {
                 var connStr = GetConnectionString(task.UserId, true);
-                using (var context = new TaskDbContext(connStr))
-                {
-                    var existing = await context.Tasks.FindAsync(task.Id).ConfigureAwait(false);
+                using var context = new TaskDbContext(connStr);
+                var existing = await context.Tasks.FindAsync(task.Id).ConfigureAwait(false);
                 if (existing != null)
                 {
-                        context.Entry(existing).CurrentValues.SetValues(task);
-                        await context.SaveChangesAsync().ConfigureAwait(false);
-                    }
+                    context.Entry(existing).CurrentValues.SetValues(task);
+                    await context.SaveChangesAsync().ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -119,16 +111,14 @@ namespace ToDos.Repository
             try
             {
                 var connStr = GetConnectionString(userId, true);
-                using (var context = new TaskDbContext(connStr))
-                {
-                    var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId).ConfigureAwait(false);
+                using var context = new TaskDbContext(connStr);
+                var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId).ConfigureAwait(false);
                 if (task == null)
                     return false;
 
-                    context.Tasks.Remove(task);
-                    await context.SaveChangesAsync().ConfigureAwait(false);
+                context.Tasks.Remove(task);
+                await context.SaveChangesAsync().ConfigureAwait(false);
                 return true;
-                }
             }
             catch (Exception ex)
             {
@@ -142,16 +132,14 @@ namespace ToDos.Repository
             try
             {
                 var connStr = GetConnectionString(userId, true);
-                using (var context = new TaskDbContext(connStr))
-                {
-                    var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId).ConfigureAwait(false);
+                using var context = new TaskDbContext(connStr);
+                var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId).ConfigureAwait(false);
                 if (task == null)
                     return false;
 
                 task.IsCompleted = isCompleted;
-                    await context.SaveChangesAsync().ConfigureAwait(false);
+                await context.SaveChangesAsync().ConfigureAwait(false);
                 return true;
-                }
             }
             catch (Exception ex)
             {
@@ -165,16 +153,14 @@ namespace ToDos.Repository
             try
             {
                 var connStr = GetConnectionString(userId, true);
-                using (var context = new TaskDbContext(connStr))
-                {
-                    var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId).ConfigureAwait(false);
+                using var context = new TaskDbContext(connStr);
+                var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId).ConfigureAwait(false);
                 if (task == null || task.IsLocked)
                     return false;
 
                 task.IsLocked = true;
-                    await context.SaveChangesAsync().ConfigureAwait(false);
+                await context.SaveChangesAsync().ConfigureAwait(false);
                 return true;
-                }
             }
             catch (Exception ex)
             {
@@ -188,16 +174,14 @@ namespace ToDos.Repository
             try
             {
                 var connStr = GetConnectionString(userId, true);
-                using (var context = new TaskDbContext(connStr))
-                {
-                    var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId).ConfigureAwait(false);
+                using var context = new TaskDbContext(connStr);
+                var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId).ConfigureAwait(false);
                 if (task == null || !task.IsLocked)
                     return false;
 
                 task.IsLocked = false;
-                    await context.SaveChangesAsync().ConfigureAwait(false);
+                await context.SaveChangesAsync().ConfigureAwait(false);
                 return true;
-                }
             }
             catch (Exception ex)
             {
@@ -211,11 +195,9 @@ namespace ToDos.Repository
             try
             {
                 var connStr = GetConnectionString(userId, false);
-                using (var context = new TaskDbContext(connStr))
-                {
-                    var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId).ConfigureAwait(false);
+                using var context = new TaskDbContext(connStr);
+                var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId).ConfigureAwait(false);
                 return task?.IsLocked ?? false;
-                }
             }
             catch (Exception ex)
             {
@@ -229,20 +211,19 @@ namespace ToDos.Repository
         /// </summary>
         public static void ResetAndPopulateDb(string connectionString, IEnumerable<int> userIds, int tasksPerUser = 5)
         {
-            using (var context = new TaskDbContext(connectionString))
-            {
-                context.Tasks.RemoveRange(context.Tasks);
-                context.SaveChanges();
+            using var context = new TaskDbContext(connectionString);
+            context.Tasks.RemoveRange(context.Tasks);
+            context.SaveChanges();
 
-                var mockTasks = ToDos.Server.Entities.Factory.TaskFactory.GenerateTasksForUsers(userIds, tasksPerUser);
-                context.Tasks.AddRange(mockTasks.Select(t => new ToDos.Entities.TaskEntity {
-                    UserId = t.UserId,
-                    Title = t.Title,
-                    Description = t.Description,
-                    IsCompleted = t.IsCompleted
-                }));
-                context.SaveChanges();
-            }
+            var mockTasks = ToDos.Server.Entities.Factory.TaskFactory.GenerateTasksForUsers(userIds, tasksPerUser);
+            context.Tasks.AddRange(mockTasks.Select(t => new ToDos.Entities.TaskEntity
+            {
+                UserId = t.UserId,
+                Title = t.Title,
+                Description = t.Description,
+                IsCompleted = t.IsCompleted
+            }));
+            context.SaveChanges();
         }
 
         private System.Threading.Timer _syncTimer;

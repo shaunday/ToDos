@@ -9,10 +9,12 @@ using ToDos.TaskSyncServer.Attributes;
 using Serilog;
 using System.Collections.Generic;
 using ToDos.DotNet.Common.SignalR;
+using Microsoft.AspNet.SignalR.Hubs;
 
 namespace ToDos.TaskSyncServer.Hubs
 {
-    [SignalRJwtAuthentication]
+    //[SignalRJwtAuthentication]
+    [HubName("TaskHub")]
     public class TaskHub : Hub, ITaskHub
     {
         private readonly ITaskService _taskService;

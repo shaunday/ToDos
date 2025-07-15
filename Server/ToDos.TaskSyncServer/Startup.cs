@@ -17,6 +17,10 @@ using Unity.Injection;
 using System.Data.Entity;
 using System.Threading;
 using ToDos.Server.DbReplication;
+using System.IO;
+using System.Text;
+using System.Diagnostics;
+using System.Linq;
 
 namespace ToDos.TaskSyncServer
 {
@@ -30,28 +34,38 @@ namespace ToDos.TaskSyncServer
             ThreadPool.SetMinThreads(100, oldMinIOC); // Set min worker threads to 100
             ThreadPool.GetMinThreads(out int newMinWorker, out int newMinIOC);
             Log.Logger.Information("ThreadPool min worker threads changed to: {MinWorker}, min IO threads: {MinIOC}", newMinWorker, newMinIOC);
+
+
             // For sharding: ensures that if a per-shard database does not exist, it will be auto-created
             // by Entity Framework Code First when first accessed. Remove or change for production if you want manual DB control.
             Database.SetInitializer(new CreateDatabaseIfNotExists<TaskDbContext>());
-            // Configure SignalR with dependency injection
+
+            // 1. Configure Unity container and register all dependencies
             var unityContainer = ConfigureUnityContainer();
 
-            // Register SignalR with Unity container
+            // 2. Set GlobalHost.DependencyResolver
             GlobalHost.DependencyResolver = new UnitySignalRDependencyResolver(unityContainer);
 
-            // Configure SignalR with keep-alive and timeout settings
-            // KeepAlive: Sends periodic "ping" messages to keep connections alive and detect disconnections
-            // DisconnectTimeout: Maximum time to wait for a client to respond before considering it disconnected
-            // These settings help with network stability, connection monitoring, and resource management
+            // 3. Set GlobalHost.Configuration properties
             GlobalHost.Configuration.DisconnectTimeout = TimeSpan.FromSeconds(30); // Set DisconnectTimeout first
             GlobalHost.Configuration.KeepAlive = TimeSpan.FromSeconds(10); // 10 <= 30/3
             GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(60); // (optional, can remain)
 
-            // Enable SignalR detailed errors (per-hub)
+            // 4. Map SignalR
             var hubConfig = new HubConfiguration
             {
                 EnableDetailedErrors = true
             };
+            app.MapSignalR(hubConfig);
+
+            // Enable SignalR trace logging for diagnostics
+            // GlobalHost.TraceManager.Switch.Level = SourceLevels.All;
+
+            // Enable SignalR detailed errors (per-hub)
+            // var hubConfig = new HubConfiguration
+            // {
+            //     EnableDetailedErrors = true
+            // };
 
             // Add global error handler for OWIN pipeline
             app.Use(async (context, next) =>
@@ -66,19 +80,6 @@ namespace ToDos.TaskSyncServer
                     throw;
                 }
             });
-
-            app.MapSignalR(hubConfig);
-
-            var config = new HttpConfiguration();
-            // Attribute routing
-            config.MapHttpAttributeRoutes();
-            // Default route
-            config.Routes.MapHttpRoute(
-                name: "DefaultApi",
-                routeTemplate: "api/{controller}/{id}",
-                defaults: new { id = RouteParameter.Optional }
-            );
-            app.UseWebApi(config);
         }
 
         private IUnityContainer ConfigureUnityContainer()
@@ -95,6 +96,7 @@ namespace ToDos.TaskSyncServer
             // Register repository
             container.RegisterType<IReadWriteDbRouter, SuffixReadWriteDbRouter>(new ContainerControlledLifetimeManager());
             container.RegisterType<ITaskRepository, TaskRepository>();
+            container.RegisterType<IDbSyncService, SimulatedDbSyncService>();
 
             container.RegisterType<ITaskService, TaskService>();
 
@@ -131,7 +133,7 @@ namespace ToDos.TaskSyncServer
             {
                 return _container.Resolve(serviceType);
             }
-            catch
+            catch (Exception ex)
             {
                 return base.GetService(serviceType);
             }

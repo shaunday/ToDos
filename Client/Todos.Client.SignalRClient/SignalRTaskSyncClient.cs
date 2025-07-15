@@ -11,6 +11,8 @@ using Todos.Client.Common.Interfaces;
 using ToDos.DotNet.Common;
 using ToDos.DotNet.Common.SignalR;
 using static Todos.Client.Common.TypesGlobal;
+using System.IO;
+using System.Text;
 
 namespace Todos.Client.SignalRClient
 {
@@ -120,9 +122,9 @@ namespace Todos.Client.SignalRClient
                 {
                     _logger.Warning("No JWT token available for SignalR connection");
                 }
-                
+
                 _hubConnection = new HubConnection(_hubUrl, queryString);
-                
+
                 SetupReconnect();
 
                 _hubProxy = _hubConnection.CreateHubProxy("TaskHub");
@@ -202,11 +204,11 @@ namespace Todos.Client.SignalRClient
                         {
                             queryString["token"] = _jwtToken;
                         }
-                        
+
                         _hubConnection = new HubConnection(_hubUrl, queryString);
-                        _hubProxy = _hubConnection.CreateHubProxy("TaskHub");
-                        
+
                         // Re-setup event handlers
+                        _hubProxy = _hubConnection.CreateHubProxy("TaskHub");
                         _hubProxy.On<TaskDTO>(SignalRGlobals.TaskAdded, task => SafeInvoke(() => TaskAdded?.Invoke(task), nameof(TaskAdded)));
                         _hubProxy.On<TaskDTO>(SignalRGlobals.TaskUpdated, task => SafeInvoke(() => TaskUpdated?.Invoke(task), nameof(TaskUpdated)));
                         _hubProxy.On<int>(SignalRGlobals.TaskDeleted, id => SafeInvoke(() => TaskDeleted?.Invoke(id), nameof(TaskDeleted)));

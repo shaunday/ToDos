@@ -10,12 +10,16 @@ namespace ToDos.TaskSyncServer
     class Program
     {
         private const string LogFileName = "ToDos.TaskSyncServer.log";
+
         static void Main()
         {
+            Serilog.Debugging.SelfLog.Enable(Console.Error);
             var logFilePath = System.IO.Path.Combine(AppContext.BaseDirectory, LogFileName);
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.File(logFilePath)
                 .CreateLogger();
+            Console.WriteLine("Logger in Program: " + Log.Logger.GetHashCode());
+            Log.Logger.Information("=== Logger initialized and writing to {Path} ===", logFilePath);
             Log.Information("TaskSyncServer started");
 
             // Add process-level unhandled exception logging
