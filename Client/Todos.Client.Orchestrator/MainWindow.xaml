@@ -115,12 +115,9 @@
 
         <!-- Combined Log Viewer -->
         <materialDesign:Card Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" Margin="24,24,24,24" Padding="24" materialDesign:ElevationAssist.Elevation="Dp2">
-            <StackPanel>
-                <TextBlock Text="Combined Logs (Filtered)" Style="{StaticResource HeaderTextStyle}" />
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Height="700">
-                    <TextBox Text="{Binding CombinedLogs}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" FontSize="13" Background="{DynamicResource MaterialDesignPaper}" BorderThickness="0"/>
-                </ScrollViewer>
-            </StackPanel>
+            <controls:LogViewerControl x:Name="LogViewer"
+                                      Margin="0"
+                                      Height="700"/>
         </materialDesign:Card>
     </Grid>
 </Window>

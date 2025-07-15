@@ -83,7 +83,7 @@ namespace Todos.Ui
         {
             if (_userId == null)
                 return;
-            if (_uiState == null) _uiState = new UiStateModel();
+            _uiState ??= new UiStateModel();
             _uiState.WindowState = WindowState.ToString();
             if (WindowState == WindowState.Normal)
             {

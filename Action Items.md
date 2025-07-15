@@ -8,18 +8,19 @@ Verify
 
 ---
 
+## UI
+
+a bit more ui work on the list
+style to click on delete
+
+---
+
 ## Entity Framework and Database
 
 * Prepare schema and code for CQRS-style read/write separation 
 * Implement \_taskCommandQueue to throttle DB writes (Single Writer Pattern)
 * Simulate master/slave DB (write to one, read from another with periodic sync)
 * Throttle or reject low-priority writes when under heavy load.: backpressure mechanism.
----
-
-## Client-Side (WPF + MVVM)
-
-a bit more ui work on the list
-Make sure that both client and server validate all inputs (e.g., task titles not empty, due dates valid).
 
 ---
 

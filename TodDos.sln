@@ -23,7 +23,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDos.JwtService", "Common\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDos.TaskSyncServer", "Server\ToDos.TaskSyncServer\ToDos.TaskSyncServer.csproj", "{68F23E49-A8D4-4076-81B2-A5D9853525D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Todos.Client.Orchestrator", "Client\Todos.Client.Orchestrator\Todos.Client.Orchestrator.csproj", "{578DFD9F-9384-4FBC-BBC0-74220A771C02}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Todos.Client.Ui.Orchestrator", "Client\Todos.Client.Orchestrator\Todos.Client.Ui.Orchestrator.csproj", "{578DFD9F-9384-4FBC-BBC0-74220A771C02}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDos.Server.Common", "Server\ToDos.Server.Common\ToDos.Server.Common.csproj", "{654C1390-DC89-A959-9159-6AFB6B8CCC94}"
 EndProject

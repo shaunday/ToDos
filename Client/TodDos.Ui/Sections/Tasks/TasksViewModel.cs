@@ -291,8 +291,7 @@ namespace Todos.Ui.ViewModels
         private void UpdateFilteredTasks()
         {
             _logger?.Information("TasksViewModel: UpdateFilteredTasks called");
-            var view = CollectionViewSource.GetDefaultView(FilteredTasksView) as IEditableCollectionView;
-            if (view != null)
+            if (CollectionViewSource.GetDefaultView(FilteredTasksView) is IEditableCollectionView view)
             {
                 if (view.IsAddingNew)
                     view.CommitNew();
@@ -308,8 +307,7 @@ namespace Todos.Ui.ViewModels
 
         private bool FilterPredicate(object obj)
         {
-            var t = obj as TaskModel;
-            if (t == null) return false;
+            if (!(obj is TaskModel t)) return false;
             // Always include the currently edited task
             if (EditingTask != null && t == EditingTask)
                 return true;

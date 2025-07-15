@@ -42,9 +42,6 @@ namespace Todos.Client.Orchestrator.ViewModels
 
         public ObservableCollection<ClientModel> FilteredClients { get; } = new ObservableCollection<ClientModel>();
 
-        [ObservableProperty]
-        private string combinedLogs = string.Empty;
-
         public MainWindowViewModel()
         {
             // Initial filter

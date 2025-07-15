@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -21,8 +22,16 @@ namespace Todos.Client.Orchestrator
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new MainWindowViewModel();
-            
+            var vm = new MainWindowViewModel();
+            DataContext = vm;
+
+            // Subscribe to changes
+            vm.FilteredClients.CollectionChanged += (s, e) =>
+            {
+                if (LogViewer != null)
+                    LogViewer.UpdateLogFiles(vm.Clients.Select(c => c.LogFilePath).ToList());
+            };
+
             // Handle window closing event
             Closing += MainWindow_Closing;
         }
