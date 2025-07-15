@@ -1,4 +1,6 @@
 using System.Windows.Controls;
+using Todos.Ui.ViewModels;
+using Unity;
 
 namespace Todos.Ui.Panels
 {
@@ -10,6 +12,7 @@ namespace Todos.Ui.Panels
         public TopPanel()
         {
             InitializeComponent();
+            DataContext = App.Container.Resolve<TopPanelViewModel>();
         }
     }
 } 

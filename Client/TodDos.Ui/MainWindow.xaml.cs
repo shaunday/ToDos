@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using Todos.Ui.Models;
 using Todos.Ui.Services;
 using Todos.Ui.ViewModels;
+using Unity;
 
 namespace Todos.Ui
 {
@@ -45,9 +46,12 @@ namespace Todos.Ui
 
         private void LoadWindowState()
         {
-            if (DataContext is MainViewModel mainVm && mainVm.ApplicationViewModel?.CurrentUser != null)
+            // Get user id from UserConnectionService
+            var userConnectionService = App.Container.Resolve<UserConnectionService>();
+            var currentUser = userConnectionService.CurrentUser;
+            if (currentUser != null)
             {
-                _userId = mainVm.ApplicationViewModel.CurrentUser.Id;
+                _userId = currentUser.Id;
             }
             else
             {

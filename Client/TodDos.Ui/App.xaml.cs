@@ -20,6 +20,7 @@ using Todos.Client.UserService;
 using ToDos.MockAuthService;
 using System.Linq;
 using Todos.Client.TaskSyncWithOfflineQueues;
+using Todos.Ui.Services; // Add this if UserConnectionService is in this namespace
 
 namespace Todos.Ui
 {
@@ -81,6 +82,7 @@ namespace Todos.Ui
             );
             Container.RegisterSingleton<IAuthService, MockAuthService>();
             Container.RegisterInstance(Log.Logger);
+            Container.RegisterSingleton<UserConnectionService>();
 
             // Register AutoMapper
             var config = new MapperConfiguration(cfg =>
@@ -94,6 +96,7 @@ namespace Todos.Ui
             Container.RegisterType<MainViewModel>();
             Container.RegisterType<LoginViewModel>();
             Container.RegisterType<TasksViewModel>();
+            Container.RegisterType<TopPanelViewModel>();
         }
 
         private void ShowMainWindow()

@@ -30,8 +30,8 @@
                 <Ellipse Width="8" 
                          Height="8" 
                          Margin="0,0,8,0"
-                         Fill="{Binding ApplicationViewModel.ConnectionStatus, Converter={StaticResource ConnectionStatusToColorConverter}}" />
-                <TextBlock Text="{Binding ApplicationViewModel.ConnectionStatusText}" 
+                         Fill="{Binding ConnectionStatus, Converter={StaticResource ConnectionStatusToColorConverter}}" />
+                <TextBlock Text="{Binding ConnectionStatusText}" 
                            FontWeight="Medium"
                            VerticalAlignment="Center" />
             </StackPanel>
@@ -45,13 +45,13 @@
                                          Height="16" 
                                          Margin="0,0,8,0"
                                          VerticalAlignment="Center" />
-                <TextBlock Text="{Binding ApplicationViewModel.CurrentUser.DisplayName}" 
+                <TextBlock Text="{Binding CurrentUser.DisplayName}" 
                            FontWeight="Medium"
                            Margin="0,0,16,0"
                            VerticalAlignment="Center" />
                 <TextBlock Text="(" 
                            VerticalAlignment="Center" />
-                <TextBlock Text="{Binding ApplicationViewModel.CurrentUser.Role}" 
+                <TextBlock Text="{Binding CurrentUser.Role}" 
                            Foreground="{DynamicResource MaterialDesignBodyLight}"
                            VerticalAlignment="Center" />
                 <TextBlock Text=")" 
@@ -59,7 +59,7 @@
                 
                 <!-- Logout Button -->
                 <Button Style="{DynamicResource MaterialDesignIconButton}"
-                        Command="{Binding ApplicationViewModel.LogoutCommand}"
+                        Command="{Binding LogoutCommand}"
                         ToolTip="Logout"
                         Margin="16,0,0,0">
                     <materialDesign:PackIcon Kind="Logout" 

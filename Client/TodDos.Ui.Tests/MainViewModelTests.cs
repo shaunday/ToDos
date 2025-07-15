@@ -13,16 +13,16 @@ namespace TodDos.Ui.Tests
         }
 
         [TestMethod]
-        public void ApplicationViewModel_Type_Should_Exist()
+        public void TopPanelViewModel_Type_Should_Exist()
         {
-            Assert.IsNotNull(typeof(Todos.Ui.ViewModels.ApplicationViewModel));
+            Assert.IsNotNull(typeof(Todos.Ui.ViewModels.TopPanelViewModel));
         }
 
         [TestMethod]
-        public void ApplicationViewModel_ConnectionStatus_PropertyChanged_RaisesEvent()
+        public void TopPanelViewModel_ConnectionStatus_PropertyChanged_RaisesEvent()
         {
-            var type = typeof(Todos.Ui.ViewModels.ApplicationViewModel);
-            var vm = (Todos.Ui.ViewModels.ApplicationViewModel)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(type);
+            var type = typeof(Todos.Ui.ViewModels.TopPanelViewModel);
+            var vm = (Todos.Ui.ViewModels.TopPanelViewModel)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(type);
             bool raised = false;
             vm.PropertyChanged += (s, e) => { if (e.PropertyName == "ConnectionStatus") raised = true; };
             var prop = type.GetProperty("ConnectionStatus", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
@@ -31,10 +31,10 @@ namespace TodDos.Ui.Tests
         }
 
         [TestMethod]
-        public void ApplicationViewModel_ConnectionStatusText_PropertyChanged_RaisesEvent()
+        public void TopPanelViewModel_ConnectionStatusText_PropertyChanged_RaisesEvent()
         {
-            var type = typeof(Todos.Ui.ViewModels.ApplicationViewModel);
-            var vm = (Todos.Ui.ViewModels.ApplicationViewModel)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(type);
+            var type = typeof(Todos.Ui.ViewModels.TopPanelViewModel);
+            var vm = (Todos.Ui.ViewModels.TopPanelViewModel)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(type);
             bool raised = false;
             vm.PropertyChanged += (s, e) => { if (e.PropertyName == "ConnectionStatusText") raised = true; };
             var prop = type.GetProperty("ConnectionStatus", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
@@ -43,10 +43,10 @@ namespace TodDos.Ui.Tests
         }
 
         [TestMethod]
-        public void ApplicationViewModel_ConnectionStatusText_AllEnumValues()
+        public void TopPanelViewModel_ConnectionStatusText_AllEnumValues()
         {
-            var type = typeof(Todos.Ui.ViewModels.ApplicationViewModel);
-            var vm = (Todos.Ui.ViewModels.ApplicationViewModel)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(type);
+            var type = typeof(Todos.Ui.ViewModels.TopPanelViewModel);
+            var vm = (Todos.Ui.ViewModels.TopPanelViewModel)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(type);
             var prop = type.GetProperty("ConnectionStatus", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
             foreach (var val in Enum.GetValues(typeof(Todos.Client.Common.TypesGlobal.ConnectionStatus)))
             {
@@ -57,10 +57,10 @@ namespace TodDos.Ui.Tests
         }
 
         [TestMethod]
-        public void ApplicationViewModel_CanSet_CurrentUser()
+        public void TopPanelViewModel_CanSet_CurrentUser()
         {
-            var type = typeof(Todos.Ui.ViewModels.ApplicationViewModel);
-            var vm = (Todos.Ui.ViewModels.ApplicationViewModel)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(type);
+            var type = typeof(Todos.Ui.ViewModels.TopPanelViewModel);
+            var vm = (Todos.Ui.ViewModels.TopPanelViewModel)System.Runtime.Serialization.FormatterServices.GetUninitializedObject(type);
             var user = new Todos.Ui.Models.UserModel();
             var prop = type.GetProperty("CurrentUser", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
             prop.SetValue(vm, user);
@@ -68,9 +68,9 @@ namespace TodDos.Ui.Tests
         }
 
         [TestMethod]
-        public void MainViewModel_ApplicationViewModel_IsSameInstance()
+        public void MainViewModel_TopPanelViewModel_IsSameInstance()
         {
-            Assert.AreSame(typeof(MainViewModel).GetProperty("ApplicationViewModel"), typeof(MainViewModel).GetProperty("ApplicationViewModel"));
+            Assert.AreSame(typeof(MainViewModel).GetProperty("TopPanelViewModel"), typeof(MainViewModel).GetProperty("TopPanelViewModel"));
         }
     }
 } 

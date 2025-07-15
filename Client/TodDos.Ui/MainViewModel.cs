@@ -13,14 +13,10 @@ namespace Todos.Ui
 {
     public partial class MainViewModel : ViewModelBase
     {
-        [ObservableProperty]
-        private ApplicationViewModel applicationViewModel;
-
+        // Remove direct construction of TopPanelViewModel and any unused field.
         public MainViewModel(INavigationService navigation, IUserService userService, ITaskSyncClient taskSyncClient, IMapper mapper) 
             : base(mapper, navigation)
         {
-            applicationViewModel = new ApplicationViewModel(userService, taskSyncClient, mapper, navigation);
-            
             // DEV CODE: Auto-login for development/testing
             _ = Task.Run(async () =>
             {
