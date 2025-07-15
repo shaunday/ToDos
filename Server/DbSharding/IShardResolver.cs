@@ -1,4 +1,4 @@
-namespace ToDos.Sharding
+namespace ToDos.Server.DbSharding
 {
     public interface IShardResolver
     {

@@ -6,7 +6,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using ToDos.Entities;
-using ToDos.Sharding;
+using ToDos.Server.DbSharding;
 
 namespace ToDos.Repository
 {

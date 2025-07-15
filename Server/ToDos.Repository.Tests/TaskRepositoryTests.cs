@@ -1,13 +1,13 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ToDos.Repository;
-using ToDos.Sharding;
+using ToDos.Server.DbSharding;
 
 namespace ToDos.Repository.Tests
 {
     [TestClass]
     public class TaskRepositoryTests
     {
-        public class MockShardResolver : ToDos.Sharding.IShardResolver
+        public class MockShardResolver : ToDos.Server.DbSharding.IShardResolver
         {
             public string GetDatabaseName(int userId) => "TestDbName";
         }

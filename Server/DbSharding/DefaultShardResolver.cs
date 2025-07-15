@@ -1,6 +1,6 @@
 using System;
 
-namespace ToDos.Sharding
+namespace ToDos.Server.DbSharding
 {
     /// <summary>
     /// Example shard resolver. Returns a database name for the user's own database (one db per user).

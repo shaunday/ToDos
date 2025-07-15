@@ -7,7 +7,7 @@ using System;
 using System.Web.Http;
 using ToDos.MockAuthService;
 using ToDos.Repository;
-using ToDos.Sharding;
+using ToDos.Server.DbSharding;
 using ToDos.Server.Common.Interfaces;
 using ToDos.TaskSyncServer.Mapping;
 using ToDos.TaskSyncServer.Services;
