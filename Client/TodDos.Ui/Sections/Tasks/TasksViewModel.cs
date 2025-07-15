@@ -89,6 +89,8 @@ namespace Todos.Ui.ViewModels
             _taskSyncClient!.TaskAdded += HandleTaskAdded;
             _taskSyncClient.TaskUpdated += HandleTaskUpdated;
             _taskSyncClient.TaskDeleted += HandleTaskDeleted;
+            _taskSyncClient.TaskLocked += HandleTaskLocked;
+            _taskSyncClient.TaskUnlocked += HandleTaskUnlocked;
             Tasks.CollectionChanged += Tasks_CollectionChanged;
             Filter.PropertyChanged += Filter_PropertyChanged;
 
@@ -101,6 +103,8 @@ namespace Todos.Ui.ViewModels
             _taskSyncClient!.TaskAdded -= HandleTaskAdded;
             _taskSyncClient.TaskUpdated -= HandleTaskUpdated;
             _taskSyncClient.TaskDeleted -= HandleTaskDeleted;
+            _taskSyncClient.TaskLocked -= HandleTaskLocked;
+            _taskSyncClient.TaskUnlocked -= HandleTaskUnlocked;
             Tasks.CollectionChanged -= Tasks_CollectionChanged;
             Filter.PropertyChanged -= Filter_PropertyChanged;
             
@@ -422,6 +426,41 @@ namespace Todos.Ui.ViewModels
                 {
                     Tasks.Remove(model);
                     Overview.Refresh(Tasks);
+                });
+            }
+        }
+
+        private void HandleTaskLocked(int taskId)
+        {
+            _logger?.Information("TasksViewModel: HandleTaskLocked called for TaskId {TaskId}", taskId);
+            var model = Tasks.FirstOrDefault(t => t.Id == taskId);
+            if (model != null)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    model.IsLocked = true;
+                    // If the currently edited task is now locked by someone else, exit edit mode
+                    if (EditingTask != null && EditingTask.Id == taskId)
+                    {
+                        ChangeTaskEditMode(model, false);
+                        AddTaskErrorMessage = "This task was locked by another user. Editing has been cancelled.";
+                        SnackbarMessageQueue.Enqueue(AddTaskErrorMessage);
+                    }
+                    UpdateFilteredTasks();
+                });
+            }
+        }
+
+        private void HandleTaskUnlocked(int taskId)
+        {
+            _logger?.Information("TasksViewModel: HandleTaskUnlocked called for TaskId {TaskId}", taskId);
+            var model = Tasks.FirstOrDefault(t => t.Id == taskId);
+            if (model != null)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    model.IsLocked = false;
+                    UpdateFilteredTasks();
                 });
             }
         }
