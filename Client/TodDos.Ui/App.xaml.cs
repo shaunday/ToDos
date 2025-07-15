@@ -85,12 +85,10 @@ namespace Todos.Ui
             Container.RegisterSingleton<INavigationService, NavigationService>();
             Container.RegisterSingleton<IUserService, MockUserService>();
             Container.RegisterSingleton<IOfflineQueueService, MemBasedOfflineQueueService>();
-            // Use only the real SignalRTaskSyncClient
-            Container.RegisterFactory<ITaskSyncClient>(c =>
-                new SignalRTaskSyncClient(Log.Logger)
-            );
+            
+            var signalRClient = new SignalRTaskSyncClient(Log.Logger);
+            Container.RegisterInstance<ITaskSyncClient>(signalRClient);
             Container.RegisterSingleton<IAuthService, MockAuthService>();
-            Container.RegisterInstance(Log.Logger);
             Container.RegisterSingleton<UserConnectionService>();
 
             // Register AutoMapper

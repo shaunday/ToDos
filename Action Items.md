@@ -1,10 +1,13 @@
 
+orch:
+first launch doesnt  give logs (again)
+padding on search too big
+margin below alive too big
+margin above clear filter/simulate buttons
 
-
-## Testing and Tooling
 
 * Simulate multiple users editing tasks concurrently to test locking and queues
-
+ ... piplines to simulate operations/ console-clients with apis?
 
 ---
 
@@ -16,7 +19,6 @@
 
 ## Nice To Have
 orchestration/simulation
-    piplines to simulate operations/ console-clients with apis
     simulate a large number of clients, throttled writes, and sharded reads
     Track and simulate connection drops, reconnect logic, slow DB writes, and queue overflow
 

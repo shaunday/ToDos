@@ -18,6 +18,12 @@ namespace ToDos.TaskSyncServer
                 .CreateLogger();
             Log.Information("TaskSyncServer started");
 
+            // Add process-level unhandled exception logging
+            AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+            {
+                Log.Logger.Fatal(args.ExceptionObject as Exception, "[FATAL] Unhandled exception in AppDomain");
+            };
+
             // Load .env.Global (must be in the output directory)
             var envPath = System.IO.Path.Combine(AppContext.BaseDirectory, ".env.Global");
             Env.Load(envPath);

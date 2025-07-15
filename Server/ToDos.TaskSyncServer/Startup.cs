@@ -47,7 +47,27 @@ namespace ToDos.TaskSyncServer
             GlobalHost.Configuration.KeepAlive = TimeSpan.FromSeconds(10); // 10 <= 30/3
             GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(60); // (optional, can remain)
 
-            app.MapSignalR();
+            // Enable SignalR detailed errors (per-hub)
+            var hubConfig = new HubConfiguration
+            {
+                EnableDetailedErrors = true
+            };
+
+            // Add global error handler for OWIN pipeline
+            app.Use(async (context, next) =>
+            {
+                try
+                {
+                    await next();
+                }
+                catch (Exception ex)
+                {
+                    Log.Logger.Error(ex, "[GLOBAL] Unhandled exception in OWIN pipeline");
+                    throw;
+                }
+            });
+
+            app.MapSignalR(hubConfig);
 
             var config = new HttpConfiguration();
             // Attribute routing
@@ -67,6 +87,7 @@ namespace ToDos.TaskSyncServer
 
             // Register logging
             container.RegisterInstance(Log.Logger);
+            container.RegisterInstance<ILogger>(Log.Logger); // Register ILogger interface as singleton
 
             // Register Auth service
             container.RegisterType<IAuthService, ToDos.MockAuthService.MockAuthService>();
