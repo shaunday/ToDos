@@ -41,10 +41,11 @@ namespace ToDos.TaskSyncServer
 
             // Configure SignalR with keep-alive and timeout settings
             // KeepAlive: Sends periodic "ping" messages to keep connections alive and detect disconnections
-            // ConnectionTimeout: Maximum time to wait for a client to respond before considering it disconnected
+            // DisconnectTimeout: Maximum time to wait for a client to respond before considering it disconnected
             // These settings help with network stability, connection monitoring, and resource management
-            GlobalHost.Configuration.KeepAlive = TimeSpan.FromSeconds(30);
-            GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(60);
+            GlobalHost.Configuration.DisconnectTimeout = TimeSpan.FromSeconds(30); // Set DisconnectTimeout first
+            GlobalHost.Configuration.KeepAlive = TimeSpan.FromSeconds(10); // 10 <= 30/3
+            GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(60); // (optional, can remain)
 
             app.MapSignalR();
 
