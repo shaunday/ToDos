@@ -44,6 +44,12 @@ namespace Todos.Client.Orchestrator.ViewModels
         [ObservableProperty]
         private string selectedSimulatorCommand;
 
+        [ObservableProperty]
+        private bool launchByFileConfig;
+        [ObservableProperty]
+        private string fileConfigPath = @"users.txt";
+        public string FileConfigDescription => "File format: one user per line: userId displayName password count\nExample: user1 John 1234 3";
+
         public ICollectionView FilteredClientsView { get; }
         public int TotalClientCount => _clientService.Clients.Count;
         public int FilteredClientCount => FilteredClientsView?.Cast<object>().Count() ?? 0;
@@ -71,6 +77,7 @@ namespace Todos.Client.Orchestrator.ViewModels
             // Listen for changes to update counts
             FilteredClientsView.CollectionChanged += (s, e) => NotifyClientCountsChanged();
             FilteredClientsView.CurrentChanged += (s, e) => NotifyClientCountsChanged();
+            _clientService.Clients.CollectionChanged += (s, e) => NotifyClientCountsChanged();
             LogViewerViewModel = new LogViewerViewModel(new LogFileWatcherService());
             FilteredClientsView.CollectionChanged += (s, e) => UpdateLogViewerLogFiles();
             FilteredClientsView.CurrentChanged += (s, e) => UpdateLogViewerLogFiles();
@@ -172,6 +179,50 @@ namespace Todos.Client.Orchestrator.ViewModels
         private void Simulate()
         {
             // SimulateAddTaskAsync(selectedSimulatorPid, ...);
+        }
+
+        [RelayCommand]
+        private void LaunchClientsByFileConfig()
+        {
+            if (string.IsNullOrWhiteSpace(FileConfigPath) || !System.IO.File.Exists(FileConfigPath))
+            {
+                System.Windows.MessageBox.Show($"File not found: {FileConfigPath}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                return;
+            }
+            var outputDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".";
+            var clientExe = System.IO.Path.Combine(outputDir, "TodDos.Ui.exe");
+            if (!System.IO.File.Exists(clientExe))
+            {
+                System.Windows.MessageBox.Show($"Client executable not found in: {outputDir}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                return;
+            }
+            var lines = System.IO.File.ReadAllLines(FileConfigPath);
+            foreach (var line in lines)
+            {
+                var parts = line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length < 4) continue;
+                string user = parts[0];
+                string displayName = parts[1]; // not used, but could be
+                string pass = parts[2];
+                if (!int.TryParse(parts[3], out int count)) count = 1;
+                for (int i = 0; i < count; i++)
+                {
+                    var startInfo = new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = clientExe,
+                        WorkingDirectory = outputDir,
+                        Arguments = $"user={user};pass={pass}"
+                    };
+                    var proc = System.Diagnostics.Process.Start(startInfo);
+                    if (proc != null)
+                    {
+                        _clientService.AddClient(TypesGlobal.ClientType.UiClient, proc);
+                        proc.EnableRaisingEvents = true;
+                        proc.Exited += (s, e) => OnClientProcessExited(_clientService.Clients.FirstOrDefault(c => c.Process == proc));
+                    }
+                }
+            }
+            FilteredClientsView.Refresh();
         }
         #endregion
 

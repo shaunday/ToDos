@@ -10,7 +10,7 @@ namespace ToDos.DotNet.Caching.Tests
     [TestClass]
     public class MemoryCacheServiceTests
     {
-        private MemoryCacheService<Guid, string> _cache;
+        private MemoryCacheService<Guid, string>? _cache;
 
         [TestInitialize]
         public void Setup()
@@ -24,8 +24,8 @@ namespace ToDos.DotNet.Caching.Tests
             var userId = Guid.NewGuid();
             var key = "test";
             var items = new[] { "a", "b", "c" };
-            _cache.Set(userId, key, items);
-            var result = _cache.Get(userId, key);
+            _cache?.Set(userId, key, items);
+            var result = _cache?.Get(userId, key);
             CollectionAssert.AreEqual(items, result.ToArray());
         }
 
@@ -34,9 +34,9 @@ namespace ToDos.DotNet.Caching.Tests
         {
             var userId = Guid.NewGuid();
             var key = "test";
-            _cache.Set(userId, key, new[] { "x" });
-            _cache.Invalidate(userId, key);
-            var result = _cache.Get(userId, key);
+            _cache?.Set(userId, key, ["x"]);
+            _cache?.Invalidate(userId, key);
+            var result = _cache?.Get(userId, key);
             Assert.IsNull(result);
         }
 
@@ -44,13 +44,13 @@ namespace ToDos.DotNet.Caching.Tests
         public void CleanupInactiveUsers_RemovesOldEntries()
         {
             var userId = Guid.NewGuid();
-            _cache.Set(userId, "test", new[] { "1" });
+            _cache?.Set(userId, "test", ["1"]);
             // Simulate inactivity by manipulating _lastAccess (reflection for test only)
             var lastAccessField = typeof(MemoryCacheService<Guid, string>).GetField("_lastAccess", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var lastAccess = (Dictionary<Guid, DateTime>)lastAccessField.GetValue(_cache);
             lastAccess[userId] = DateTime.UtcNow.AddHours(-2);
-            _cache.CleanupInactiveUsers(TimeSpan.FromHours(1));
-            var result = _cache.Get(userId, "test");
+            _cache?.CleanupInactiveUsers(TimeSpan.FromHours(1));
+            var result = _cache?.Get(userId, "test");
             Assert.IsNull(result);
         }
     }

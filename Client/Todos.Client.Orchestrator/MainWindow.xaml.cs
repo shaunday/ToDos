@@ -9,6 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Todos.Client.Orchestrator.Services;
 using Todos.Client.Orchestrator.ViewModels;
 
 namespace Todos.Client.Orchestrator
@@ -24,7 +25,6 @@ namespace Todos.Client.Orchestrator
             InitializeComponent();
             var vm = new MainWindowViewModel();
             DataContext = vm;
-            // Removed log viewer event hookups; now handled in MainWindowViewModel
             Closing += MainWindow_Closing;
         }
 
@@ -32,11 +32,11 @@ namespace Todos.Client.Orchestrator
         {
             if (DataContext is MainWindowViewModel viewModel)
             {
-                var allClientsCount = viewModel.FilteredClientsView.Cast<object>().Count();
-                if (allClientsCount > 0)
+                var aliveClientsCount = viewModel.FilteredClientsView.Cast<ClientModel>().Count(c => c.IsAlive);
+                if (aliveClientsCount > 0)
                 {
                     var result = MessageBox.Show(
-                        $"You have {allClientsCount} client(s) running. Do you want to close all clients and exit?",
+                        $"You have {aliveClientsCount} client(s) running. Do you want to close all clients and exit?",
                         "Confirm Exit",
                         MessageBoxButton.YesNoCancel,
                         MessageBoxImage.Question);

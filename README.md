@@ -98,3 +98,11 @@ Polly(8.6.2) — .NET resilience and transient-fault-handling library for polici
 
 Performance Optimization Patterns used:
 caching, etc
+
+
+highlight
+Why the codebase is large (features, separation, testability, scalability).
+That you focused on production-grade patterns, not just “getting it working.”
+That you can also deliver smaller, focused solutions if needed
+
+highlight - no warnings of any kind
