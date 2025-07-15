@@ -42,10 +42,15 @@ namespace Todos.Client.Orchestrator.ViewModels
 
         public ICollectionView FilteredClientsView { get; }
 
+        public int TotalClientCount => _clientService.Clients.Count;
+        public int FilteredClientCount => FilteredClientsView?.Cast<object>().Count() ?? 0;
+
         public MainWindowViewModel()
         {
             FilteredClientsView = CollectionViewSource.GetDefaultView(_clientService.Clients);
             FilteredClientsView.Filter = FilterClientPredicate;
+            // Set default filter to alive only
+            FilterIsAlive = true;
             // Subscribe to process Exited for all existing clients
             foreach (var client in _clientService.Clients)
             {
@@ -57,11 +62,20 @@ namespace Todos.Client.Orchestrator.ViewModels
             }
             // Initial filter
             FilteredClientsView.Refresh();
+            // Listen for changes to update counts
+            FilteredClientsView.CollectionChanged += (s, e) => NotifyClientCountsChanged();
+            FilteredClientsView.CurrentChanged += (s, e) => NotifyClientCountsChanged();
         }
 
         partial void OnFilterClientTypeChanged(TypesGlobal.ClientType? value) => FilteredClientsView.Refresh();
         partial void OnFilterIsAliveChanged(bool? value) => FilteredClientsView.Refresh();
         partial void OnFilterProcessIdTextChanged(string value) => FilteredClientsView.Refresh();
+
+        private void NotifyClientCountsChanged()
+        {
+            OnPropertyChanged(nameof(TotalClientCount));
+            OnPropertyChanged(nameof(FilteredClientCount));
+        }
 
         [RelayCommand]
         private void ClearFilters()
@@ -169,8 +183,8 @@ namespace Todos.Client.Orchestrator.ViewModels
             // Remove client and refresh view
             App.Current.Dispatcher.Invoke(() =>
             {
-                _clientService.RemoveClient(client);
                 FilteredClientsView.Refresh();
+                NotifyClientCountsChanged();
             });
         }
     }

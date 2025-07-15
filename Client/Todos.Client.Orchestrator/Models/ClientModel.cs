@@ -5,7 +5,7 @@ using Todos.Client.Common.Factories;
 
 namespace Todos.Client.Orchestrator.Services
 {
-    public class ClientModel : ObservableObject
+    public partial class ClientModel : ObservableObject
     {
         public TypesGlobal.ClientType ClientType { get; }
         public Process Process { get; }
@@ -13,12 +13,8 @@ namespace Todos.Client.Orchestrator.Services
         public string LogFileName { get; }
         public int ProcessId => Process.Id;
 
+        [ObservableProperty]
         private bool isAlive;
-        public bool IsAlive
-        {
-            get => isAlive;
-            private set => SetProperty(ref isAlive, value);
-        }
 
         public ClientModel(TypesGlobal.ClientType clientType, Process process)
         {
@@ -27,7 +23,7 @@ namespace Todos.Client.Orchestrator.Services
             var logFileName = LogFactory.GetLogFileName(process.Id, clientType);
             LogFileName = logFileName;
             LogFilePath = LogFactory.GetLogFilePath(logFileName);
-            isAlive = !process.HasExited;
+            IsAlive = !process.HasExited;
 
             process.EnableRaisingEvents = true;
             process.Exited += (s, e) =>

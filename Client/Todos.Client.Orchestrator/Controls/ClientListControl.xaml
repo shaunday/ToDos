@@ -29,8 +29,21 @@
     </UserControl.Resources>
     <materialDesign:Card Padding="12" materialDesign:ElevationAssist.Elevation="Dp3">
         <DockPanel LastChildFill="True">
-            <!-- Kill All Button -->
-            <Button Content="Kill All" Style="{StaticResource MaterialDesignOutlinedButton}" Width="220" Height="30" FontSize="16" Command="{Binding KillAllClientsCommand}" DockPanel.Dock="Top" />
+            <!-- Overview Summary and Kill All Button on same line using Grid -->
+            <Grid Margin="0,0,0,8" DockPanel.Dock="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Column="0">
+                    <TextBlock Text="Clients: " FontWeight="Bold" FontSize="15" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding TotalClientCount}" FontWeight="Bold" FontSize="15" Foreground="Gray" VerticalAlignment="Center"/>
+                    <TextBlock Text=" / " FontSize="15" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding FilteredClientCount}" FontWeight="Bold" FontSize="15" Foreground="DarkGreen" VerticalAlignment="Center"/>
+                    <TextBlock Text=" shown" FontSize="15" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Button Content="Kill All" Style="{StaticResource MaterialDesignOutlinedButton}" Width="220" Height="30" FontSize="16" Command="{Binding KillAllClientsCommand}" HorizontalAlignment="Right" Grid.Column="1" />
+            </Grid>
             <!-- Client List -->
             <ListView x:Name="ClientListView"
                       ItemsSource="{Binding FilteredClientsView}"

@@ -37,7 +37,8 @@ namespace Todos.Client.Orchestrator.Services
                     model.Process.Kill();
             }
             catch { /* log if needed */ }
-            RemoveClient(model);
+            // Do not remove from Clients; just update IsAlive
+            model.IsAlive = false;
         }
 
         public void KillAllClients()
