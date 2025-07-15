@@ -16,6 +16,7 @@ using Unity.Lifetime;
 using Unity.Injection;
 using System.Data.Entity;
 using System.Threading;
+using ToDos.Server.DbReplication;
 
 namespace ToDos.TaskSyncServer
 {
@@ -72,6 +73,7 @@ namespace ToDos.TaskSyncServer
             container.RegisterType<IAuthService, ToDos.MockAuthService.MockAuthService>();
 
             // Register repository
+            container.RegisterType<IReadWriteDbRouter, SuffixReadWriteDbRouter>(new ContainerControlledLifetimeManager());
             container.RegisterType<ITaskRepository, TaskRepository>();
 
             container.RegisterType<ITaskService, TaskService>();

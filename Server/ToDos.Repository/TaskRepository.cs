@@ -7,29 +7,38 @@ using System.Linq;
 using System.Threading.Tasks;
 using ToDos.Entities;
 using ToDos.Server.DbSharding;
+using ToDos.Server.DbReplication;
 
 namespace ToDos.Repository
 {
     public class TaskRepository : ITaskRepository
     {
         private readonly IShardResolver _shardResolver;
+        private readonly IReadWriteDbRouter _dbRouter;
         private readonly ILogger _logger;
 
-        public TaskRepository(IShardResolver shardResolver, ILogger logger)
+        public TaskRepository(IShardResolver shardResolver, IReadWriteDbRouter dbRouter, ILogger logger)
         {
             _shardResolver = shardResolver;
+            _dbRouter = dbRouter;
             _logger = logger;
 
             var envPath = System.IO.Path.Combine(AppContext.BaseDirectory, ".env.Repository");
             Env.Load(envPath);
         }
 
+        private string GetConnectionString(int userId, bool isWriteOperation)
+        {
+            var logicalDb = _shardResolver.GetDatabaseName(userId);
+            var physicalDb = _dbRouter.GetPhysicalDbName(logicalDb, isWriteOperation);
+            return ConnectionStringAccess.GetDbConnectionString(physicalDb);
+        }
+
         public async Task<IEnumerable<TaskEntity>> GetByUserIdAsync(int userId)
         {
             try
             {
-                var dbName = _shardResolver.GetDatabaseName(userId);
-                var connStr = ConnectionStringAccess.GetDbConnectionString(dbName);
+                var connStr = GetConnectionString(userId, false);
                 using (var context = new TaskDbContext(connStr))
                 {
                     return await context.Tasks
@@ -48,8 +57,7 @@ namespace ToDos.Repository
         {
             try
             {
-                var dbName = _shardResolver.GetDatabaseName(userId);
-                var connStr = ConnectionStringAccess.GetDbConnectionString(dbName);
+                var connStr = GetConnectionString(userId, false);
                 using (var context = new TaskDbContext(connStr))
                 {
                     return await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId).ConfigureAwait(false);
@@ -66,8 +74,7 @@ namespace ToDos.Repository
         {
             try
             {
-                var dbName = _shardResolver.GetDatabaseName(task.UserId);
-                var connStr = ConnectionStringAccess.GetDbConnectionString(dbName);
+                var connStr = GetConnectionString(task.UserId, true);
                 using (var context = new TaskDbContext(connStr))
                 {
                     context.Tasks.Add(task);
@@ -85,8 +92,7 @@ namespace ToDos.Repository
         {
             try
             {
-                var dbName = _shardResolver.GetDatabaseName(task.UserId);
-                var connStr = ConnectionStringAccess.GetDbConnectionString(dbName);
+                var connStr = GetConnectionString(task.UserId, true);
                 using (var context = new TaskDbContext(connStr))
                 {
                     var existing = await context.Tasks.FindAsync(task.Id).ConfigureAwait(false);
@@ -108,8 +114,7 @@ namespace ToDos.Repository
         {
             try
             {
-                var dbName = _shardResolver.GetDatabaseName(userId);
-                var connStr = ConnectionStringAccess.GetDbConnectionString(dbName);
+                var connStr = GetConnectionString(userId, true);
                 using (var context = new TaskDbContext(connStr))
                 {
                     var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId).ConfigureAwait(false);
@@ -132,8 +137,7 @@ namespace ToDos.Repository
         {
             try
             {
-                var dbName = _shardResolver.GetDatabaseName(userId);
-                var connStr = ConnectionStringAccess.GetDbConnectionString(dbName);
+                var connStr = GetConnectionString(userId, true);
                 using (var context = new TaskDbContext(connStr))
                 {
                     var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId).ConfigureAwait(false);
@@ -156,8 +160,7 @@ namespace ToDos.Repository
         {
             try
             {
-                var dbName = _shardResolver.GetDatabaseName(userId);
-                var connStr = ConnectionStringAccess.GetDbConnectionString(dbName);
+                var connStr = GetConnectionString(userId, true);
                 using (var context = new TaskDbContext(connStr))
                 {
                     var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId).ConfigureAwait(false);
@@ -180,8 +183,7 @@ namespace ToDos.Repository
         {
             try
             {
-                var dbName = _shardResolver.GetDatabaseName(userId);
-                var connStr = ConnectionStringAccess.GetDbConnectionString(dbName);
+                var connStr = GetConnectionString(userId, true);
                 using (var context = new TaskDbContext(connStr))
                 {
                     var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId).ConfigureAwait(false);
@@ -204,8 +206,7 @@ namespace ToDos.Repository
         {
             try
             {
-                var dbName = _shardResolver.GetDatabaseName(userId);
-                var connStr = ConnectionStringAccess.GetDbConnectionString(dbName);
+                var connStr = GetConnectionString(userId, false);
                 using (var context = new TaskDbContext(connStr))
                 {
                     var task = await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId).ConfigureAwait(false);

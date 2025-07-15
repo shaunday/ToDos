@@ -4,7 +4,10 @@ namespace ToDos.Server.DbReplication
     {
         public string GetPhysicalDbName(string logicalDbName, bool isWriteOperation)
         {
-            return isWriteOperation ? $"{logicalDbName}_master" : $"{logicalDbName}_slave";
+            return logicalDbName; //mock for now
+
+            //for production
+            //return isWriteOperation ? $"{logicalDbName}_master" : $"{logicalDbName}_slave";
         }
     }
 } 

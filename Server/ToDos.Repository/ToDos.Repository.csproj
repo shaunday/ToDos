@@ -18,5 +18,6 @@
   <ItemGroup>
     <ProjectReference Include="..\ToDos.Server.Common\ToDos.Server.Common.csproj" />
     <ProjectReference Include="..\DbSharding\ToDos.Server.DbSharding.csproj" />
+    <ProjectReference Include="..\DbReplication\ToDos.Server.DbReplication.csproj" />
   </ItemGroup>
 </Project>
