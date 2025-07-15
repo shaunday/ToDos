@@ -31,7 +31,7 @@ namespace Todos.Ui.ViewModels
         private readonly new ITaskSyncClient _taskSyncClient;
         private readonly UserConnectionService _userConnectionService;
 
-        private ObservableCollection<TaskModel> Tasks { get; set; } = new ObservableCollection<TaskModel>();
+        public ObservableCollection<TaskModel> Tasks { get; set; } = new ObservableCollection<TaskModel>();
         private bool _hasLoadedOnce = false;
 
         #endregion
@@ -61,7 +61,8 @@ namespace Todos.Ui.ViewModels
         [ObservableProperty]
         private TaskFilter filter = new TaskFilter();
 
-        public ICollectionView FilteredTasksView { get; set; }
+        [ObservableProperty]
+        private ICollectionView filteredTasksView;
 
         public TasksOverviewModel Overview { get; } = new TasksOverviewModel();
         public TasksOverviewModel FilteredOverview { get; } = new TasksOverviewModel();
@@ -311,7 +312,6 @@ namespace Todos.Ui.ViewModels
         #region Private Methods
         private void UpdateFilteredTasks()
         {
-            _logger?.Information("TasksViewModel: UpdateFilteredTasks called");
             if (CollectionViewSource.GetDefaultView(FilteredTasksView) is IEditableCollectionView view)
             {
                 if (view.IsAddingNew)
@@ -323,7 +323,7 @@ namespace Todos.Ui.ViewModels
             // Update filtered overview
             var filtered = Filter.Apply(Tasks, EditingTask);
             FilteredOverview.Refresh(filtered, EditingTask);
-          Overview.Refresh(Tasks);
+            Overview.Refresh(Tasks);
         }
 
         private bool FilterPredicate(object obj)
@@ -356,10 +356,11 @@ namespace Todos.Ui.ViewModels
                 {
                     var userTaskDtos = await _taskSyncClient!.GetUserTasksAsync(currentUserId);
                     var userTaskModels = userTaskDtos.Select(dto => _mapper!.Map<TaskModel>(dto));
+                    var taskModelsList = userTaskModels.ToList();
 
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        Tasks = new ObservableCollection<TaskModel>(userTaskModels);
+                        Tasks = new ObservableCollection<TaskModel>(taskModelsList);
                         Overview.Refresh(Tasks);
                         FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
                         FilteredTasksView.Filter = FilterPredicate;
