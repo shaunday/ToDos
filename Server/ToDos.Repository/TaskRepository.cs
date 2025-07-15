@@ -31,9 +31,9 @@ namespace ToDos.Repository
 
         private string GetConnectionString(int userId, bool isWriteOperation)
         {
-            var logicalDb = _shardResolver.GetDatabaseName(userId);
-            var physicalDb = _dbRouter.GetPhysicalDbName(logicalDb, isWriteOperation);
-            return ConnectionStringAccess.GetDbConnectionString(physicalDb);
+            var shardedDbName = _shardResolver.GetDatabaseName(userId);
+            var readWriteSwitchDbName = _dbRouter.GetPhysicalDbName(shardedDbName, isWriteOperation);
+            return ConnectionStringAccess.GetDbConnectionString(); //using empty instead of passing (physicalDb)
         }
 
         public async Task<IEnumerable<ToDos.Entities.TaskEntity>> GetByUserIdAsync(int userId)

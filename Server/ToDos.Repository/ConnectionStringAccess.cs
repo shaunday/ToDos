@@ -9,8 +9,13 @@ namespace ToDos.Repository
 {
     public static class ConnectionStringAccess
     {
-        public static string GetDbConnectionString(string dbName)
+        public static string GetDbConnectionString(string dbName ="")
         {
+            if (string.IsNullOrEmpty(dbName))
+            {
+                dbName = Environment.GetEnvironmentVariable("DB_NAME");
+            }
+
             string server = Environment.GetEnvironmentVariable("DB_SERVER");
             string user = Environment.GetEnvironmentVariable("DB_USER");
             string pass = Environment.GetEnvironmentVariable("DB_PASS");

@@ -32,6 +32,10 @@ namespace ToDos.TaskSyncServer
 
             IUnityContainer container = ConfigureUnityContainer();
 
+            //mock db
+            string conString = ConnectionStringAccess.GetDbConnectionString(); //empty for default
+            TaskRepository.ResetAndPopulateDb(conString, new List<int> { 0, 1 }, 3);
+
             var resolver = new HybridSignalRResolver(container);
             GlobalHost.DependencyResolver = resolver;
 
