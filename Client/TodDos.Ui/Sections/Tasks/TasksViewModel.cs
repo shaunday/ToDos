@@ -18,6 +18,8 @@ using ToDos.MockAuthService;
 using MaterialDesignThemes.Wpf;
 using CommunityToolkit.Mvvm.Messaging;
 using System.Windows;
+using Unity;
+using Todos.Ui.Services;
 
 namespace Todos.Ui.ViewModels
 {
@@ -349,17 +351,14 @@ namespace Todos.Ui.ViewModels
         private int GetCurrentUserId()
         {
             _logger?.Information("TasksViewModel: GetCurrentUserId called");
-
-            var jwtToken = _taskSyncClient?.GetJwtToken();
-
-            if (string.IsNullOrEmpty(jwtToken))
+            var userConnectionService = App.Container.Resolve<UserConnectionService>();
+            var currentUser = userConnectionService.CurrentUser;
+            if (currentUser != null)
             {
-                _logger.Warning("No JWT token available for getting user ID");
-                throw new InvalidOperationException("No JWT token available for getting user ID");
+                return currentUser.Id;
             }
-
-            // Use AuthService to extract user ID from token
-            return _authService.GetUserIdFromTokenWithoutValidation(jwtToken);
+            _logger?.Warning("No current user available in UserConnectionService");
+            return 0;
         }
         #endregion
 
