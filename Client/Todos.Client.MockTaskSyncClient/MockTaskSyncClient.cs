@@ -34,11 +34,13 @@ namespace Todos.Client.MockTaskSyncClient
         }
         
         public event Action<ConnectionStatus> ConnectionStatusChanged;
+#pragma warning disable CS0067
         public event Action<TaskDTO> TaskAdded;
         public event Action<TaskDTO> TaskUpdated;
         public event Action<int> TaskDeleted;
         public event Action<int> TaskLocked;
         public event Action<int> TaskUnlocked;
+#pragma warning restore CS0067
 
         private string _jwtToken = string.Empty;
         public string ConnectionId { get; private set; }
