@@ -7,7 +7,7 @@ using System;
 using System.Web.Http;
 using ToDos.MockAuthService;
 using ToDos.Repository;
-using ToDos.Repository.Sharding;
+using ToDos.Sharding;
 using ToDos.Server.Common.Interfaces;
 using ToDos.TaskSyncServer.Mapping;
 using ToDos.TaskSyncServer.Services;
@@ -77,10 +77,8 @@ namespace ToDos.TaskSyncServer
             container.RegisterType<ITaskService, TaskService>();
 
             // Register ShardResolver
-            var connStrTemplate = ConnectionStringAccess.GetDbConnectionString();
             container.RegisterType<IShardResolver, DefaultShardResolver>(
-                new ContainerControlledLifetimeManager(),
-                new InjectionConstructor(connStrTemplate)
+                new ContainerControlledLifetimeManager()
             );
 
             // Register AutoMapper

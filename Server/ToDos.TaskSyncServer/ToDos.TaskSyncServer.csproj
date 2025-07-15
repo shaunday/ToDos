@@ -34,6 +34,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ToDos.Repository\ToDos.Repository.csproj" />
     <ProjectReference Include="..\ToDos.Server.Common\ToDos.Server.Common.csproj" />
+    <ProjectReference Include="..\ToDos.Sharding\ToDos.Sharding.csproj" />
     <ProjectReference Include="..\..\Common\ToDos.DotNet.Common\ToDos.DotNet.Common.csproj" />
     <ProjectReference Include="..\..\Common\ToDos.JwtService\ToDos.JwtService.csproj" />
   </ItemGroup>

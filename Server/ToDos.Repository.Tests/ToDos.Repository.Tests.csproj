@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ToDos.Repository\ToDos.Repository.csproj" />
+    <ProjectReference Include="..\ToDos.Sharding\ToDos.Sharding.csproj" />
   </ItemGroup>
 
 </Project>
