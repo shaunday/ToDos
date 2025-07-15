@@ -27,7 +27,6 @@ namespace Todos.Ui.ViewModels
     public partial class TasksViewModel : ViewModelBase, IInitializable, ICleanable
     {
         #region Fields
-        private readonly IAuthService _authService;
         private readonly new IMapper _mapper;
         private readonly new ITaskSyncClient _taskSyncClient;
         private readonly UserConnectionService _userConnectionService;
@@ -71,10 +70,9 @@ namespace Todos.Ui.ViewModels
         #endregion
 
         #region Constructors and Lifecycle
-        public TasksViewModel(INavigationService navigation, Serilog.ILogger logger, IAuthService authService)
+        public TasksViewModel(INavigationService navigation, Serilog.ILogger logger)
             : base(navigation, logger)
         {
-            _authService = authService;
             _mapper = App.Container.Resolve<IMapper>();
             _taskSyncClient = App.Container.Resolve<ITaskSyncClient>();
             _userConnectionService = App.Container.Resolve<UserConnectionService>();

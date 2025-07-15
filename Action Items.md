@@ -9,8 +9,6 @@ orch:
 
 
 Server:
-  //[SignalRJwtAuthentication]
-   GlobalHost.Configuration.
    container types
 
 

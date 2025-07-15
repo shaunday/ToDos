@@ -13,7 +13,7 @@ using Microsoft.AspNet.SignalR.Hubs;
 
 namespace ToDos.TaskSyncServer.Hubs
 {
-    //[SignalRJwtAuthentication]
+    [SignalRJwtAuthentication]
     [HubName("TaskHub")]
     public class TaskHub : Hub, ITaskHub
     {
@@ -41,7 +41,7 @@ namespace ToDos.TaskSyncServer.Hubs
             {
                 return userId;
             }
-            return 0; // Return 0 for invalid user ID
+            return -1; 
         }
 
         public async Task<TaskDTO> AddTask(TaskDTO task)
