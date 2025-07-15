@@ -377,8 +377,8 @@ namespace Todos.Ui.ViewModels
             var model = _mapper!.Map<TaskModel>(taskDto);
             Application.Current.Dispatcher.Invoke(() =>
             {
-                Tasks.Add(model);
-                UpdateFilteredTasks();
+            Tasks.Add(model);
+            UpdateFilteredTasks();
             });
         }
 
@@ -394,7 +394,7 @@ namespace Todos.Ui.ViewModels
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     Tasks[index] = updatedModel;
-                    UpdateFilteredTasks();
+                UpdateFilteredTasks();
                 });
             }
         }
@@ -406,9 +406,9 @@ namespace Todos.Ui.ViewModels
             if (model != null)
             {
                 Application.Current.Dispatcher.Invoke(() =>
-                {
-                    Tasks.Remove(model);
-                    UpdateFilteredTasks();
+            {
+                Tasks.Remove(model);
+                UpdateFilteredTasks();
                 });
             }
         }

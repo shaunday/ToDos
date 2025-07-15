@@ -34,6 +34,7 @@ namespace Todos.Client.TaskSyncWithOfflineQueues
             }
         }
 
+        // Call this on user logout to clear all pending actions for the previous user.
         public void Clear()
         {
             lock (_lock)

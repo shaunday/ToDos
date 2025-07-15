@@ -47,6 +47,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDos.Repository.Tests", "S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToDos.TaskSyncServer.Tests", "Server\ToDos.TaskSyncServer.Tests\ToDos.TaskSyncServer.Tests.csproj", "{6B8A1A0F-E91E-43DE-AFA1-342FE4E02BEF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Todos.Client.TaskSyncWithOfflineQueues", "Client\Todos.Client.TaskSyncWithOfflineQueues\Todos.Client.TaskSyncWithOfflineQueues.csproj", "{60C7D132-E0A0-B051-3B65-FC3825A20D17}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -285,6 +287,18 @@ Global
 		{6B8A1A0F-E91E-43DE-AFA1-342FE4E02BEF}.Release|x64.Build.0 = Release|Any CPU
 		{6B8A1A0F-E91E-43DE-AFA1-342FE4E02BEF}.Release|x86.ActiveCfg = Release|Any CPU
 		{6B8A1A0F-E91E-43DE-AFA1-342FE4E02BEF}.Release|x86.Build.0 = Release|Any CPU
+		{60C7D132-E0A0-B051-3B65-FC3825A20D17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60C7D132-E0A0-B051-3B65-FC3825A20D17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60C7D132-E0A0-B051-3B65-FC3825A20D17}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{60C7D132-E0A0-B051-3B65-FC3825A20D17}.Debug|x64.Build.0 = Debug|Any CPU
+		{60C7D132-E0A0-B051-3B65-FC3825A20D17}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{60C7D132-E0A0-B051-3B65-FC3825A20D17}.Debug|x86.Build.0 = Debug|Any CPU
+		{60C7D132-E0A0-B051-3B65-FC3825A20D17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60C7D132-E0A0-B051-3B65-FC3825A20D17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60C7D132-E0A0-B051-3B65-FC3825A20D17}.Release|x64.ActiveCfg = Release|Any CPU
+		{60C7D132-E0A0-B051-3B65-FC3825A20D17}.Release|x64.Build.0 = Release|Any CPU
+		{60C7D132-E0A0-B051-3B65-FC3825A20D17}.Release|x86.ActiveCfg = Release|Any CPU
+		{60C7D132-E0A0-B051-3B65-FC3825A20D17}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -309,6 +323,7 @@ Global
 		{9D58187D-5B1F-46A5-9D66-BF612BB485A6} = {20D01410-5222-402E-A016-99C43F7FFAD3}
 		{6022E064-41B4-4D27-8EE9-3F52F31CABDE} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{6B8A1A0F-E91E-43DE-AFA1-342FE4E02BEF} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{60C7D132-E0A0-B051-3B65-FC3825A20D17} = {20D01410-5222-402E-A016-99C43F7FFAD3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {18CAB5A8-F3C0-4162-B968-49435E091621}

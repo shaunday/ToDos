@@ -25,7 +25,7 @@ namespace Todos.Ui
 {
     public partial class App : Application
     {
-        public IUnityContainer Container { get; private set; }
+        public static IUnityContainer Container { get; private set; }
 
         protected override void OnStartup(StartupEventArgs e)
         {

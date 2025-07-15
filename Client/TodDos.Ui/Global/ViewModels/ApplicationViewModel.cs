@@ -13,6 +13,8 @@ using Todos.Ui.Models;
 using Todos.Ui.Services.Navigation;
 using static Todos.Client.Common.TypesGlobal;
 using TodDos.Ui.Global.ViewModels;
+using Todos.Client.TaskSyncWithOfflineQueues;
+using Unity;
 
 namespace Todos.Ui.ViewModels
 {
@@ -26,7 +28,6 @@ namespace Todos.Ui.ViewModels
         private UserModel currentUser;
 
         private readonly IUserService _userService;
-        private readonly IOfflineQueueService _offlineQueueService;
 
         public string ConnectionStatusText => ConnectionStatus switch
         {
@@ -37,11 +38,10 @@ namespace Todos.Ui.ViewModels
             _ => "Disconnected"
         };
 
-        public ApplicationViewModel(IUserService userService, ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation, IOfflineQueueService offlineQueueService) 
+        public ApplicationViewModel(IUserService userService, ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation) 
             : base(taskSyncClient, mapper, navigation)
         {
             _userService = userService;
-            _offlineQueueService = offlineQueueService;
             
             // Subscribe to events
             _userService.TokenChanged += HandleTokenChanged;
@@ -90,12 +90,20 @@ namespace Todos.Ui.ViewModels
                 {
                     // Handle disconnection error
                 }
+                ClearOfflineQueue();
             }
         }
 
         private void HandleUserChanged(UserDTO userDto)
         {
             CurrentUser = _mapper!.Map<UserModel>(userDto);
+            ClearOfflineQueue();
+        }
+
+        private void ClearOfflineQueue()
+        {
+            var offlineQueueService = (App.Container as Unity.UnityContainer)?.Resolve<IOfflineQueueService>();
+            offlineQueueService?.Clear();
         }
 
         [RelayCommand]
@@ -124,7 +132,6 @@ namespace Todos.Ui.ViewModels
             try
             {
                 await _userService.LogoutAsync();
-                _offlineQueueService.Clear(); // Clear offline queue on logout
                 // Disconnection will be handled by HandleTokenChanged
             }
             catch (Exception)
