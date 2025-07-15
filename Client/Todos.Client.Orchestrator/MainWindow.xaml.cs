@@ -24,26 +24,8 @@ namespace Todos.Client.Orchestrator
             InitializeComponent();
             var vm = new MainWindowViewModel();
             DataContext = vm;
-
-            // Hook up filter change handlers to update log viewer
-            vm.FilteredClientsView.CollectionChanged += (s, e) => UpdateLogViewerFromFilteredClientsView(vm);
-            // Also update after every filter refresh (for filter property changes)
-            vm.FilteredClientsView.CurrentChanged += (s, e) => UpdateLogViewerFromFilteredClientsView(vm);
-           
-            // Handle window closing event
+            // Removed log viewer event hookups; now handled in MainWindowViewModel
             Closing += MainWindow_Closing;
-        }
-
-        private void UpdateLogViewerFromFilteredClientsView(MainWindowViewModel vm)
-        {
-            if (LogViewer != null)
-            {
-                var logFilePaths = vm.FilteredClientsView.Cast<Todos.Client.Orchestrator.Services.ClientModel>()
-                    .Select(c => c.LogFilePath)
-                    .Where(System.IO.File.Exists)
-                    .ToList();
-                LogViewer.UpdateLogFiles(logFilePaths);
-            }
         }
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

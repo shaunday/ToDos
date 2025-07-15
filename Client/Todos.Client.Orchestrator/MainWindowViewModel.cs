@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Data;
 using Todos.Client.Common;
 using Todos.Client.Orchestrator.Services;
+using Todos.Client.Orchestrator.ViewModels;
 
 namespace Todos.Client.Orchestrator.ViewModels
 {
@@ -46,6 +47,7 @@ namespace Todos.Client.Orchestrator.ViewModels
         public ICollectionView FilteredClientsView { get; }
         public int TotalClientCount => _clientService.Clients.Count;
         public int FilteredClientCount => FilteredClientsView?.Cast<object>().Count() ?? 0;
+        public LogViewerViewModel LogViewerViewModel { get; }
         #endregion
 
         #region Constructor
@@ -69,6 +71,10 @@ namespace Todos.Client.Orchestrator.ViewModels
             // Listen for changes to update counts
             FilteredClientsView.CollectionChanged += (s, e) => NotifyClientCountsChanged();
             FilteredClientsView.CurrentChanged += (s, e) => NotifyClientCountsChanged();
+            LogViewerViewModel = new LogViewerViewModel(new LogFileWatcherService());
+            FilteredClientsView.CollectionChanged += (s, e) => UpdateLogViewerLogFiles();
+            FilteredClientsView.CurrentChanged += (s, e) => UpdateLogViewerLogFiles();
+            UpdateLogViewerLogFiles();
         }
         #endregion
 
@@ -194,6 +200,15 @@ namespace Todos.Client.Orchestrator.ViewModels
                 FilteredClientsView.Refresh();
                 NotifyClientCountsChanged();
             });
+        }
+
+        private void UpdateLogViewerLogFiles()
+        {
+            var logFilePaths = FilteredClientsView.Cast<ClientModel>()
+                .Select(c => c.LogFilePath)
+                .Where(System.IO.File.Exists)
+                .ToList();
+            LogViewerViewModel.UpdateLogFiles(logFilePaths);
         }
         #endregion
     }
