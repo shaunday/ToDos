@@ -25,40 +25,55 @@ namespace Todos.Client.Orchestrator
             var vm = new MainWindowViewModel();
             DataContext = vm;
 
-            // Subscribe to changes
-            vm.FilteredClients.CollectionChanged += (s, e) =>
-            {
-                if (LogViewer != null)
-                    LogViewer.UpdateLogFiles(vm.Clients.Select(c => c.LogFilePath).ToList());
-            };
+            // Hook up filter change handlers to update log viewer
+            vm.FilteredClientsView.CollectionChanged += (s, e) => UpdateLogViewerFromFilteredClientsView(vm);
+            // Also update after every filter refresh (for filter property changes)
+            vm.FilteredClientsView.CurrentChanged += (s, e) => UpdateLogViewerFromFilteredClientsView(vm);
+           
 
             // Handle window closing event
             Closing += MainWindow_Closing;
         }
 
+        private void UpdateLogViewerFromFilteredClientsView(MainWindowViewModel vm)
+        {
+            if (LogViewer != null)
+            {
+                var logFilePaths = vm.FilteredClientsView.Cast<Todos.Client.Orchestrator.Services.ClientModel>()
+                    .Select(c => c.LogFilePath)
+                    .Where(System.IO.File.Exists)
+                    .ToList();
+                LogViewer.UpdateLogFiles(logFilePaths);
+            }
+        }
+
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (DataContext is MainWindowViewModel viewModel && viewModel.Clients.Count > 0)
+            if (DataContext is MainWindowViewModel viewModel)
             {
-                var result = MessageBox.Show(
-                    $"You have {viewModel.Clients.Count} client(s) running. Do you want to close all clients and exit?",
-                    "Confirm Exit",
-                    MessageBoxButton.YesNoCancel,
-                    MessageBoxImage.Question);
-
-                switch (result)
+                var allClientsCount = viewModel.FilteredClients.Cast<object>().Count();
+                if (allClientsCount > 0)
                 {
-                    case MessageBoxResult.Yes:
-                        // Kill all clients and close
-                        viewModel.KillAllClientsCommand.Execute(null);
-                        break;
-                    case MessageBoxResult.No:
-                        // Close without killing clients
-                        break;
-                    case MessageBoxResult.Cancel:
-                        // Cancel the closing
-                        e.Cancel = true;
-                        return;
+                    var result = MessageBox.Show(
+                        $"You have {viewModel.FilteredClients.Count} client(s) running. Do you want to close all clients and exit?",
+                        "Confirm Exit",
+                        MessageBoxButton.YesNoCancel,
+                        MessageBoxImage.Question);
+
+                    switch (result)
+                    {
+                        case MessageBoxResult.Yes:
+                            // Kill all clients and close
+                            viewModel.KillAllClientsCommand.Execute(null);
+                            break;
+                        case MessageBoxResult.No:
+                            // Close without killing clients
+                            break;
+                        case MessageBoxResult.Cancel:
+                            // Cancel the closing
+                            e.Cancel = true;
+                            return;
+                    }
                 }
             }
         }

@@ -51,7 +51,9 @@ namespace Todos.Client.Orchestrator.ViewModels
         public void UpdateLogFiles(System.Collections.Generic.List<string> logFilePaths)
         {
             App.Current.Dispatcher.Invoke(() => LogLines.Clear());
-            _logFileWatcherService.SetLogFiles(logFilePaths);
+            // Only keep files that exist
+            var existingFiles = logFilePaths.Where(System.IO.File.Exists).ToList();
+            _logFileWatcherService.SetLogFiles(existingFiles);
             _logFileWatcherService.ReloadAllLogLines();
         }
 

@@ -3,10 +3,12 @@ using CommunityToolkit.Mvvm.Input;
 using System;
 using System.Collections;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Data;
 using Todos.Client.Common;
 using Todos.Client.Orchestrator.Services;
 
@@ -38,19 +40,20 @@ namespace Todos.Client.Orchestrator.ViewModels
         [ObservableProperty]
         private string selectedSimulatorCommand;
 
-        public ObservableCollection<ClientModel> Clients => _clientService.Clients;
-
         public ObservableCollection<ClientModel> FilteredClients { get; } = new ObservableCollection<ClientModel>();
+        public ICollectionView FilteredClientsView { get; }
 
         public MainWindowViewModel()
         {
+            FilteredClientsView = CollectionViewSource.GetDefaultView(_clientService.Clients);
+            FilteredClientsView.Filter = FilterClientPredicate;
             // Initial filter
-            UpdateFilteredClients();
+            FilteredClientsView.Refresh();
         }
 
-        partial void OnFilterClientTypeChanged(TypesGlobal.ClientType? value) => UpdateFilteredClients();
-        partial void OnFilterIsAliveChanged(bool? value) => UpdateFilteredClients();
-        partial void OnFilterProcessIdTextChanged(string value) => UpdateFilteredClients();
+        partial void OnFilterClientTypeChanged(TypesGlobal.ClientType? value) => FilteredClientsView.Refresh();
+        partial void OnFilterIsAliveChanged(bool? value) => FilteredClientsView.Refresh();
+        partial void OnFilterProcessIdTextChanged(string value) => FilteredClientsView.Refresh();
 
         [RelayCommand]
         private void ClearFilters()
@@ -60,50 +63,43 @@ namespace Todos.Client.Orchestrator.ViewModels
             FilterProcessIdText = string.Empty;
         }
 
-
-        private void UpdateFilteredClients()
+        private bool FilterClientPredicate(object obj)
         {
-            var filtered = _clientService.Clients.Where(c =>
-                (!FilterClientType.HasValue || c.ClientType == FilterClientType.Value) &&
-                (!FilterIsAlive.HasValue || c.IsAlive == FilterIsAlive.Value) &&
-                (string.IsNullOrWhiteSpace(FilterProcessIdText) || c.ProcessId.ToString().Contains(FilterProcessIdText))
-            ).ToList();
-            FilteredClients.Clear();
-            foreach (var c in filtered)
-            {
-                Console.WriteLine($"[DEBUG] Filtered client: PID={c.ProcessId}, LogFilePath={c.LogFilePath}");
-                FilteredClients.Add(c);
-            }
+            var c = obj as ClientModel;
+            if (c == null) return false;
+            if (FilterClientType.HasValue && c.ClientType != FilterClientType.Value) return false;
+            if (FilterIsAlive.HasValue && c.IsAlive != FilterIsAlive.Value) return false;
+            if (!string.IsNullOrWhiteSpace(FilterProcessIdText) && !c.ProcessId.ToString().Contains(FilterProcessIdText)) return false;
+            return true;
         }
 
         [RelayCommand]
         private void LaunchClient()
         {
-            // Launch as many clients as specified by LaunchClientCount (minimum 1)
             int count = Math.Max(1, LaunchClientCount);
-            var outputDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".";
-            var clientExe = Path.Combine(outputDir, "TodDos.Ui.exe");
-            if (!File.Exists(clientExe))
+            var outputDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".";
+            var clientExe = System.IO.Path.Combine(outputDir, "TodDos.Ui.exe");
+            if (!System.IO.File.Exists(clientExe))
             {
-                MessageBox.Show($"Client executable not found in: {outputDir}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show($"Client executable not found in: {outputDir}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                 return;
             }
             for (int i = 0; i < count; i++)
             {
-                var startInfo = new ProcessStartInfo
+                var startInfo = new System.Diagnostics.ProcessStartInfo
                 {
                     FileName = clientExe,
                     WorkingDirectory = outputDir
                 };
-                var proc = Process.Start(startInfo);
+                var proc = System.Diagnostics.Process.Start(startInfo);
                 if (proc != null)
                 {
                     _clientService.AddClient(TypesGlobal.ClientType.UiClient, proc);
                     proc.EnableRaisingEvents = true;
-                    proc.Exited += (s, e) => Application.Current?.Dispatcher.Invoke(UpdateFilteredClients);
+                    proc.Exited += (s, e) => System.Windows.Application.Current?.Dispatcher.Invoke(() => FilteredClientsView.Refresh());
                 }
             }
-            UpdateFilteredClients();
+            FilteredClientsView.Refresh();
         }
 
         [RelayCommand]
@@ -111,18 +107,18 @@ namespace Todos.Client.Orchestrator.ViewModels
         {
             if (model == null) return;
             _clientService.KillClient(model);
-            UpdateFilteredClients();
+            FilteredClientsView.Refresh();
         }
 
         [RelayCommand]
         private void KillAllClients()
         {
-            if (Clients.Count == 0) return;
-            var result = MessageBox.Show($"Are you sure you want to kill all {Clients.Count} running client(s)?", "Confirm Kill All", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result == MessageBoxResult.Yes)
+            if (_clientService.Clients.Count == 0) return;
+            var result = System.Windows.MessageBox.Show($"Are you sure you want to kill all {_clientService.Clients.Count} running client(s)?", "Confirm Kill All", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
+            if (result == System.Windows.MessageBoxResult.Yes)
             {
                 _clientService.KillAllClients();
-                UpdateFilteredClients();
+                FilteredClientsView.Refresh();
             }
         }
 
@@ -130,11 +126,11 @@ namespace Todos.Client.Orchestrator.ViewModels
         private void OpenLog(ClientModel model)
         {
             if (model == null) return;
-            Console.WriteLine($"[DEBUG] Attempting to open log file: {model.LogFilePath}");
-            if (File.Exists(model.LogFilePath))
-                Process.Start(new ProcessStartInfo(model.LogFilePath) { UseShellExecute = true });
+            System.Console.WriteLine($"[DEBUG] Attempting to open log file: {model.LogFilePath}");
+            if (System.IO.File.Exists(model.LogFilePath))
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(model.LogFilePath) { UseShellExecute = true });
             else
-                MessageBox.Show($"Log file not found: {model.LogFilePath}", "Log Not Found", MessageBoxButton.OK, MessageBoxImage.Information);
+                System.Windows.MessageBox.Show($"Log file not found: {model.LogFilePath}", "Log Not Found", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
         }
 
         [RelayCommand]
@@ -146,7 +142,7 @@ namespace Todos.Client.Orchestrator.ViewModels
             {
                 _clientService.RemoveClient(model);
             }
-            UpdateFilteredClients();
+            FilteredClientsView.Refresh();
         }
 
         [RelayCommand]
@@ -157,7 +153,7 @@ namespace Todos.Client.Orchestrator.ViewModels
 
         public void OnFilterChanged()
         {
-            UpdateFilteredClients();
+            FilteredClientsView.Refresh();
         }
     }
 } 
