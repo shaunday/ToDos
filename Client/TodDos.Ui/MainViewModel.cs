@@ -17,28 +17,33 @@ namespace Todos.Ui
     {
         public MainViewModel(INavigationService navigation, Serilog.ILogger logger = null) : base(navigation, logger)
         {
-            // DEV CODE: Auto-login for development/testing
-            _ = Task.Run(async () =>
+           
+        }
+
+        public async Task AutoLogin(string user, string pass)
+        {
+            try
             {
-                try
+                var userService = App.Container.Resolve<IUserService>();
+                var result = await userService.AuthenticateAsync(user, pass);
+                if (result)
                 {
-                    var userService = App.Container.Resolve<Todos.Client.UserService.Interfaces.IUserService>();
-                    var result = await userService.AuthenticateAsync("defaultuser", "1234");
-                    if (result)
+                    // Navigate to tasks after successful login
+                    await Task.Delay(100); // Small delay to ensure login completes
+                    Application.Current.Dispatcher.Invoke(new Action(() =>
                     {
-                        // Navigate to tasks after successful login
-                        await Task.Delay(100); // Small delay to ensure login completes
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
-                        {
-                            Navigation.NavigateTo<TasksViewModel>();
-                        }));
-                    }
+                        Navigation.NavigateTo<TasksViewModel>();
+                    }));
                 }
-                catch (Exception )
+                else
                 {
-                    // Handle auto-login failure silently
+                    //goto login view and login manually
                 }
-            });
+            }
+            catch (Exception)
+            {
+                // Handle auto-login failure silently
+            }
         }
     }
 }

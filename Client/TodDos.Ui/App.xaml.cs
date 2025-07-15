@@ -31,13 +31,24 @@ namespace Todos.Ui
         protected override void OnStartup(StartupEventArgs e)
         {
             SetupLogging();
-
             RegisterGlobalExceptionHandlers();
-
             ConfigureContainer();
 
-            ShowMainWindow();
-
+            string autoUser = null;
+            string autoPass = null;
+            string autologinArg = e.Args.FirstOrDefault(arg => arg.Contains("user="));
+            if (autologinArg != null)
+            {
+                var parts = autologinArg.Split(';');
+                autoUser = parts.FirstOrDefault(p => p.StartsWith("user="))?.Split('=')[1];
+                autoPass = parts.FirstOrDefault(p => p.StartsWith("pass="))?.Split('=')[1];
+            }
+            if (string.IsNullOrEmpty(autoUser) || string.IsNullOrEmpty(autoPass))
+            {
+                autoUser = "defaultuser";
+                autoPass = "1234";
+            }
+            ShowMainWindow(autoUser, autoPass);
             base.OnStartup(e);
         }
 
@@ -99,17 +110,18 @@ namespace Todos.Ui
             Container.RegisterType<TopPanelViewModel>();
         }
 
-        private void ShowMainWindow()
+        private void ShowMainWindow(string autoUser, string autoPass)
         {
             Process appProcess = Process.GetCurrentProcess();
-
+            var mainVm = Container.Resolve<MainViewModel>();
             var window = new MainWindow
             {
-                DataContext = Container.Resolve<MainViewModel>(),
+                DataContext = mainVm,
                 Title = $"ToDos Client - PID: {appProcess.Id}"
             };
-
             window.Show();
+            // Trigger auto-login after window is shown
+            _ = mainVm.AutoLogin(autoUser, autoPass);
         }
 
         protected override void OnExit(ExitEventArgs e)
