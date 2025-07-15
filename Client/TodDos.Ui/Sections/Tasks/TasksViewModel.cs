@@ -32,6 +32,7 @@ namespace Todos.Ui.ViewModels
         private readonly UserConnectionService _userConnectionService;
 
         private ObservableCollection<TaskModel> Tasks { get; set; } = new ObservableCollection<TaskModel>();
+        private bool _hasLoadedOnce = false;
 
         #endregion
 
@@ -91,8 +92,8 @@ namespace Todos.Ui.ViewModels
             _taskSyncClient.TaskUnlocked += HandleTaskUnlocked;
             Tasks.CollectionChanged += Tasks_CollectionChanged;
             Filter.PropertyChanged += Filter_PropertyChanged;
-
-            await ReloadAllTasksAndUiStateAsync();
+          
+            _ = ReloadAllTasksAndUiStateAsync();
         }
 
         public override void Cleanup()
@@ -377,6 +378,8 @@ namespace Todos.Ui.ViewModels
 
         private async Task ReloadAllTasksAndUiStateAsync()
         {
+            if (_hasLoadedOnce) return;
+            _hasLoadedOnce = true;
             await LoadTasksAsync();
             ApplyUiState();
         }
@@ -398,7 +401,6 @@ namespace Todos.Ui.ViewModels
         {
             if (status == ConnectionStatus.Connected)
             {
-                // Reload all tasks and UI state on reconnect
                 _ = ReloadAllTasksAndUiStateAsync();
             }
         }

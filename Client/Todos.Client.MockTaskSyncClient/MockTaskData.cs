@@ -17,7 +17,7 @@ namespace Todos.Client.MockTaskSyncClient
                     Title = "Complete project documentation", 
                     Description = "Write comprehensive documentation for the new feature including API specs and user guides", 
                     IsCompleted = false,
-                    Priority = "High",
+                    Priority = TaskPriority.High,
                     DueDate = DateTime.Now.AddDays(3),
                     Tags = new List<TagDTO> { new TagDTO { Name = "documentation" }, new TagDTO { Name = "api" }, new TagDTO { Name = "feature" } }
                 },
@@ -28,7 +28,7 @@ namespace Todos.Client.MockTaskSyncClient
                     Title = "Review pull requests", 
                     Description = "Review 5 pending pull requests for the backend team", 
                     IsCompleted = true,
-                    Priority = "Medium",
+                    Priority = TaskPriority.Medium,
                     DueDate = DateTime.Now.AddDays(-1),
                     Tags = new List<TagDTO> { new TagDTO { Name = "review" }, new TagDTO { Name = "backend" }, new TagDTO { Name = "pr" } }
                 },
@@ -40,7 +40,7 @@ namespace Todos.Client.MockTaskSyncClient
                     Description = "Users are experiencing authentication failures on mobile devices", 
                     IsCompleted = false, 
                     IsLocked = true,
-                    Priority = "High",
+                    Priority = TaskPriority.High,
                     DueDate = DateTime.Now.AddHours(6),
                     Tags = new List<TagDTO> { new TagDTO { Name = "bug" }, new TagDTO { Name = "login" }, new TagDTO { Name = "critical" } }
                 },
@@ -51,7 +51,7 @@ namespace Todos.Client.MockTaskSyncClient
                     Title = "Update dependencies", 
                     Description = "Update all NuGet packages to latest stable versions and test for breaking changes", 
                     IsCompleted = false,
-                    Priority = "Low",
+                    Priority = TaskPriority.Low,
                     DueDate = DateTime.Now.AddDays(7),
                     Tags = new List<TagDTO> { new TagDTO { Name = "dependencies" }, new TagDTO { Name = "nuget" }, new TagDTO { Name = "update" } }
                 },
@@ -62,7 +62,7 @@ namespace Todos.Client.MockTaskSyncClient
                     Title = "Prepare presentation for stakeholders", 
                     Description = "Create slides for quarterly review meeting with key metrics and progress updates", 
                     IsCompleted = false,
-                    Priority = "High",
+                    Priority = TaskPriority.High,
                     DueDate = DateTime.Now.AddDays(2),
                     Tags = new List<TagDTO> { new TagDTO { Name = "presentation" }, new TagDTO { Name = "stakeholders" }, new TagDTO { Name = "meeting" } }
                 },
@@ -73,7 +73,7 @@ namespace Todos.Client.MockTaskSyncClient
                     Title = "Code review for new feature", 
                     Description = "Review the implementation of the new search functionality and provide feedback", 
                     IsCompleted = true,
-                    Priority = "Medium",
+                    Priority = TaskPriority.Medium,
                     DueDate = DateTime.Now.AddDays(-2),
                     Tags = new List<TagDTO> { new TagDTO { Name = "review" }, new TagDTO { Name = "feature" }, new TagDTO { Name = "search" } }
                 },
@@ -84,7 +84,7 @@ namespace Todos.Client.MockTaskSyncClient
                     Title = "Setup CI/CD pipeline", 
                     Description = "Configure automated testing and deployment pipeline for the new microservice", 
                     IsCompleted = false,
-                    Priority = "High",
+                    Priority = TaskPriority.High,
                     DueDate = DateTime.Now.AddDays(5),
                     Tags = new List<TagDTO> { new TagDTO { Name = "ci" }, new TagDTO { Name = "cd" }, new TagDTO { Name = "automation" }, new TagDTO { Name = "devops" } }
                 },
@@ -95,7 +95,7 @@ namespace Todos.Client.MockTaskSyncClient
                     Title = "Database optimization", 
                     Description = "Analyze and optimize slow queries in the production database", 
                     IsCompleted = false,
-                    Priority = "Medium",
+                    Priority = TaskPriority.Medium,
                     DueDate = DateTime.Now.AddDays(10),
                     Tags = new List<TagDTO> { new TagDTO { Name = "database" }, new TagDTO { Name = "optimization" }, new TagDTO { Name = "performance" } }
                 },
@@ -106,7 +106,7 @@ namespace Todos.Client.MockTaskSyncClient
                     Title = "Security audit", 
                     Description = "Conduct security review of authentication and authorization systems", 
                     IsCompleted = false,
-                    Priority = "High",
+                    Priority = TaskPriority.High,
                     DueDate = DateTime.Now.AddDays(1),
                     Tags = new List<TagDTO> { new TagDTO { Name = "security" }, new TagDTO { Name = "audit" }, new TagDTO { Name = "auth" } }
                 },
@@ -117,7 +117,7 @@ namespace Todos.Client.MockTaskSyncClient
                     Title = "Update user manual", 
                     Description = "Revise user documentation to reflect recent UI changes and new features", 
                     IsCompleted = false,
-                    Priority = "Low",
+                    Priority = TaskPriority.Low,
                     DueDate = DateTime.Now.AddDays(14),
                     Tags = new List<TagDTO> { new TagDTO { Name = "documentation" }, new TagDTO { Name = "user" }, new TagDTO { Name = "manual" } }
                 },
@@ -128,7 +128,7 @@ namespace Todos.Client.MockTaskSyncClient
                     Title = "Performance testing", 
                     Description = "Run load tests on the new API endpoints to ensure they meet performance requirements", 
                     IsCompleted = true,
-                    Priority = "Medium",
+                    Priority = TaskPriority.Medium,
                     DueDate = DateTime.Now.AddDays(-3),
                     Tags = new List<TagDTO> { new TagDTO { Name = "performance" }, new TagDTO { Name = "testing" }, new TagDTO { Name = "api" } }
                 },
@@ -139,7 +139,7 @@ namespace Todos.Client.MockTaskSyncClient
                     Title = "Bug fix: Memory leak", 
                     Description = "Investigate and fix memory leak reported in the image processing module", 
                     IsCompleted = false,
-                    Priority = "High",
+                    Priority = TaskPriority.High,
                     DueDate = DateTime.Now.AddDays(4),
                     Tags = new List<TagDTO> { new TagDTO { Name = "bug" }, new TagDTO { Name = "memory" }, new TagDTO { Name = "leak" } }
                 }

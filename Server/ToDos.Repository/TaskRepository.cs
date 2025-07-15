@@ -51,7 +51,8 @@ namespace ToDos.Repository
                 var connStr = GetConnectionString(userId, false);
                 using var context = new TaskDbContext(connStr);
                 return await context.Tasks
-                .Where(t => t.UserId == userId)
+                    .Include(t => t.Tags)
+                    .Where(t => t.UserId == userId)
                     .ToListAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -67,7 +68,9 @@ namespace ToDos.Repository
             {
                 var connStr = GetConnectionString(userId, false);
                 using var context = new TaskDbContext(connStr);
-                return await context.Tasks.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId).ConfigureAwait(false);
+                return await context.Tasks
+                    .Include(t => t.Tags)
+                    .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

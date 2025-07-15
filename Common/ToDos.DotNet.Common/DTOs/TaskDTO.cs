@@ -11,7 +11,7 @@ namespace ToDos.DotNet.Common
         public bool IsCompleted { get; set; }
         public bool IsLocked { get; set; }
         public int UserId { get; set; }
-        public string Priority { get; set; }
+        public TaskPriority Priority { get; set; }
         public DateTime? DueDate { get; set; }
         public List<TagDTO> Tags { get; set; }
     }

@@ -10,6 +10,10 @@ namespace ToDos.Entities
 {
     public class TaskEntity
     {
+        public TaskEntity()
+        {
+            Tags = new List<TagEntity>();
+        }
         public int Id { get; set; }
         public int UserId { get; set; }
         public string Title { get; set; }
