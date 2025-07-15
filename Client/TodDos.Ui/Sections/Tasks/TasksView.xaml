@@ -37,8 +37,9 @@
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="Opacity" Value="1" />
             <Setter Property="Margin" Value="1" />
-       
-            <Style.Triggers>
+            <Setter Property="Padding" Value="1,0" />
+
+                <Style.Triggers>
                 <Trigger Property="IsSelected" Value="True">
                     <Setter Property="Background" Value="Transparent"/>
                     <Setter Property="BorderBrush" Value="Transparent"/>

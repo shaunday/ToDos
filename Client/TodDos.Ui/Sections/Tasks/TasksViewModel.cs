@@ -159,13 +159,17 @@ namespace Todos.Ui.ViewModels
 
                 if (res)
                 {
-                    IsAddingNewTask = false;
-                    NewTaskBuffer = null;
+                  
+                    Tasks.Add(newTaskModel);
+                    UpdateFilteredTasks();
                 }
                 else
                 {
                     //todo
                 }
+                IsAddingNewTask = false;
+                NewTaskBuffer = null;
+
             }, "Failed to add task.", SnackbarMessageQueue);
             IsLoading = false;
         }
