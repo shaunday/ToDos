@@ -16,8 +16,11 @@ namespace Todos.Client.Orchestrator.ViewModels
 {
     public partial class MainWindowViewModel : ObservableObject
     {
+        #region Fields
         private readonly ClientProcessService _clientService = new ClientProcessService();
+        #endregion
 
+        #region Properties
         [ObservableProperty]
         private TypesGlobal.ClientType? filterClientType;
         [ObservableProperty]
@@ -41,10 +44,11 @@ namespace Todos.Client.Orchestrator.ViewModels
         private string selectedSimulatorCommand;
 
         public ICollectionView FilteredClientsView { get; }
-
         public int TotalClientCount => _clientService.Clients.Count;
         public int FilteredClientCount => FilteredClientsView?.Cast<object>().Count() ?? 0;
+        #endregion
 
+        #region Constructor
         public MainWindowViewModel()
         {
             FilteredClientsView = CollectionViewSource.GetDefaultView(_clientService.Clients);
@@ -66,17 +70,9 @@ namespace Todos.Client.Orchestrator.ViewModels
             FilteredClientsView.CollectionChanged += (s, e) => NotifyClientCountsChanged();
             FilteredClientsView.CurrentChanged += (s, e) => NotifyClientCountsChanged();
         }
+        #endregion
 
-        partial void OnFilterClientTypeChanged(TypesGlobal.ClientType? value) => FilteredClientsView.Refresh();
-        partial void OnFilterIsAliveChanged(bool? value) => FilteredClientsView.Refresh();
-        partial void OnFilterProcessIdTextChanged(string value) => FilteredClientsView.Refresh();
-
-        private void NotifyClientCountsChanged()
-        {
-            OnPropertyChanged(nameof(TotalClientCount));
-            OnPropertyChanged(nameof(FilteredClientCount));
-        }
-
+        #region Commands
         [RelayCommand]
         private void ClearFilters()
         {
@@ -172,6 +168,18 @@ namespace Todos.Client.Orchestrator.ViewModels
         {
             // SimulateAddTaskAsync(selectedSimulatorPid, ...);
         }
+        #endregion
+
+        #region Methods
+        partial void OnFilterClientTypeChanged(TypesGlobal.ClientType? value) => FilteredClientsView.Refresh();
+        partial void OnFilterIsAliveChanged(bool? value) => FilteredClientsView.Refresh();
+        partial void OnFilterProcessIdTextChanged(string value) => FilteredClientsView.Refresh();
+
+        private void NotifyClientCountsChanged()
+        {
+            OnPropertyChanged(nameof(TotalClientCount));
+            OnPropertyChanged(nameof(FilteredClientCount));
+        }
 
         public void OnFilterChanged()
         {
@@ -183,9 +191,11 @@ namespace Todos.Client.Orchestrator.ViewModels
             // Remove client and refresh view
             App.Current.Dispatcher.Invoke(() =>
             {
+                _clientService.RemoveClient(client);
                 FilteredClientsView.Refresh();
                 NotifyClientCountsChanged();
             });
         }
+        #endregion
     }
 } 
