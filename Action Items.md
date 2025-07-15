@@ -1,10 +1,7 @@
 
 
 
-signlarr server? signalr globals...
 
-a bit more ui work on the list
-caching server, client
 login/ orchestrator > login
 
 ## Testing and Tooling
@@ -23,6 +20,8 @@ login/ orchestrator > login
 
 
 nice to have:
+client caching
+a bit more ui work on the list : padding for color/ right side is being cut off on edit mode
 Track and simulate connection drops, reconnect logic, slow DB writes, and queue overflow
 show item editing when filter and its not on
 On permanent disconnect, prompt UI to notify the user or retry manually.

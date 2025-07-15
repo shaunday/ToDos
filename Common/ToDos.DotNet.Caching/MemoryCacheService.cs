@@ -7,12 +7,12 @@ using Serilog;
 
 namespace ToDos.DotNet.Caching
 {
-    public class MemoryCacheService<TDto> : ICacheService<TDto>
+    public class MemoryCacheService<TUserId, TDto> : ICacheService<TUserId, TDto>
     {
         private readonly MemoryCache _cache;
         private readonly object _lock = new object();
         private readonly ILogger _logger;
-        private readonly Dictionary<Guid, DateTime> _lastAccess = new Dictionary<Guid, DateTime>();
+        private readonly Dictionary<TUserId, DateTime> _lastAccess = new Dictionary<TUserId, DateTime>();
         private readonly TimeSpan _defaultDuration = TimeSpan.FromMinutes(10);
 
         public MemoryCacheService(string cacheName, ILogger logger)
@@ -21,9 +21,9 @@ namespace ToDos.DotNet.Caching
             _logger = logger ?? Log.Logger;
         }
 
-        private string GetCacheKey(Guid userId, string key) => $"{userId}_{key}";
+        private string GetCacheKey(TUserId userId, string key) => $"{userId}_{key}";
 
-        public IEnumerable<TDto> Get(Guid userId, string key)
+        public IEnumerable<TDto> Get(TUserId userId, string key)
         {
             var cacheKey = GetCacheKey(userId, key);
             var result = _cache.Get(cacheKey) as IEnumerable<TDto>;
@@ -34,7 +34,7 @@ namespace ToDos.DotNet.Caching
             return result;
         }
 
-        public void Set(Guid userId, string key, IEnumerable<TDto> items, TimeSpan? duration = null)
+        public void Set(TUserId userId, string key, IEnumerable<TDto> items, TimeSpan? duration = null)
         {
             var cacheKey = GetCacheKey(userId, key);
             var policy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.Add(duration ?? _defaultDuration) };
@@ -46,7 +46,7 @@ namespace ToDos.DotNet.Caching
             _logger.Information("Set cache for {CacheKey}", cacheKey);
         }
 
-        public void Invalidate(Guid userId, string key = null)
+        public void Invalidate(TUserId userId, string key = null)
         {
             lock (_lock)
             {
@@ -65,7 +65,7 @@ namespace ToDos.DotNet.Caching
             _logger.Information("Invalidated cache for user {UserId}, key {Key}", userId, key);
         }
 
-        public int GetCachedCount(Guid userId, string key)
+        public int GetCachedCount(TUserId userId, string key)
         {
             var cacheKey = GetCacheKey(userId, key);
             var items = _cache.Get(cacheKey) as IEnumerable<TDto>;

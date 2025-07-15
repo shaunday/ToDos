@@ -8,6 +8,7 @@ using ToDos.DotNet.Common;
 using ToDos.Entities;
 using ToDos.Repository;
 using ToDos.Server.Common.Interfaces;
+using ToDos.DotNet.Caching;
 
 namespace ToDos.TaskSyncServer.Services
 {
@@ -16,6 +17,9 @@ namespace ToDos.TaskSyncServer.Services
         private readonly ITaskRepository _taskRepository;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
+        // Use int for userId in cache
+        private readonly ICacheService<int, TaskDTO> _taskCache = new MemoryCacheService<int, TaskDTO>("TaskCache", Log.Logger);
+        private const string TaskCacheKey = "tasks";
 
         public event Action<TaskDTO> TaskAdded;
         public event Action<TaskDTO> TaskUpdated;
@@ -35,8 +39,35 @@ namespace ToDos.TaskSyncServer.Services
             try
             {
                 _logger.Information("Getting tasks for user: {UserId}", userId);
+                // Try cache first
+                try
+                {
+                    var cached = _taskCache.Get(userId, TaskCacheKey);
+                    if (cached != null)
+                    {
+                        var cachedList = cached.ToList();
+                        if (cachedList.Count > 0)
+                        {
+                            _logger.Information("Returning cached tasks for user: {UserId}", userId);
+                            return cachedList;
+                        }
+                    }
+                }
+                catch (Exception cacheEx)
+                {
+                    _logger.Warning(cacheEx, "Cache get failed for user: {UserId}", userId);
+                }
                 var tasks = await _taskRepository.GetByUserIdAsync(userId);
-                return _mapper.Map<IEnumerable<TaskDTO>>(tasks);
+                var dtos = _mapper.Map<IEnumerable<TaskDTO>>(tasks).ToList();
+                try
+                {
+                    _taskCache.Set(userId, TaskCacheKey, dtos);
+                }
+                catch (Exception cacheEx)
+                {
+                    _logger.Warning(cacheEx, "Cache set failed for user: {UserId}", userId);
+                }
+                return dtos;
             }
             catch (Exception ex)
             {
@@ -75,6 +106,15 @@ namespace ToDos.TaskSyncServer.Services
                 TaskAdded?.Invoke(addedTask);
                 
                 _logger.Information("Task added successfully: {TaskId}", addedTask.Id);
+                // Invalidate cache for this user
+                try
+                {
+                    _taskCache.Invalidate(taskDto.UserId, TaskCacheKey);
+                }
+                catch (Exception cacheEx)
+                {
+                    _logger.Warning(cacheEx, "Cache invalidate failed for user: {UserId}", taskDto.UserId);
+                }
                 return addedTask;
             }
             catch (Exception ex)
@@ -114,6 +154,15 @@ namespace ToDos.TaskSyncServer.Services
                 TaskUpdated?.Invoke(updatedTask);
                 
                 _logger.Information("Task updated successfully: {TaskId}", updatedTask.Id);
+                // Invalidate cache for this user
+                try
+                {
+                    _taskCache.Invalidate(taskDto.UserId, TaskCacheKey);
+                }
+                catch (Exception cacheEx)
+                {
+                    _logger.Warning(cacheEx, "Cache invalidate failed for user: {UserId}", taskDto.UserId);
+                }
                 return true;
             }
             catch (Exception ex)
@@ -136,6 +185,15 @@ namespace ToDos.TaskSyncServer.Services
                     // Raise event for real-time updates
                     TaskDeleted?.Invoke(taskId);
                     _logger.Information("Task deleted successfully: {TaskId}", taskId);
+                    // Invalidate cache for this user
+                    try
+                    {
+                        _taskCache.Invalidate(userId, TaskCacheKey);
+                    }
+                    catch (Exception cacheEx)
+                    {
+                        _logger.Warning(cacheEx, "Cache invalidate failed for user: {UserId}", userId);
+                    }
                 }
                 else
                 {

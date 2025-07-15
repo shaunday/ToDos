@@ -32,6 +32,7 @@
     <PackageReference Include="Unity.WebAPI" Version="5.4.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Common\ToDos.DotNet.Caching\ToDos.DotNet.Caching.csproj" />
     <ProjectReference Include="..\ToDos.Repository\ToDos.Repository.csproj" />
     <ProjectReference Include="..\ToDos.Server.Common\ToDos.Server.Common.csproj" />
     <ProjectReference Include="..\DbSharding\ToDos.Server.DbSharding.csproj" />
