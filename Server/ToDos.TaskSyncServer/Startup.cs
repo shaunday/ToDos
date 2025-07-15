@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Diagnostics;
 using System.Threading;
-using ToDos.JwtMockAuthService;
 using ToDos.MockAuthService;
 using ToDos.Repository;
 using ToDos.Server.Common.Interfaces;
@@ -33,17 +32,7 @@ namespace ToDos.TaskSyncServer
 
             Log.Logger.Information("Fallback 1");
 
-            IUnityContainer container = null;
-            try
-            {
-                container = ConfigureUnityContainer();
-                Log.Logger.Information("Fallback 2");
-            }
-            catch (Exception ex)
-            {
-                Log.Logger.Error(ex, "Exception during Unity container configuration");
-                throw;
-            }
+            IUnityContainer container = ConfigureUnityContainer();
 
             var resolver = new HybridSignalRResolver(container);
             GlobalHost.DependencyResolver = resolver;
