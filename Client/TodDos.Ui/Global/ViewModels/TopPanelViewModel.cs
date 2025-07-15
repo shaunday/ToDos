@@ -16,6 +16,7 @@ using static Todos.Client.Common.TypesGlobal;
 using TodDos.Ui.Global.ViewModels;
 using Todos.Client.TaskSyncWithOfflineQueues;
 using Unity;
+using Serilog;
 
 namespace Todos.Ui.ViewModels
 {
@@ -39,8 +40,8 @@ namespace Todos.Ui.ViewModels
             _ => "Disconnected"
         };
 
-        public TopPanelViewModel(UserConnectionService userConnectionService, INavigationService navigation)
-            : base(navigation)
+        public TopPanelViewModel(UserConnectionService userConnectionService, INavigationService navigation, Serilog.ILogger logger = null)
+            : base(navigation, logger)
         {
             _userConnectionService = userConnectionService;
             _userConnectionService.UserChanged += OnUserChanged;

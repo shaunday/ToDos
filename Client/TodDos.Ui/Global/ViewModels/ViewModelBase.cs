@@ -28,26 +28,9 @@ namespace TodDos.Ui.Global.ViewModels
         protected readonly ILogger _logger;
         public INavigationService Navigation { get; }
 
-        public ViewModelBase(INavigationService navigation)
+        public ViewModelBase(INavigationService navigation, ILogger logger = null)
         {
             Navigation = navigation;
-        }
-
-        public ViewModelBase(IMapper mapper, INavigationService navigation) : this(navigation)
-        {
-            _mapper = mapper;
-        }
-
-        public ViewModelBase(ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation) : this(navigation)
-        {
-            _mapper = mapper;
-            _taskSyncClient = taskSyncClient;
-        }
-
-        public ViewModelBase(ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation, ILogger logger) : this(navigation)
-        {
-            _mapper = mapper;
-            _taskSyncClient = taskSyncClient;
             _logger = logger;
         }
 

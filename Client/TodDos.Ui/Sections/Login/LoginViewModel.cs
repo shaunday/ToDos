@@ -8,14 +8,16 @@ using System.Text;
 using System.Threading.Tasks;
 using TodDos.Ui.Global.ViewModels;
 using Todos.Ui.Services.Navigation;
+using Serilog;
+using Unity;
 
 namespace Todos.Ui.ViewModels
 {
     public partial class LoginViewModel : ViewModelBase, IInitializable, ICleanable
     {
-        public LoginViewModel(IMapper mapper, INavigationService navigation) : base(mapper, navigation)
-        {
 
+        public LoginViewModel(INavigationService navigation, ILogger logger = null) : base(navigation, logger)
+        {
         }
 
         public override void Init() { }

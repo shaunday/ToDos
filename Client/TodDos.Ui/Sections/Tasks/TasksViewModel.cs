@@ -27,6 +27,8 @@ namespace Todos.Ui.ViewModels
     {
         #region Fields
         private readonly IAuthService _authService;
+        private readonly new IMapper _mapper;
+        private readonly new ITaskSyncClient _taskSyncClient;
 
         [ObservableProperty]
         private TaskModel editingTask;
@@ -65,11 +67,12 @@ namespace Todos.Ui.ViewModels
         #endregion
 
         #region Constructors and Lifecycle
-        public TasksViewModel(ITaskSyncClient taskSyncClient, IMapper mapper, INavigationService navigation, ILogger logger, IAuthService authService)
-            : base(taskSyncClient, mapper, navigation, logger)
+        public TasksViewModel(INavigationService navigation, Serilog.ILogger logger, IAuthService authService)
+            : base(navigation, logger)
         {
             _authService = authService;
-
+            _mapper = App.Container.Resolve<IMapper>();
+            _taskSyncClient = App.Container.Resolve<ITaskSyncClient>();
             FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
             FilteredTasksView.Filter = FilterPredicate;
         }

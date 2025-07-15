@@ -8,20 +8,21 @@ using AutoMapper;
 using System.Threading.Tasks;
 using System.Windows;
 using System;
+using Serilog;
+using Unity;
 
 namespace Todos.Ui
 {
     public partial class MainViewModel : ViewModelBase
     {
-        // Remove direct construction of TopPanelViewModel and any unused field.
-        public MainViewModel(INavigationService navigation, IUserService userService, ITaskSyncClient taskSyncClient, IMapper mapper) 
-            : base(mapper, navigation)
+        public MainViewModel(INavigationService navigation, Serilog.ILogger logger = null) : base(navigation, logger)
         {
             // DEV CODE: Auto-login for development/testing
             _ = Task.Run(async () =>
             {
                 try
                 {
+                    var userService = App.Container.Resolve<Todos.Client.UserService.Interfaces.IUserService>();
                     var result = await userService.AuthenticateAsync("defaultuser", "1234");
                     if (result)
                     {
