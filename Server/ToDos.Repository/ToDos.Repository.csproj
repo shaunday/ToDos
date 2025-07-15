@@ -21,4 +21,9 @@
     <ProjectReference Include="..\DbReplication\ToDos.Server.DbReplication.csproj" />
     <ProjectReference Include="..\ToDos.Server.Entities.Factory\ToDos.Server.Entities.Factory.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update=".env.Repository">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

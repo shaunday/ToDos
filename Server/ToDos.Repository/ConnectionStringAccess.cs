@@ -11,8 +11,10 @@ namespace ToDos.Repository
     {
         public static string GetDbConnectionString(string dbName ="")
         {
-            if (string.IsNullOrEmpty(dbName))
+            if (string.IsNullOrEmpty(dbName)) //dev-mode
             {
+                var envPath = System.IO.Path.Combine(AppContext.BaseDirectory, ".env.Repository");
+                Env.Load(envPath);
                 dbName = Environment.GetEnvironmentVariable("DB_NAME");
             }
 
@@ -21,7 +23,11 @@ namespace ToDos.Repository
             string pass = Environment.GetEnvironmentVariable("DB_PASS");
 
             string connectionString = $"Server={server};Database={dbName};User Id={user};Password={pass};TrustServerCertificate=True;";
-            return connectionString;
+
+
+            string connectionOverride = Environment.GetEnvironmentVariable("MSSQL_TRUSTED_CONNECTION_STRING");
+
+            return connectionOverride;
         }
     }
 }
