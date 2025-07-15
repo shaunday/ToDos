@@ -72,13 +72,13 @@ namespace Todos.Client.TaskSyncWithOfflineQueues
             }
         }
 
-        public async Task<bool> DeleteTaskAsync(int taskId)
+        public async Task<bool> DeleteTaskAsync(int userId, int taskId)
         {
             if (_isOnline)
-                return await _innerClient.DeleteTaskAsync(taskId);
+                return await _innerClient.DeleteTaskAsync(userId, taskId);
             else
             {
-                var action = new PendingAction { ActionType = "Delete", Task = new TaskDTO { Id = taskId }, Timestamp = DateTime.UtcNow };
+                var action = new PendingAction { ActionType = "Delete", Task = new TaskDTO { Id = taskId }, UserId = userId, Timestamp = DateTime.UtcNow };
                 _queueService.Enqueue(action);
                 return true;
             }
@@ -129,7 +129,7 @@ namespace Todos.Client.TaskSyncWithOfflineQueues
                         await _innerClient.UpdateTaskAsync(action.Task);
                         break;
                     case "Delete":
-                        await _innerClient.DeleteTaskAsync(action.Task.Id);
+                        await _innerClient.DeleteTaskAsync(action.UserId, action.Task.Id);
                         break;
                 }
                 _queueService.Remove(action);

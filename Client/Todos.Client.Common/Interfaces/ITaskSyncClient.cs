@@ -25,7 +25,7 @@ namespace Todos.Client.Common.Interfaces
         // CRUD operations
         Task<bool> AddTaskAsync(TaskDTO task);
         Task<bool> UpdateTaskAsync(TaskDTO task);
-        Task<bool> DeleteTaskAsync(int taskId);
+        Task<bool> DeleteTaskAsync(int userId, int taskId);
         Task<bool> LockTaskAsync(int taskId);
         Task<bool> UnlockTaskAsync(int taskId);
 

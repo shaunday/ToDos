@@ -90,9 +90,9 @@ namespace Todos.Client.MockTaskSyncClient
             return Task.FromResult(true);
         }
 
-        public Task<bool> DeleteTaskAsync(int taskId)
+        public Task<bool> DeleteTaskAsync(int userId, int taskId)
         {
-            _logger?.Information("MockTaskSyncClient: TaskDeleted event for TaskId {TaskId}", taskId);
+            _logger?.Information("MockTaskSyncClient: TaskDeleted event for TaskId {TaskId} for UserId {UserId}", taskId, userId);
             return Task.FromResult(true);
         }
 

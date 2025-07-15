@@ -284,9 +284,9 @@ namespace Todos.Client.SignalRClient
             return true;
         }
 
-        public Task<bool> DeleteTaskAsync(int taskId)
+        public Task<bool> DeleteTaskAsync(int userId, int taskId)
         {
-            return InvokeWithRetrySafeAsync<bool>(SignalRGlobals.DeleteTask, taskId);
+            return InvokeWithRetrySafeAsync<bool>(SignalRGlobals.DeleteTask, userId, taskId);
         }
 
         public Task<IEnumerable<TaskDTO>> GetUserTasksAsync(int userId) =>

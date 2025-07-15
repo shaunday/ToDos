@@ -252,7 +252,8 @@ namespace Todos.Ui.ViewModels
             await RunWithErrorHandlingAsync(async () =>
             {
                 AddTaskErrorMessage = string.Empty;
-                var deleted = await _taskSyncClient!.DeleteTaskAsync(task.Id);
+                var currentUserId = GetCurrentUserId();
+                var deleted = await _taskSyncClient!.DeleteTaskAsync(currentUserId, task.Id);
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     if (deleted)
@@ -267,7 +268,6 @@ namespace Todos.Ui.ViewModels
                     }
                 });
             }, "Failed to delete task.", SnackbarMessageQueue);
-            _ = _taskSyncClient!.DeleteTaskAsync(task.Id);
         }
 
         #endregion
