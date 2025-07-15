@@ -1,9 +1,17 @@
 
 orch:
-first launch doesnt  give logs (again)
-padding on search too big
-margin below alive too big
-margin above clear filter/simulate buttons
+  first launch doesnt  give logs (again)
+  padding on search too big
+  margin below alive too big
+  margin above clear filter/simulate buttons
+  add server log
+
+
+
+Server:
+  //[SignalRJwtAuthentication]
+   GlobalHost.Configuration.
+   container types
 
 
 * Simulate multiple users editing tasks concurrently to test locking and queues
