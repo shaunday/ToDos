@@ -61,7 +61,7 @@ namespace Todos.Ui.ViewModels
         [ObservableProperty]
         private TaskFilter filter = new TaskFilter();
 
-        public ICollectionView FilteredTasksView { get; private set; }
+        public ICollectionView FilteredTasksView { get; set; }
 
         public TasksOverviewModel Overview { get; } = new TasksOverviewModel();
         public TasksOverviewModel FilteredOverview { get; } = new TasksOverviewModel();
