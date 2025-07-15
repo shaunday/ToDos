@@ -20,6 +20,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using System.Windows;
 using Unity;
 using Todos.Ui.Services;
+using static Todos.Client.Common.TypesGlobal;
 
 namespace Todos.Ui.ViewModels
 {
@@ -29,6 +30,7 @@ namespace Todos.Ui.ViewModels
         private readonly IAuthService _authService;
         private readonly new IMapper _mapper;
         private readonly new ITaskSyncClient _taskSyncClient;
+        private readonly UserConnectionService _userConnectionService;
 
         [ObservableProperty]
         private TaskModel editingTask;
@@ -73,6 +75,8 @@ namespace Todos.Ui.ViewModels
             _authService = authService;
             _mapper = App.Container.Resolve<IMapper>();
             _taskSyncClient = App.Container.Resolve<ITaskSyncClient>();
+            _userConnectionService = App.Container.Resolve<UserConnectionService>();
+            _userConnectionService.ConnectionStatusChanged += OnConnectionStatusChanged;
             FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
             FilteredTasksView.Filter = FilterPredicate;
         }
@@ -85,9 +89,8 @@ namespace Todos.Ui.ViewModels
             _taskSyncClient.TaskDeleted += HandleTaskDeleted;
             Tasks.CollectionChanged += Tasks_CollectionChanged;
             Filter.PropertyChanged += Filter_PropertyChanged;
-            
-            await LoadTasksAsync();
-            ApplyUiState();
+
+            await ReloadAllTasksAndUiStateAsync();
         }
 
         public override void Cleanup()
@@ -351,6 +354,12 @@ namespace Todos.Ui.ViewModels
             IsLoading = false;
         }
 
+        private async Task ReloadAllTasksAndUiStateAsync()
+        {
+            await LoadTasksAsync();
+            ApplyUiState();
+        }
+
         private int GetCurrentUserId()
         {
             _logger?.Information("TasksViewModel: GetCurrentUserId called");
@@ -362,6 +371,15 @@ namespace Todos.Ui.ViewModels
             }
             _logger?.Warning("No current user available in UserConnectionService");
             return 0;
+        }
+
+        private void OnConnectionStatusChanged(ConnectionStatus status)
+        {
+            if (status == ConnectionStatus.Connected)
+            {
+                // Reload all tasks and UI state on reconnect
+                _ = ReloadAllTasksAndUiStateAsync();
+            }
         }
         #endregion
 

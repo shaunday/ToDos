@@ -79,12 +79,5 @@ namespace Todos.Ui.ViewModels
                 ConnectionStatus = ConnectionStatus.Failed;
             }
         }
-
-
-
-        private void UpdateConnectionStatus()
-        {
-            ConnectionStatus = _taskSyncClient.ConnectionStatus;
-        }
     }
 }

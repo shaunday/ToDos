@@ -1,11 +1,12 @@
 
 
+Verify
+
 1.	Real-time data synchronization between multiple desktop clients.
 2.	Robust architecture and design pattern usage.
 3.	Performance and scalability awareness.
 
-
-
+---
 
 ## Entity Framework and Database
 
@@ -17,10 +18,7 @@
 
 ## Client-Side (WPF + MVVM)
 
-fix get user id - from appviewmodel
-get all tasks on reconnect
 a bit more ui work on the list
-
 Make sure that both client and server validate all inputs (e.g., task titles not empty, due dates valid).
 
 ---
