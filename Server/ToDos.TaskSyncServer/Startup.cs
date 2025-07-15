@@ -72,7 +72,7 @@ namespace ToDos.TaskSyncServer
 
             container.RegisterInstance<ILogger>(Log.Logger);
 
-            container.RegisterSingleton<IAuthService, MockAuthService.MockAuthService>();
+            container.RegisterSingleton<IAuthService, MockAuthService.MockJwtAuthService>();
             container.RegisterType<IReadWriteDbRouter, SuffixReadWriteDbRouter>(new ContainerControlledLifetimeManager());
             container.RegisterType<ITaskRepository, TaskRepository>();
             container.RegisterType<IDbSyncService, SimulatedDbSyncService>();

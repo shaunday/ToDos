@@ -25,7 +25,7 @@ namespace Todos.UserService
             Env.Load(envPath);
             
             // Initialize Auth service
-            _authService = new MockAuthService(Serilog.Log.Logger);
+            _authService = new MockJwtAuthService(Serilog.Log.Logger);
             
             // Initialize with guest user
             _currentUser = new UserDTO

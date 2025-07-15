@@ -89,7 +89,7 @@ namespace Todos.Ui
             
             var signalRClient = new SignalRTaskSyncClient(Log.Logger);
             Container.RegisterInstance<ITaskSyncClient>(signalRClient);
-            Container.RegisterSingleton<IAuthService, MockAuthService>();
+            Container.RegisterSingleton<IAuthService, MockJwtAuthService>();
             Container.RegisterSingleton<UserConnectionService>();
 
             // Register AutoMapper

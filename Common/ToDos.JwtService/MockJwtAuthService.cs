@@ -1,6 +1,7 @@
+using Serilog;
 using System;
 using System.Collections.Generic;
-using Serilog;
+using System.Diagnostics;
 using ToDos.DotNet.Common;
 
 namespace ToDos.MockAuthService
@@ -13,12 +14,11 @@ namespace ToDos.MockAuthService
         int GetUserIdFromTokenWithoutValidation(string token);
     }
 
-    public class MockAuthService : IAuthService
+    public class MockJwtAuthService : IAuthService
     {
         private readonly ILogger _logger;
-        private readonly Dictionary<string, TokenInfo> _validTokens = new Dictionary<string, TokenInfo>();
 
-        public MockAuthService(ILogger logger)
+        public MockJwtAuthService(ILogger logger)
         {
             _logger = logger;
             _logger.Information("Mock Auth Service initialized");
@@ -28,18 +28,9 @@ namespace ToDos.MockAuthService
         {
             try
             {
-                // Create a simple mock token format: "MOCK_{userId}_{username}_{timestamp}"
-                var timestamp = DateTime.UtcNow.Ticks;
-                var token = $"MOCK_{userId}_{username}_{timestamp}";
-                
-                // Store token info for validation
-                _validTokens[token] = new TokenInfo
-                {
-                    UserId = userId,
-                    Username = username,
-                    ExpiresAt = DateTime.UtcNow.AddHours(24)
-                };
-                
+                // Create a simple mock token format: "MOCK_{userId}_{username}_{expiresAtTicks}"
+                var expiresAt = DateTime.UtcNow.AddHours(24);
+                var token = $"MOCK_{userId}_{username}_{expiresAt.Ticks}";
                 _logger.Information("Generated mock token for user: {Username} (ID: {UserId})", username, userId);
                 return token;
             }
@@ -60,19 +51,29 @@ namespace ToDos.MockAuthService
                     return false;
                 }
 
-                if (!_validTokens.TryGetValue(token, out var tokenInfo))
+                // Parse mock token format: "MOCK_{userId}_{username}_{expiresAtTicks}"
+                if (!token.StartsWith("MOCK_"))
                 {
-                    _logger.Warning("Token not found in valid tokens");
+                    _logger.Warning("Token does not match mock format");
                     return false;
                 }
-
-                if (DateTime.UtcNow > tokenInfo.ExpiresAt)
+                var parts = token.Split('_');
+                if (parts.Length < 4)
+                {
+                    _logger.Warning("Token does not have enough parts");
+                    return false;
+                }
+                if (!long.TryParse(parts[3], out var expiresAtTicks))
+                {
+                    _logger.Warning("Token expiration is not valid");
+                    return false;
+                }
+                var expiresAt = new DateTime(expiresAtTicks, DateTimeKind.Utc);
+                if (DateTime.UtcNow > expiresAt)
                 {
                     _logger.Warning("Token has expired");
-                    _validTokens.Remove(token);
                     return false;
                 }
-
                 _logger.Debug("Mock token validated successfully");
                 return true;
             }
@@ -91,12 +92,12 @@ namespace ToDos.MockAuthService
                 {
                     return 0;
                 }
-
-                if (_validTokens.TryGetValue(token, out var tokenInfo))
+                // Parse mock token format: "MOCK_{userId}_{username}_{expiresAtTicks}"
+                var parts = token.Split('_');
+                if (parts.Length >= 3 && int.TryParse(parts[1], out var userId))
                 {
-                    return tokenInfo.UserId;
+                    return userId;
                 }
-
                 return 0;
             }
             catch (Exception ex)
@@ -115,8 +116,7 @@ namespace ToDos.MockAuthService
                     _logger.Warning("No token provided for extracting user ID");
                     return 0;
                 }
-
-                // Parse mock token format: "MOCK_{userId}_{username}_{timestamp}"
+                // Parse mock token format: "MOCK_{userId}_{username}_{expiresAtTicks}"
                 if (token.StartsWith("MOCK_"))
                 {
                     var parts = token.Split('_');
@@ -125,13 +125,6 @@ namespace ToDos.MockAuthService
                         return userId;
                     }
                 }
-
-                // Fallback: try to get from stored tokens
-                if (_validTokens.TryGetValue(token, out var tokenInfo))
-                {
-                    return tokenInfo.UserId;
-                }
-
                 _logger.Warning("Could not extract user ID from mock token");
                 return 0;
             }
@@ -140,13 +133,6 @@ namespace ToDos.MockAuthService
                 _logger.Error(ex, "Error extracting user ID from mock token without validation");
                 return 0;
             }
-        }
-
-        private class TokenInfo
-        {
-            public int UserId { get; set; }
-            public string Username { get; set; }
-            public DateTime ExpiresAt { get; set; }
         }
     }
 } 
