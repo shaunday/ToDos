@@ -72,7 +72,6 @@ namespace ToDos.TaskSyncServer
 
             container.RegisterInstance<ILogger>(Log.Logger);
 
-            // Services
             container.RegisterSingleton<IAuthService, MockAuthService.MockAuthService>();
             container.RegisterType<IReadWriteDbRouter, SuffixReadWriteDbRouter>(new ContainerControlledLifetimeManager());
             container.RegisterType<ITaskRepository, TaskRepository>();
@@ -87,16 +86,7 @@ namespace ToDos.TaskSyncServer
             }, new SerilogLoggerFactory(Log.Logger));
 
             container.RegisterInstance<IMapper>(config.CreateMapper());
-            container.RegisterType<IMarker, Marker>();
             container.RegisterType<IHub, TaskHub>("TaskHub");
-
-            //var hubTest = container.Resolve<TaskHub>();
-            //Log.Logger.Information("Resolved TaskHub manually: {Hub}", hubTest.GetType().Name);
-
-            Log.Logger.Information("Unity container configured successfully");
-
-
-
 
             return container;
         }
@@ -119,25 +109,16 @@ namespace ToDos.TaskSyncServer
             {
                 try
                 {
-                    return _container.Resolve(serviceType);
+                    var resolved = _container.Resolve(serviceType);
+                    return resolved;
                 }
-                catch (ResolutionFailedException) { }
+                catch (ResolutionFailedException ex)
+                {
+                    Log.Logger.Warning(ex, "Failed to resolve {0} from Unity", serviceType.Name);
+                }
             }
 
-            Debug.WriteLine($"[Fallback] Default resolution: {serviceType.Name}");
             return base.GetService(serviceType);
-        }
-
-        public override IEnumerable<object> GetServices(Type serviceType)
-        {
-            try
-            {
-                return _container.ResolveAll(serviceType);
-            }
-            catch
-            {
-                return base.GetServices(serviceType);
-            }
         }
     }
 }

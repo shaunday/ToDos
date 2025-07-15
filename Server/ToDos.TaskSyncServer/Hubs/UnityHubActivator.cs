@@ -19,7 +19,6 @@ namespace ToDos.TaskSyncServer.Hubs
             try
             {
                 var hub = (IHub)_container.Resolve(descriptor.HubType);
-                Log.Logger.Information("Resolved hub {HubType} via Unity", descriptor.HubType.Name);
                 return hub;
             }
             catch (Exception ex)

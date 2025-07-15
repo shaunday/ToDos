@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using ToDos.Entities;
 using ToDos.Server.DbSharding;
 using ToDos.Server.DbReplication;
-using ToDos.Server.Entities.Factory;
-using FactoryTaskEntity = ToDos.Server.Entities.Factory.TaskEntity;
 
 namespace ToDos.Repository
 {
