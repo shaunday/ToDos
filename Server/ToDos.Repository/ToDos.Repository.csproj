@@ -19,5 +19,6 @@
     <ProjectReference Include="..\ToDos.Server.Common\ToDos.Server.Common.csproj" />
     <ProjectReference Include="..\DbSharding\ToDos.Server.DbSharding.csproj" />
     <ProjectReference Include="..\DbReplication\ToDos.Server.DbReplication.csproj" />
+    <ProjectReference Include="..\ToDos.Server.Entities.Factory\ToDos.Server.Entities.Factory.csproj" />
   </ItemGroup>
 </Project>

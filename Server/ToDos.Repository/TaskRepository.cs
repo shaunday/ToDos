@@ -8,19 +8,23 @@ using System.Threading.Tasks;
 using ToDos.Entities;
 using ToDos.Server.DbSharding;
 using ToDos.Server.DbReplication;
+using ToDos.Server.Entities.Factory;
+using FactoryTaskEntity = ToDos.Server.Entities.Factory.TaskEntity;
 
 namespace ToDos.Repository
 {
-    public class TaskRepository : ITaskRepository
+    public class TaskRepository : ITaskRepository, IDisposable
     {
         private readonly IShardResolver _shardResolver;
         private readonly IReadWriteDbRouter _dbRouter;
         private readonly ILogger _logger;
+        private readonly IDbSyncService _dbSyncService;
 
-        public TaskRepository(IShardResolver shardResolver, IReadWriteDbRouter dbRouter, ILogger logger)
+        public TaskRepository(IShardResolver shardResolver, IReadWriteDbRouter dbRouter, IDbSyncService dbSyncService, ILogger logger)
         {
             _shardResolver = shardResolver;
             _dbRouter = dbRouter;
+            _dbSyncService = dbSyncService;
             _logger = logger;
 
             var envPath = System.IO.Path.Combine(AppContext.BaseDirectory, ".env.Repository");
@@ -34,7 +38,7 @@ namespace ToDos.Repository
             return ConnectionStringAccess.GetDbConnectionString(physicalDb);
         }
 
-        public async Task<IEnumerable<TaskEntity>> GetByUserIdAsync(int userId)
+        public async Task<IEnumerable<ToDos.Entities.TaskEntity>> GetByUserIdAsync(int userId)
         {
             try
             {
@@ -53,7 +57,7 @@ namespace ToDos.Repository
             }
         }
 
-        public async Task<TaskEntity> GetByIdAsync(int userId, int id)
+        public async Task<ToDos.Entities.TaskEntity> GetByIdAsync(int userId, int id)
         {
             try
             {
@@ -70,7 +74,7 @@ namespace ToDos.Repository
             }
         }
 
-        public async Task AddAsync(TaskEntity task)
+        public async Task AddAsync(ToDos.Entities.TaskEntity task)
         {
             try
             {
@@ -88,7 +92,7 @@ namespace ToDos.Repository
             }
         }
 
-        public async Task UpdateAsync(TaskEntity task)
+        public async Task UpdateAsync(ToDos.Entities.TaskEntity task)
         {
             try
             {
@@ -218,6 +222,61 @@ namespace ToDos.Repository
                 _logger.Error(ex, "Exception in IsTaskLockedAsync");
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Clears all tasks and populates the DB with mock data for the given user IDs.
+        /// </summary>
+        public static void ResetAndPopulateDb(string connectionString, IEnumerable<int> userIds, int tasksPerUser = 5)
+        {
+            using (var context = new TaskDbContext(connectionString))
+            {
+                context.Tasks.RemoveRange(context.Tasks);
+                context.SaveChanges();
+
+                var mockTasks = ToDos.Server.Entities.Factory.TaskFactory.GenerateTasksForUsers(userIds, tasksPerUser);
+                context.Tasks.AddRange(mockTasks.Select(t => new ToDos.Entities.TaskEntity {
+                    UserId = t.UserId,
+                    Title = t.Title,
+                    Description = t.Description,
+                    IsCompleted = t.IsCompleted
+                }));
+                context.SaveChanges();
+            }
+        }
+
+        private System.Threading.Timer _syncTimer;
+
+        /// <summary>
+        /// Triggers a sync for all logical DBs (if supported by the sync service).
+        /// </summary>
+        public void SyncAllDbs()
+        {
+            _dbSyncService.SyncAll();
+        }
+
+        /// <summary>
+        /// Starts periodic sync for all logical DBs at the given interval (in milliseconds).
+        /// </summary>
+        public void StartPeriodicSync(int intervalMs)
+        {
+            _syncTimer?.Dispose();
+            _syncTimer = new System.Threading.Timer(_ => SyncAllDbs(), null, intervalMs, intervalMs);
+        }
+
+        /// <summary>
+        /// Stops the periodic sync timer.
+        /// </summary>
+        public void StopPeriodicSync()
+        {
+            _syncTimer?.Dispose();
+            _syncTimer = null;
+        }
+
+        // IMPORTANT: Call Dispose() or StopPeriodicSync() on shutdown to clean up the timer.
+        public void Dispose()
+        {
+            StopPeriodicSync();
         }
     }
 }
