@@ -1,2 +1,13 @@
-# Script: bulk_update_status_client2.txt
-# Simulates client 2 updating the status of many tasks at once. 
+# Bulk Update Status Simulation
+userId=402
+signToEvents=true
+numOfClients=2
+
+# Complete 120 tasks, 350ms between each, 900ms after all
+Complete,120,350,900
+
+# Complete 25 tasks quickly, 20ms between, 110ms after
+Complete,25,20,110
+
+# Complete 15 tasks, 70ms between, 130ms after
+Complete,15,70,130 

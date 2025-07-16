@@ -4,6 +4,42 @@ This directory contains scenario-based test scripts for simulating various clien
 
 **Note:** Each script file in a scenario directory is intended to be run concurrently with the others in the same directory, simulating multiple clients acting at the same time.
 
+## Running Simulations
+
+### Orchestrated Multi-Client Mode
+To run multiple simulator clients in parallel (as specified by the `numOfClients` header in the script file), use the `--orchestrate` flag:
+
+```
+ToDos.Clients.Simulator.exe --orchestrate <scriptfile>
+```
+- The orchestrator will read the `numOfClients` value from the script file (default is 1 if missing) and launch that many clients in parallel.
+- Each client will use a unique userId (base userId from the script + client index).
+
+### Single-Client Mode
+To run a single simulator client (legacy mode), provide a userId and script file:
+
+```
+ToDos.Clients.Simulator.exe <userId> <scriptfile>
+```
+- Only one client will run, regardless of the `numOfClients` value in the script file.
+
+## Script File Headers
+- `userId=<number>`: Base user ID for the simulation (each client gets userId + index).
+- `signToEvents=true|false`: Subscribe to task events and log them.
+- `numOfClients=<number>`: Number of concurrent simulator clients to launch (used only in orchestrate mode).
+
+## Example Script File
+```
+userId=123
+signToEvents=true
+numOfClients=5
+
+Add,500,500,2000
+Add,100,50,500
+Delete,50,20,200
+GetAll,10,1000,500
+```
+
 ## Scenario Directories
 
 ### 1. BasicUsage

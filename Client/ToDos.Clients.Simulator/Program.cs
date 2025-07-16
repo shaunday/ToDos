@@ -1,5 +1,6 @@
 ﻿using System;
 using Unity;
+using System.Linq;
 
 namespace ToDos.Clients.Simulator
 {
@@ -9,8 +10,16 @@ namespace ToDos.Clients.Simulator
         {
             var container = new UnityContainer();
             UnityConfig.RegisterTypes(container);
-            var app = container.Resolve<SimulatorApp>();
-            await app.Run(args);
+            if (args.Length > 0 && args[0] == "--orchestrate")
+            {
+                var orchestrator = new SimulationOrchestrator(container);
+                await orchestrator.Run(args.Skip(1).ToArray());
+            }
+            else
+            {
+                var app = container.Resolve<SimulatorApp>();
+                await app.Run(args);
+            }
         }
     }
 }

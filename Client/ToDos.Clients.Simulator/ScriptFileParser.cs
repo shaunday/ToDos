@@ -9,6 +9,7 @@ namespace ToDos.Clients.Simulator
     {
         public int? UserId { get; set; }
         public bool? SignToEvents { get; set; }
+        public int NumOfClients { get; set; } = 1;
         public List<ScriptLine> ScriptLines { get; set; }
     }
 
@@ -20,6 +21,7 @@ namespace ToDos.Clients.Simulator
             var result = new List<ScriptLine>();
             int? userId = null;
             bool? signToEvents = null;
+            int numOfClients = 1;
             foreach (var rawLine in lines)
             {
                 var line = rawLine.Trim();
@@ -35,6 +37,12 @@ namespace ToDos.Clients.Simulator
                 {
                     if (bool.TryParse(line.Substring(13), out bool sign))
                         signToEvents = sign;
+                    continue;
+                }
+                if (line.StartsWith("numOfClients=", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (int.TryParse(line.Substring(13), out int nClients))
+                        numOfClients = nClients;
                     continue;
                 }
                 var parts = line.Split(',');
@@ -56,6 +64,7 @@ namespace ToDos.Clients.Simulator
             {
                 UserId = userId,
                 SignToEvents = signToEvents,
+                NumOfClients = numOfClients,
                 ScriptLines = result
             };
         }

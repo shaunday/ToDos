@@ -1,2 +1,13 @@
-# Script: bulk_delete_tasks_client1.txt
-# Simulates client 1 deleting multiple tasks in bulk. 
+# Bulk Delete Tasks Simulation
+userId=301
+signToEvents=true
+numOfClients=3
+
+# Delete 200 tasks, 400ms between each, 1000ms after all
+Delete,200,400,1000
+
+# Delete 50 tasks quickly, 20ms between, 200ms after
+Delete,50,20,200
+
+# Delete 30 tasks, 100ms between, 150ms after
+Delete,30,100,150 

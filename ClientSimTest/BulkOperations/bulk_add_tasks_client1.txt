@@ -1,2 +1,13 @@
-# Script: bulk_add_tasks_client1.txt
-# Simulates client 1 adding many tasks at once. 
+# Bulk Add Tasks Simulation
+userId=201
+signToEvents=true
+numOfClients=4
+
+# Add 500 tasks, 500ms between each, 2000ms after all
+Add,500,500,2000
+
+# Add 100 tasks quickly, 50ms between, 500ms after
+Add,100,50,500
+
+# Add 50 tasks, 100ms between, 200ms after
+Add,50,100,200 

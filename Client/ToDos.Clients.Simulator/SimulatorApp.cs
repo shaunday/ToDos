@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace ToDos.Clients.Simulator
 {
@@ -15,7 +16,7 @@ namespace ToDos.Clients.Simulator
             _executor = executor;
         }
 
-        public void Run(string[] args)
+        public async Task Run(string[] args)
         {
             string filePath = null;
             int? userId = null;
