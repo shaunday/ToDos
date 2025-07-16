@@ -44,6 +44,65 @@ namespace Todos.Client.Orchestrator.ViewModels
         [ObservableProperty]
         private string selectedSimulatorCommand;
 
+        // --- Sim Launcher fields ---
+        [ObservableProperty]
+        private int simLaunchCount = 1;
+        [ObservableProperty]
+        private string simUserId = string.Empty;
+        [ObservableProperty]
+        private string simFolderPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".";
+        public string SimLauncherInstructions => "Count defaults to 1. User ID is optional. Folder Path is optional and defaults to the output directory. The launcher will attempt to load the folder path as relative to the output directory first, then as an absolute path if not found.";
+
+        // --- Sim Launcher command ---
+        [RelayCommand]
+        private void LaunchClientSim()
+        {
+            int count = Math.Max(1, SimLaunchCount);
+            string userId = string.IsNullOrWhiteSpace(SimUserId) ? "defaultUser" : SimUserId;
+            string outputDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".";
+            string folder = string.IsNullOrWhiteSpace(SimFolderPath) ? outputDir : SimFolderPath;
+            // Try relative first, then absolute
+            string relPath = System.IO.Path.Combine(outputDir, SimFolderPath);
+            if (!string.IsNullOrWhiteSpace(SimFolderPath) && System.IO.Directory.Exists(relPath))
+                folder = relPath;
+            else if (!string.IsNullOrWhiteSpace(SimFolderPath) && System.IO.Directory.Exists(SimFolderPath))
+                folder = SimFolderPath;
+            else if (!string.IsNullOrWhiteSpace(SimFolderPath))
+                folder = relPath; // fallback to relative if not found
+            var simExe = System.IO.Path.Combine(outputDir, "ToDos.Clients.Simulator.exe");
+            if (!System.IO.File.Exists(simExe))
+            {
+                System.Windows.MessageBox.Show($"Simulator executable not found in: {outputDir}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                return;
+            }
+            for (int i = 0; i < count; i++)
+            {
+                var args = $"--user {userId} --folder {folder}";
+                var startInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = simExe,
+                    WorkingDirectory = outputDir,
+                    Arguments = args
+                };
+                System.Diagnostics.Process.Start(startInfo);
+            }
+        }
+
+        [RelayCommand]
+        private void OpenSimExampleFile()
+        {
+            string outputDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".";
+            string exampleFile = System.IO.Path.Combine(outputDir, "ExampleScript.txt");
+            if (System.IO.File.Exists(exampleFile))
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(exampleFile) { UseShellExecute = true });
+            }
+            else
+            {
+                System.Windows.MessageBox.Show($"Example file not found: {exampleFile}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
+        }
+
         [ObservableProperty]
         private bool launchByFileConfig;
         [ObservableProperty]

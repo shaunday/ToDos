@@ -79,7 +79,7 @@
                         <TextBox Text="{Binding FileConfigPath, Mode=TwoWay}" Width="140" Margin="0,0,0,0"/>
                     </StackPanel>
                     <TextBlock x:Name="FileConfigDesc" Text="{Binding FileConfigDescription}" TextWrapping="Wrap" FontSize="11" Foreground="Gray" Margin="0,0,0,12" Visibility="{Binding LaunchByFileConfig, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                    <Button x:Name="LaunchByFileConfigButton" Content="Launch by File Config" Style="{StaticResource MaterialDesignRaisedButton}" Command="{Binding LaunchClientsByFileConfigCommand}" HorizontalAlignment="Stretch" Margin="0,0,0,12" Visibility="{Binding LaunchByFileConfig, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <Button x:Name="LaunchByFileConfigButton" Content="Launch UiClients by File Config" Style="{StaticResource MaterialDesignRaisedButton}" Command="{Binding LaunchClientsByFileConfigCommand}" HorizontalAlignment="Stretch" Margin="0,0,0,12" Visibility="{Binding LaunchByFileConfig, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                     <!-- Normal controls, hidden when LaunchByFileConfig is true -->
                     <Grid x:Name="ClientTypeGrid" Margin="0,4,0,8" Visibility="{Binding LaunchByFileConfig, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                         <Grid.ColumnDefinitions>
@@ -97,7 +97,7 @@
                         <TextBlock Text="Count:" VerticalAlignment="Center"/>
                         <TextBox x:Name="ClientCountTextBox" Grid.Column="1" Text="{Binding LaunchClientCount, Mode=TwoWay}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="8,0,0,0"/>
                     </Grid>
-                    <Button x:Name="LaunchClientButton" Content="Launch Client(s)" Style="{StaticResource MaterialDesignRaisedButton}" Command="{Binding LaunchClientCommand}" HorizontalAlignment="Stretch" Margin="0,4,0,8" Visibility="{Binding LaunchByFileConfig, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                    <Button x:Name="LaunchClientButton" Content="Launch UI Client(s)" Style="{StaticResource MaterialDesignRaisedButton}" Command="{Binding LaunchClientCommand}" HorizontalAlignment="Stretch" Margin="0,4,0,8" Visibility="{Binding LaunchByFileConfig, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                 </StackPanel>
             </materialDesign:Card>
             <materialDesign:Card Padding="8" Margin="0,0,0,8" materialDesign:ElevationAssist.Elevation="Dp1">
@@ -107,23 +107,28 @@
                         <TextBlock Text="Client Type:" VerticalAlignment="Center"/>
                         <TextBlock Text="Client Simulator" FontSize="14" VerticalAlignment="Center" Margin="8,0,0,0"/>
                     </StackPanel>
-                    <Grid>
+                    <Grid Margin="0,0,0,8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Simulator PID:" VerticalAlignment="Center" Margin="0,0,0,2"/>
-                        <ComboBox x:Name="SimulatorPidComboBox" Grid.Column="1" ItemsSource="{Binding SimulatorPids}" SelectedItem="{Binding SelectedSimulatorPid, Mode=TwoWay}" Margin="8,0,0,0"/>
+                        <TextBlock Text="Count:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0"/>
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SimLaunchCount, Mode=TwoWay}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="8,0,0,0"/>
+                        <TextBlock Text="User ID:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0"/>
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SimUserId, Mode=TwoWay}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="8,0,0,0"/>
+                        <TextBlock Text="Folder Path:" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0"/>
+                        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                            <TextBox Text="{Binding SimFolderPath, Mode=TwoWay}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Width="180"/>
+                        </StackPanel>
                     </Grid>
-                    <Grid Margin="0,0,0,8" >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="Command:" VerticalAlignment="Center"/>
-                        <ComboBox x:Name="SimulatorCommandComboBox" Grid.Column="1" ItemsSource="{Binding SimulatorCommands}" SelectedItem="{Binding SelectedSimulatorCommand, Mode=TwoWay}" Margin="8,0,0,0"/>
-                    </Grid>
-                    <Button Content="Simulate" Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding SimulateCommand}" HorizontalAlignment="Stretch" Margin="0,4,0,8"/>
+                    <Button Content="Open Example File" Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding OpenSimExampleFileCommand}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,4" Width="180" Height="28" Grid.ColumnSpan="2"/>
+                    <TextBlock Text="{Binding SimLauncherInstructions}" FontSize="11" Foreground="Gray" Margin="0,0,0,8" TextWrapping="Wrap" MaxWidth="210"/>
+                    <Button Content="Launch Client Simulation(s)" Style="{StaticResource MaterialDesignRaisedButton}" Command="{Binding LaunchClientSimCommand}" HorizontalAlignment="Stretch" Margin="0,4,0,8" Height="36"/>
                 </StackPanel>
             </materialDesign:Card>
             <materialDesign:Card Padding="8" materialDesign:ElevationAssist.Elevation="Dp1">

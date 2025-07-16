@@ -1,3 +1,10 @@
+# This is one of potentially many script files in a directory.
+# All files in the selected directory will be launched concurrently as separate simulations.
+#
+# Usage:
+#   Place multiple .txt files with different scripts in the same folder.
+#   The orchestrator will launch a simulator for each file in the folder at the same time.
+
 # Example simulation script for ToDos.Clients.Simulator
 # Format: operation1,operation2,...,count,delayEach,delayEnd
 # Optional headers:
