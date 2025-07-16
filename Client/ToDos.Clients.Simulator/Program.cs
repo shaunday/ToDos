@@ -36,26 +36,5 @@ namespace ToDos.Clients.Simulator
                 await app.Run(args);
             }
         }
-
-
-        public static string GetLogFileName(int pid, ClientType clientType)
-        {
-            if (pid <= 0)
-                throw new ArgumentException("PID must be a positive integer", nameof(pid));
-
-            string clientTypeName = clientType.ToString();
-            return $"{clientTypeName}_{pid}.log";
-        }
-        public enum ClientType { UiClient, ClientSimulator }
-
-        public static string GetLogFilePath(string fileName)
-        {
-            // Use the directory of the running executable
-            var baseDir = AppContext.BaseDirectory;
-            var logsDir = Path.Combine(baseDir, "Logs");
-            if (!Directory.Exists(logsDir))
-                Directory.CreateDirectory(logsDir);
-            return Path.Combine(logsDir, fileName);
-        }
     }
 }

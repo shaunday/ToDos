@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Todos.Client.Common\Todos.Client.Common.csproj" />
     <ProjectReference Include="..\Todos.Client.SignalRClient\Todos.Client.SignalRClient.csproj" />
     <ProjectReference Include="..\..\Common\ToDos.JwtService\ToDos.JwtService.csproj" />
   </ItemGroup>
