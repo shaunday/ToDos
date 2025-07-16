@@ -22,6 +22,7 @@ using Unity;
 using Todos.Ui.Services;
 using static Todos.Client.Common.TypesGlobal;
 using Todos.Ui.Services.Messenger;
+using System.Collections.Generic;
 
 namespace Todos.Ui.ViewModels
 {
@@ -33,6 +34,7 @@ namespace Todos.Ui.ViewModels
         private readonly UserConnectionService _userConnectionService;
 
         public ObservableCollection<TaskModel> Tasks { get; set; } = new ObservableCollection<TaskModel>();
+        private HashSet<int> _taskIds = new HashSet<int>();
         private bool _hasLoadedOnce = false;
 
         #endregion
@@ -169,8 +171,9 @@ namespace Todos.Ui.ViewModels
 
                 if (res)
                 {
-                  
+
                     Tasks.Add(newTaskModel);
+                    _taskIds.Add(newTaskModel.Id);
                     UpdateFilteredTasks();
                 }
                 else
@@ -268,6 +271,7 @@ namespace Todos.Ui.ViewModels
                     if (deleted)
                     {
                         Tasks.Remove(task);
+                        _taskIds.Remove(task.Id);
                         Overview.Refresh(Tasks);
                     }
                     else
@@ -369,6 +373,7 @@ namespace Todos.Ui.ViewModels
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         Tasks = new ObservableCollection<TaskModel>(taskModelsList);
+                        _taskIds = new HashSet<int>(taskModelsList.Select(t => t.Id));
                         Overview.Refresh(Tasks);
                         FilteredTasksView = CollectionViewSource.GetDefaultView(Tasks);
                         FilteredTasksView.Filter = FilterPredicate;
@@ -412,6 +417,16 @@ namespace Todos.Ui.ViewModels
                 _ = ReloadAllTasksAndUiStateAsync();
             }
         }
+
+        // Validation.. sort of
+        private bool ShouldSkipTask(TaskModel model)
+        {
+            if (model == null)
+                return true;
+            if (_taskIds.Contains(model.Id))
+                return true;
+            return false;
+        }
         #endregion
 
         #region Event Handlers
@@ -424,11 +439,13 @@ namespace Todos.Ui.ViewModels
         private void HandleTaskAdded(TaskDTO task)
         {
             _logger?.Information("TasksViewModel: HandleTaskAdded called for TaskId {TaskId}", task?.Id);
-            if (task == null) return;
             var model = _mapper!.Map<TaskModel>(task);
+            if (ShouldSkipTask(model))
+                return;
             Application.Current.Dispatcher.Invoke(() =>
             {
                 Tasks.Add(model);
+                _taskIds.Add(model.Id);
                 UpdateFilteredTasks();
             });
         }
@@ -454,14 +471,16 @@ namespace Todos.Ui.ViewModels
         {
             _logger?.Information("TasksViewModel: HandleTaskDeleted called for TaskId {TaskId}", taskId);
             var model = Tasks.FirstOrDefault(t => t.Id == taskId);
-            if (model != null)
+            if (ShouldSkipTask(model))
             {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    Tasks.Remove(model);
-                    Overview.Refresh(Tasks);
-                });
+                return;
             }
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Tasks.Remove(model);
+                _taskIds.Remove(taskId);
+                Overview.Refresh(Tasks);
+            });
         }
 
         private void HandleTaskLocked(int taskId)
