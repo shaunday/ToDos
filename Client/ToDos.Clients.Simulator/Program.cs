@@ -23,6 +23,7 @@ namespace ToDos.Clients.Simulator
 
             var container = new UnityContainer();
             UnityConfig.RegisterTypes(container);
+
             if (args.Length > 0 && args[0] == "--orchestrate")
             {
                 var orchestrator = new SimulationOrchestrator(container);
