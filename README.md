@@ -143,6 +143,7 @@ flowchart TB
   - UI built with Material Design for WPF.
   - **Advanced Filtering:**
     - The UI supports advanced filtering of tasks by tag, user, completion status, and other criteria, allowing users to focus on relevant tasks.
+    - Filtering is performed both on the server (broadcast filtering) and on the client (due to SignalR limitations, some filtering—such as by tag or user—may be done client-side after receiving updates).
   - **Task Locking, Editing, Adding, Deleting:**
     - When a user begins editing a task, the client requests a lock from the server to prevent simultaneous edits by other users. The lock is released when editing is finished or the user disconnects.
     - Adding, editing, and deleting tasks are performed via SignalR calls to the server, which then broadcasts updates to all connected clients in real time.
@@ -161,6 +162,8 @@ flowchart TB
   - Essential for stress-testing, scenario automation, and demonstrating system robustness under load.
   - **Multi-Instance & Multi-User Support:**
     - The system supports running multiple instances for the same user as well as for different users, all kept in sync in real time.
+  - **Combined Logs Viewer:**
+    - Orchestrator provides a combined logs viewer for all clients it launches, with filtering options by process ID, live status, and client type.
 
 ### Server Architecture
 - **ASP.NET Server (Todos.TaskSyncServer):**
@@ -210,12 +213,10 @@ flowchart TB
 2. **Clone the repository**
 3. **Restore NuGet packages**
 4. **Configure SQL Server connection string:**
-   - Edit `.env.repository` or `App.config`/`Web.config` to point to your SQL Server instance.
+   - Edit `.env.repository` to point to your SQL Server instance. Sharding and read/write separation are turned off by default; you only need to adjust the server name.
    - Example:
-     ```xml
-     <connectionStrings>
-       <add name="TaskDbContext" connectionString="Data Source=YOUR_SERVER;Initial Catalog=ToDosDb;Integrated Security=True;" providerName="System.Data.SqlClient" />
-     </connectionStrings>
+     ```
+     MSSQL_TRUSTED_CONNECTION_STRING=Server=NOVPC;Database=db1;Trusted_Connection=True;TrustServerCertificate=True;
      ```
 5. **Build and run the server**
 6. **Build and run one or more WPF clients**
@@ -258,7 +259,7 @@ flowchart TB
 - **Shared Methods/Classes/Enums:** Common projects expose types for cross-assembly use (e.g., LogFactory).
 - **Broadcast Filtering:** The server filters which clients receive which updates. Clients may also filter received data in the UI due to SignalR server limitations (e.g., filtering by tag, user, or other criteria is done client-side if not possible server-side).
 - **Queue for Offline/Persistence:** The client uses a queue to buffer actions while offline and ensure persistence, so changes are reliably sent to the server when reconnected.
-- **IDs:** `userId` and `taskId` are created on the server as integers; `tagId` is created on the client as a GUID.
+- **IDs:** `userId` and `taskId` are created on the server as auto-incrementing integers (by the database), ensuring uniqueness and referential integrity. `tagId` is created on the client as a GUID, which preserves uniqueness even before the tag is synced to the server.
 - **Edge Case Handling:** Try/catch blocks around critical sync and broadcast logic.
 - **JWT Authentication:** The SignalR Hub implements JWT authentication (`jjwtauthenticate`), which is mostly mocked for demonstration and testing purposes, fulfilling the bonus authentication requirement.
 - **Automatic Login in Dev Mode:** In current development mode, login is performed automatically using a demo user or via orchestrator overload, simplifying testing and demonstration.
