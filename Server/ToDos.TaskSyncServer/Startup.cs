@@ -34,7 +34,7 @@ namespace ToDos.TaskSyncServer
 
             //mock db
             string conString = ConnectionStringAccess.GetDbConnectionString(); //empty for default
-            TaskRepository.ResetAndPopulateDb(conString, new List<int> { 0, 1 }, 3);
+            TaskRepository.ResetAndPopulateDb(conString, new List<int> { 0, 1 }, 7);
 
             var resolver = new HybridSignalRResolver(container);
             GlobalHost.DependencyResolver = resolver;

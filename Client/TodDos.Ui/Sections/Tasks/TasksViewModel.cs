@@ -181,7 +181,6 @@ namespace Todos.Ui.ViewModels
 
             await RunWithErrorHandlingAsync(async () =>
             {
-                AddTaskErrorMessage = string.Empty;
                 var locked = await _taskSyncClient!.LockTaskAsync(task.Id);
                 if (locked)
                 {
@@ -189,8 +188,7 @@ namespace Todos.Ui.ViewModels
                 }
                 else
                 {
-                    AddTaskErrorMessage = "Task is currently being edited by another user.";
-                    SnackbarMessageQueue.Enqueue(AddTaskErrorMessage);
+                    SnackbarMessageQueue.Enqueue("Task is currently being edited by another user.");
                 }
             }, "Failed to edit task.", SnackbarMessageQueue);
         }
@@ -235,7 +233,6 @@ namespace Todos.Ui.ViewModels
             if (task == null || !task.IsEditing || EditingTaskBackup == null) return;
             await RunWithErrorHandlingAsync(async () =>
             {
-                AddTaskErrorMessage = string.Empty;
                 await _taskSyncClient!.UnlockTaskAsync(task.Id);
                 // Restore original values from backup
                 task.CopyFrom(EditingTaskBackup);
@@ -251,7 +248,6 @@ namespace Todos.Ui.ViewModels
 
             await RunWithErrorHandlingAsync(async () =>
             {
-                AddTaskErrorMessage = string.Empty;
                 var currentUserId = GetCurrentUserId();
                 var deleted = await _taskSyncClient!.DeleteTaskAsync(currentUserId, task.Id);
                 Application.Current.Dispatcher.Invoke(() =>
@@ -263,8 +259,7 @@ namespace Todos.Ui.ViewModels
                     }
                     else
                     {
-                        AddTaskErrorMessage = "Failed to delete task.";
-                        SnackbarMessageQueue.Enqueue(AddTaskErrorMessage);
+                        SnackbarMessageQueue.Enqueue("Failed to delete task.");
                     }
                 });
             }, "Failed to delete task.", SnackbarMessageQueue);
@@ -370,8 +365,7 @@ namespace Todos.Ui.ViewModels
                 else
                 {
                     _logger?.Warning("TasksViewModel: No valid user ID found for loading tasks");
-                    AddTaskErrorMessage = "User not authenticated. Please log in.";
-                    SnackbarMessageQueue.Enqueue(AddTaskErrorMessage);
+                    SnackbarMessageQueue.Enqueue("User not authenticated. Please log in.");
                 }
             }, "Failed to load tasks.", SnackbarMessageQueue);
             IsLoading = false;
@@ -470,8 +464,7 @@ namespace Todos.Ui.ViewModels
                     if (EditingTask != null && EditingTask.Id == taskId)
                     {
                         ChangeTaskEditMode(model, false);
-                        AddTaskErrorMessage = "This task was locked by another user. Editing has been cancelled.";
-                        SnackbarMessageQueue.Enqueue(AddTaskErrorMessage);
+                        SnackbarMessageQueue.Enqueue("This task was locked by another user. Editing has been cancelled.");
                     }
                     UpdateFilteredTasks();
                 });

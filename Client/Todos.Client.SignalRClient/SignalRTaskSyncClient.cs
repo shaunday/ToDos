@@ -268,20 +268,14 @@ namespace Todos.Client.SignalRClient
         #region Public API Methods
 
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        public async Task<bool> AddTaskAsync(TaskDTO task)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+        public Task<bool> AddTaskAsync(TaskDTO task)
         {
-            // Simulate add logic (call server, etc.)
-            return true;
+            return InvokeWithRetrySafeAsync<bool>(SignalRGlobals.AddTask, task);
         }
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        public async Task<bool> UpdateTaskAsync(TaskDTO task)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+        public Task<bool> UpdateTaskAsync(TaskDTO task)
         {
-            // Simulate update logic (call server, etc.)
-            return true;
+            return InvokeWithRetrySafeAsync<bool>(SignalRGlobals.UpdateTask, task);
         }
 
         public Task<bool> DeleteTaskAsync(int userId, int taskId)
@@ -338,7 +332,27 @@ namespace Todos.Client.SignalRClient
             return await _retryPolicy.ExecuteAsync(async () =>
             {
                 _logger.Information("Invoking {MethodName} on SignalR hub...", methodName);
-                return await _hubProxy.Invoke<T>(methodName, args);
+                var result = await _hubProxy.Invoke<object>(methodName, args);
+                
+                // Handle type conversion for older SignalR client
+                if (result is T typedResult)
+                {
+                    return typedResult;
+                }
+                
+                // Try to convert the result to the expected type
+                if (typeof(T) == typeof(bool) && result is bool boolResult)
+                {
+                    return (T)(object)boolResult;
+                }
+                
+                if (typeof(T) == typeof(IEnumerable<TaskDTO>) && result is IEnumerable<TaskDTO> tasksResult)
+                {
+                    return (T)(object)tasksResult;
+                }
+                
+                // If conversion fails, throw an exception
+                throw new InvalidCastException($"Cannot convert result of type {result?.GetType().Name ?? "null"} to {typeof(T).Name}");
             });
         }
 
