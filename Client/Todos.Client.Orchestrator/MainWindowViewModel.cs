@@ -12,13 +12,15 @@ using System.Windows.Data;
 using Todos.Client.Common;
 using Todos.Client.Orchestrator.Services;
 using Todos.Client.Orchestrator.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace Todos.Client.Orchestrator.ViewModels
 {
     public partial class MainWindowViewModel : ObservableObject
     {
         #region Fields
-        private readonly ClientProcessService _clientService = new ClientProcessService();
+        public  ClientProcessService ClientService { get; private set; }
         #endregion
 
         #region Properties
@@ -110,7 +112,7 @@ namespace Todos.Client.Orchestrator.ViewModels
         public string FileConfigDescription => "File format: one user per line: userId displayName password count\nExample: user1 John 1234 3";
 
         public ICollectionView FilteredClientsView { get; }
-        public int TotalClientCount => _clientService.Clients.Count;
+        public int TotalClientCount => ClientService.Clients.Count;
         public int FilteredClientCount => FilteredClientsView?.Cast<object>().Count() ?? 0;
         public LogViewerViewModel LogViewerViewModel { get; }
         #endregion
@@ -118,12 +120,14 @@ namespace Todos.Client.Orchestrator.ViewModels
         #region Constructor
         public MainWindowViewModel()
         {
-            FilteredClientsView = CollectionViewSource.GetDefaultView(_clientService.Clients);
+            var logger = (ILogger)App.Container.Resolve(typeof(ILogger), null);
+            ClientService = new ClientProcessService(logger);
+            FilteredClientsView = CollectionViewSource.GetDefaultView(ClientService.Clients);
             FilteredClientsView.Filter = FilterClientPredicate;
             // Set default filter to alive only
             FilterIsAlive = true;
             // Subscribe to process Exited for all existing clients
-            foreach (var client in _clientService.Clients)
+            foreach (var client in ClientService.Clients)
             {
                 if (client.Process != null)
                 {
@@ -136,7 +140,7 @@ namespace Todos.Client.Orchestrator.ViewModels
             // Listen for changes to update counts
             FilteredClientsView.CollectionChanged += (s, e) => NotifyClientCountsChanged();
             FilteredClientsView.CurrentChanged += (s, e) => NotifyClientCountsChanged();
-            _clientService.Clients.CollectionChanged += (s, e) => NotifyClientCountsChanged();
+            ClientService.Clients.CollectionChanged += (s, e) => NotifyClientCountsChanged();
             LogViewerViewModel = new LogViewerViewModel(new LogFileWatcherService());
             FilteredClientsView.CollectionChanged += (s, e) => UpdateLogViewerLogFiles();
             FilteredClientsView.CurrentChanged += (s, e) => UpdateLogViewerLogFiles();
@@ -183,9 +187,9 @@ namespace Todos.Client.Orchestrator.ViewModels
                 var proc = System.Diagnostics.Process.Start(startInfo);
                 if (proc != null)
                 {
-                    _clientService.AddClient(TypesGlobal.ClientType.UiClient, proc);
+                    ClientService.AddClient(TypesGlobal.ClientType.UiClient, proc);
                     proc.EnableRaisingEvents = true;
-                    proc.Exited += (s, e) => OnClientProcessExited(_clientService.Clients.FirstOrDefault(c => c.Process == proc));
+                    proc.Exited += (s, e) => OnClientProcessExited(ClientService.Clients.FirstOrDefault(c => c.Process == proc));
                 }
             }
             FilteredClientsView.Refresh();
@@ -195,18 +199,19 @@ namespace Todos.Client.Orchestrator.ViewModels
         private void KillClient(ClientModel model)
         {
             if (model == null) return;
-            _clientService.KillClient(model);
+            ClientService.KillClient(model);
             FilteredClientsView.Refresh();
         }
 
         [RelayCommand]
         private void KillAllClients()
         {
-            if (_clientService.Clients.Count == 0) return;
-            var result = System.Windows.MessageBox.Show($"Are you sure you want to kill all {_clientService.Clients.Count} running client(s)?", "Confirm Kill All", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
+            var aliveClientsCount = ClientService.Clients.Cast<ClientModel>().Count(c => c.IsAlive);
+            if (aliveClientsCount == 0) return;
+            var result = System.Windows.MessageBox.Show($"Are you sure you want to kill all {aliveClientsCount} running client(s)?", "Confirm Kill All", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
             if (result == System.Windows.MessageBoxResult.Yes)
             {
-                _clientService.KillAllClients();
+                ClientService.KillAllClients();
                 FilteredClientsView.Refresh();
             }
         }
@@ -229,7 +234,7 @@ namespace Todos.Client.Orchestrator.ViewModels
             var toDelete = selectedItems.Cast<ClientModel>().ToList();
             foreach (var model in toDelete)
             {
-                _clientService.RemoveClient(model);
+                ClientService.RemoveClient(model);
             }
             FilteredClientsView.Refresh();
         }
@@ -275,9 +280,9 @@ namespace Todos.Client.Orchestrator.ViewModels
                     var proc = System.Diagnostics.Process.Start(startInfo);
                     if (proc != null)
                     {
-                        _clientService.AddClient(TypesGlobal.ClientType.UiClient, proc);
+                        ClientService.AddClient(TypesGlobal.ClientType.UiClient, proc);
                         proc.EnableRaisingEvents = true;
-                        proc.Exited += (s, e) => OnClientProcessExited(_clientService.Clients.FirstOrDefault(c => c.Process == proc));
+                        proc.Exited += (s, e) => OnClientProcessExited(ClientService.Clients.FirstOrDefault(c => c.Process == proc));
                     }
                 }
             }
