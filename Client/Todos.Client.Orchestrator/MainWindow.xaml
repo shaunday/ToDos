@@ -62,7 +62,6 @@
             <materialDesign:Card Padding="8" Margin="0,0,0,8" materialDesign:ElevationAssist.Elevation="Dp1">
                 <StackPanel>
                     <TextBlock Text="Orchestrator Launcher" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Margin="0,0,0,20"/>
-                    <!-- Professional Launch by file config checkbox -->
                     <DockPanel Margin="0,0,0,8">
                         <CheckBox Content=""
                                   IsChecked="{Binding LaunchByFileConfig, Mode=TwoWay}"
@@ -98,21 +97,21 @@
                         <TextBlock Text="Count:" VerticalAlignment="Center"/>
                         <TextBox x:Name="ClientCountTextBox" Grid.Column="1" Text="{Binding LaunchClientCount, Mode=TwoWay}" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Margin="8,0,0,0"/>
                     </Grid>
-                    <Button x:Name="LaunchClientButton" Content="Launch Client(s)" Style="{StaticResource MaterialDesignRaisedButton}" Command="{Binding LaunchClientCommand}" HorizontalAlignment="Stretch" Margin="0,0,0,12" Visibility="{Binding LaunchByFileConfig, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                    <Button x:Name="LaunchClientButton" Content="Launch Client(s)" Style="{StaticResource MaterialDesignRaisedButton}" Command="{Binding LaunchClientCommand}" HorizontalAlignment="Stretch" Margin="0,4,0,8" Visibility="{Binding LaunchByFileConfig, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                 </StackPanel>
             </materialDesign:Card>
             <materialDesign:Card Padding="8" Margin="0,0,0,8" materialDesign:ElevationAssist.Elevation="Dp1">
                 <StackPanel>
-                    <TextBlock Text="Simulator Controls" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Margin="0,0,0,8"/>
+                    <TextBlock Text="Simulator Controls" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Margin="0,0,0,12"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Simulator PID:" VerticalAlignment="Center"/>
+                        <TextBlock Text="Simulator PID:" VerticalAlignment="Center" Margin="0,0,0,2"/>
                         <ComboBox x:Name="SimulatorPidComboBox" Grid.Column="1" ItemsSource="{Binding SimulatorPids}" SelectedItem="{Binding SelectedSimulatorPid, Mode=TwoWay}" Margin="8,0,0,0"/>
                     </Grid>
-                    <Grid Margin="0,4,0,0">
+                    <Grid Margin="0,0,0,8" >
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
@@ -120,13 +119,13 @@
                         <TextBlock Text="Command:" VerticalAlignment="Center"/>
                         <ComboBox x:Name="SimulatorCommandComboBox" Grid.Column="1" ItemsSource="{Binding SimulatorCommands}" SelectedItem="{Binding SelectedSimulatorCommand, Mode=TwoWay}" Margin="8,0,0,0"/>
                     </Grid>
-                    <Button Content="Simulate" Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding SimulateCommand}" HorizontalAlignment="Stretch" Margin="0,4,0,0"/>
+                    <Button Content="Simulate" Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding SimulateCommand}" HorizontalAlignment="Stretch" Margin="0,4,0,8"/>
                 </StackPanel>
             </materialDesign:Card>
             <materialDesign:Card Padding="8" materialDesign:ElevationAssist.Elevation="Dp1">
                 <StackPanel>
-                    <TextBlock Text="Filtering" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Margin="0,0,0,8"/>
-                    <Grid>
+                    <TextBlock Text="Filtering" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Margin="0,0,0,12"/>
+                    <Grid Margin="0,0,0,8" >
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
@@ -137,27 +136,27 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <!-- Client Type Filter -->
-                        <TextBlock Text="Client Type:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0"/>
-                        <ComboBox x:Name="ClientTypeCombo" Grid.Row="0" Grid.Column="1" ItemsSource="{Binding Source={StaticResource ClientTypeValues}}" SelectedItem="{Binding FilterClientType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEditable="False" Margin="8,0,0,0"/>
-                        <!-- IsAliveCheck centered in its own row -->
-                        <DockPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,12,0,12" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <DockPanel Margin="0,0,0,8" >
                             <CheckBox x:Name="IsAliveCheck"
                                       Content=""
                                       IsChecked="{Binding FilterIsAlive, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       Style="{StaticResource MaterialDesignCheckBox}"
                                       VerticalAlignment="Center"
                                       Margin="0,0,8,0"/>
-                            <TextBlock Text="Alive Only"
+                            <TextBlock Text="Only Live Instances"
                                        VerticalAlignment="Center"
                                        FontWeight="SemiBold"
                                        FontSize="14"
                                        Foreground="{DynamicResource MaterialDesignBody}"/>
                         </DockPanel>
+                        <TextBlock Text="Client Type:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Margin="0,0,0,2"/>
+                        <ComboBox x:Name="ClientTypeCombo" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Source={StaticResource ClientTypeValues}}" SelectedItem="{Binding FilterClientType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEditable="False" Margin="8,0,0,2"/>
+
                         <!-- PID Filter -->
                         <TextBlock Text="PID:" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="8,0,0,0"/>
                         <TextBox Text="{Binding FilterProcessIdText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" VerticalContentAlignment="Center" Margin="60,0,0,0"/>
                     </Grid>
-                    <Button Content="Clear All Filters" Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding ClearFiltersCommand}" HorizontalAlignment="Stretch" Margin="0,4,0,0"/>
+                    <Button Content="Clear All Filters" Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding ClearFiltersCommand}" HorizontalAlignment="Stretch" Margin="0,4,0,8"/>
                     <!-- Kill All Clients button, only visible if there are clients -->
                     <Button x:Name="KillAllClientsButton"
                             Content="Kill All Clients"
