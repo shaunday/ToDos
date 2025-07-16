@@ -61,7 +61,7 @@
         <StackPanel Grid.Column="0" Margin="4,8,0,8" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
             <materialDesign:Card Padding="8" Margin="0,0,0,8" materialDesign:ElevationAssist.Elevation="Dp1">
                 <StackPanel>
-                    <TextBlock Text="Orchestrator Launcher" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Margin="0,0,0,20"/>
+                    <TextBlock Text="Orchestrator Ui Launcher" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Margin="0,0,0,20"/>
                     <DockPanel Margin="0,0,0,8">
                         <CheckBox Content=""
                                   IsChecked="{Binding LaunchByFileConfig, Mode=TwoWay}"
@@ -81,13 +81,13 @@
                     <TextBlock x:Name="FileConfigDesc" Text="{Binding FileConfigDescription}" TextWrapping="Wrap" FontSize="11" Foreground="Gray" Margin="0,0,0,12" Visibility="{Binding LaunchByFileConfig, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                     <Button x:Name="LaunchByFileConfigButton" Content="Launch by File Config" Style="{StaticResource MaterialDesignRaisedButton}" Command="{Binding LaunchClientsByFileConfigCommand}" HorizontalAlignment="Stretch" Margin="0,0,0,12" Visibility="{Binding LaunchByFileConfig, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                     <!-- Normal controls, hidden when LaunchByFileConfig is true -->
-                    <Grid x:Name="ClientTypeGrid" Margin="0,0,0,8" Visibility="{Binding LaunchByFileConfig, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <Grid x:Name="ClientTypeGrid" Margin="0,4,0,8" Visibility="{Binding LaunchByFileConfig, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Client Type:" VerticalAlignment="Center"/>
-                        <ComboBox x:Name="ClientTypeComboBox" Grid.Column="1" SelectedItem="{Binding LaunchClientType, Mode=TwoWay}" ItemsSource="{Binding Source={StaticResource ClientTypeValues}}" SelectedIndex="0" Margin="8,0,0,0"/>
+                        <TextBlock Grid.Column="1" Text="Ui Client" FontSize="14" VerticalAlignment="Center" Margin="8,0,0,0"/>
                     </Grid>
                     <Grid x:Name="ClientCountGrid" Margin="0,0,0,8" Visibility="{Binding LaunchByFileConfig, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                         <Grid.ColumnDefinitions>
@@ -102,7 +102,11 @@
             </materialDesign:Card>
             <materialDesign:Card Padding="8" Margin="0,0,0,8" materialDesign:ElevationAssist.Elevation="Dp1">
                 <StackPanel>
-                    <TextBlock Text="Simulator Controls" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Margin="0,0,0,12"/>
+                    <TextBlock Text="Client Simulators Launcher" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Margin="0,0,0,12"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,8">
+                        <TextBlock Text="Client Type:" VerticalAlignment="Center"/>
+                        <TextBlock Text="Client Simulator" FontSize="14" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                    </StackPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>

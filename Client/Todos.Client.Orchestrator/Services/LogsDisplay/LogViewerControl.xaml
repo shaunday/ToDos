@@ -41,9 +41,10 @@
                                  FontSize="14"/>
                     </DockPanel>
                 </Border>
-                <Button Grid.Column="2" Content="Clear" Command="{Binding ClearCommand}" MinWidth="100" Height="40"
+                <Button Grid.Column="2" Content="Clear" Command="{Binding ClearCommand}"
+                        Width="180" Height="36" FontSize="15"
                         Style="{StaticResource MaterialDesignOutlinedButton}"
-                        Margin="16,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                        Margin="8,0,0,0" VerticalAlignment="Top" HorizontalAlignment="Right"/>
             </Grid>
         </StackPanel>
         <Border CornerRadius="6" BorderBrush="#DDD" BorderThickness="1" Background="White" Padding="0" Margin="0,0,0,0">
