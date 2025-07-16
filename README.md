@@ -72,7 +72,7 @@ Automapping: Model <> DTO
 ASP.Net.Web > Interface for Communication > Implementation
 Automapping: DB Entity <> DTO
 
-tips and tricks - connection id, NoSelectOnClickBehavior, clear focus, others, unlock on exit
+tips and tricks - connection id, NoSelectOnClickBehavior, clear focus, others, unlock on exit, use hashset in clients sim
 methods/classes/enums in common projects allow sharing/access across assemblies/execs - like log factory
 
 

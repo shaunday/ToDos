@@ -70,7 +70,7 @@ namespace Todos.UserService
                 };
                 
                 // Generate proper mock token using the service
-                var mockToken = _authService.GenerateToken(user.Id, user.UserName);
+                var mockToken = _authService.GenerateToken(user.Id/*, user.UserName*/);
                 
                 _currentUser = user;
                 _jwtToken = mockToken;
@@ -116,7 +116,7 @@ namespace Todos.UserService
             if (_currentUser.IsAuthenticated)
             {
                 // Generate new mock token using the service
-                var newToken = _authService.GenerateToken(_currentUser.Id, _currentUser.UserName);
+                var newToken = _authService.GenerateToken(_currentUser.Id/*, _currentUser.UserName*/);
                 _jwtToken = newToken;
                 TokenChanged?.Invoke(newToken);
                 return true;

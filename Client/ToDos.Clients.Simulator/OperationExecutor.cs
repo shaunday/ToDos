@@ -27,7 +27,7 @@ namespace ToDos.Clients.Simulator
                     {
                         foreach (var op in line.Operations)
                         {
-                            _logger.Info("[User {UserId}] Executing {Operation}", userId, op);
+                            _logger.Information("[User {UserId}] Executing {Operation}", userId, op);
                             switch (op.Trim().ToLowerInvariant())
                             {
                                 case "add":
@@ -46,7 +46,7 @@ namespace ToDos.Clients.Simulator
                                     _taskSyncClient.GetAll(userId).GetAwaiter().GetResult();
                                     break;
                                 default:
-                                    _logger.Info("Unknown operation: {Operation}", op);
+                                    _logger.Information("Unknown operation: {Operation}", op);
                                     break;
                             }
                         }

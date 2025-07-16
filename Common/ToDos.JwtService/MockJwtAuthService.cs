@@ -26,10 +26,9 @@ namespace ToDos.MockAuthService
 
         public string GenerateToken(int userId)
         {
+            string username = "mock";
             try
             {
-                string username = "mock";
-
                 // Create a simple mock token format: "MOCK_{userId}_{username}_{expiresAtTicks}"
                 var expiresAt = DateTime.UtcNow.AddHours(24);
                 var token = $"MOCK_{userId}_{username}_{expiresAt.Ticks}";

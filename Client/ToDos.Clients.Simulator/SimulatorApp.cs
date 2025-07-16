@@ -37,7 +37,7 @@ namespace ToDos.Clients.Simulator
                 signToEvents = parseResult.SignToEvents;
             if (!userId.HasValue)
                 throw new ArgumentException("UserId must be specified either as a command-line argument or in the script file header.");
-            _executor.Logger.Info("Simulator starting with userId={UserId}, signToEvents={SignToEvents}, script={Script}", userId, signToEvents, filePath);
+            _executor.Logger.Information("Simulator starting with userId={UserId}, signToEvents={SignToEvents}, script={Script}", userId, signToEvents, filePath);
             _executor.Execute(userId.Value, parseResult.ScriptLines, signToEvents ?? false);
         }
     }
