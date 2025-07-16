@@ -54,10 +54,13 @@ namespace ToDos.TaskSyncServer.Hubs
                 
                 _logger.Information("Adding task for user: {UserId}", userId);
                 var result = await _taskService.AddTaskAsync(task);
-                // Broadcast to all except sender
-                BroadcastTaskAdded(result, Context.ConnectionId);
+                if (result)
+                {
+                    // Broadcast to all except sender
+                    BroadcastTaskAdded(result, Context.ConnectionId);
+                }
                 stopwatch.Stop();
-                return true; // Return success if we got here
+                return result; 
             }
             catch (Exception ex)
             {
@@ -97,8 +100,11 @@ namespace ToDos.TaskSyncServer.Hubs
             {
                 _logger.Information("Deleting task {TaskId} for user: {UserId}", taskId, userId);
                 var result = await _taskService.DeleteTaskAsync(userId, taskId);
-                // Broadcast to all except sender
-                BroadcastTaskDeleted(taskId, userId, Context.ConnectionId);
+                if (result)
+                {
+                    // Broadcast to all except sender
+                    BroadcastTaskDeleted(taskId, userId, Context.ConnectionId);
+                }
                 stopwatch.Stop();
                 return result;
             }
@@ -117,6 +123,10 @@ namespace ToDos.TaskSyncServer.Hubs
             {
                 _logger.Information("Locking task {TaskId} for user: {UserId}", taskId, userId);
                 var result = await _taskService.LockTaskAsync(userId, taskId);
+                if (result)
+                {
+                    BroadcastTaskLocked(taskId, userId, Context.ConnectionId);
+                }
                 stopwatch.Stop();
                 return result;
             }
@@ -135,6 +145,10 @@ namespace ToDos.TaskSyncServer.Hubs
             {
                 _logger.Information("Unlocking task {TaskId} for user: {UserId}", taskId, userId);
                 var result = await _taskService.UnlockTaskAsync(userId, taskId);
+                if (result)
+                {
+                    BroadcastTaskUnlocked(taskId, userId, Context.ConnectionId);
+                }
                 stopwatch.Stop();
                 return result;
             }
