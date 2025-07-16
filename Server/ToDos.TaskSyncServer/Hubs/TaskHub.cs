@@ -331,51 +331,55 @@ namespace ToDos.TaskSyncServer.Hubs
 
         public static int GetActiveConnections() => _activeConnections;
 
+        // Unified broadcast method to handle all broadcast types
+        private void BroadcastToUserGroup<T>(string methodName, T data, int userId, string exceptConnectionId = null)
+        {
+            try
+            {
+                var groupName = $"User_{userId}";
+                var clientGroup = Clients.Group(groupName);
+                
+                if (!string.IsNullOrEmpty(exceptConnectionId))
+                {
+                    clientGroup.AllExcept(exceptConnectionId).Invoke(methodName, data);
+                }
+                else
+                {
+                    clientGroup.Invoke(methodName, data);
+                }
+                
+                _logger.Information("Broadcasted {MethodName} to group: {GroupName} except: {ExceptConnectionId}", methodName, groupName, exceptConnectionId);
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning(ex, "Failed to broadcast {MethodName} for user {UserId}. This might be normal if no clients are connected.", methodName, userId);
+            }
+        }
+
         // Helper methods to broadcast with operationId and exceptConnectionId
         private void BroadcastTaskAdded(TaskDTO task, string exceptConnectionId = null)
         {
-            var groupName = $"User_{task.UserId}";
-            if (!string.IsNullOrEmpty(exceptConnectionId))
-                Clients.Group(groupName).AllExcept(exceptConnectionId).TaskAdded(task);
-            else
-                Clients.Group(groupName).TaskAdded(task);
-            _logger.Information("Broadcasted TaskAdded to group: {GroupName} except: {ExceptConnectionId}", groupName, exceptConnectionId);
+            BroadcastToUserGroup(SignalRGlobals.TaskAdded, task, task.UserId, exceptConnectionId);
         }
+        
         private void BroadcastTaskUpdated(TaskDTO task, string exceptConnectionId = null)
         {
-            var groupName = $"User_{task.UserId}";
-            if (!string.IsNullOrEmpty(exceptConnectionId))
-                Clients.Group(groupName).AllExcept(exceptConnectionId).TaskUpdated(task);
-            else
-                Clients.Group(groupName).TaskUpdated(task);
-            _logger.Information("Broadcasted TaskUpdated to group: {GroupName} except: {ExceptConnectionId}", groupName, exceptConnectionId);
+            BroadcastToUserGroup(SignalRGlobals.TaskUpdated, task, task.UserId, exceptConnectionId);
         }
+        
         private void BroadcastTaskDeleted(int taskId, int userId, string exceptConnectionId = null)
         {
-            var groupName = $"User_{userId}";
-            if (!string.IsNullOrEmpty(exceptConnectionId))
-                Clients.Group(groupName).AllExcept(exceptConnectionId).TaskDeleted(taskId);
-            else
-                Clients.Group(groupName).TaskDeleted(taskId);
-            _logger.Information("Broadcasted TaskDeleted to group: {GroupName} except: {ExceptConnectionId}", groupName, exceptConnectionId);
+            BroadcastToUserGroup(SignalRGlobals.TaskDeleted, taskId, userId, exceptConnectionId);
         }
+        
         private void BroadcastTaskLocked(int taskId, int userId, string exceptConnectionId = null)
         {
-            var groupName = $"User_{userId}";
-            if (!string.IsNullOrEmpty(exceptConnectionId))
-                Clients.Group(groupName).AllExcept(exceptConnectionId).TaskLocked(taskId);
-            else
-                Clients.Group(groupName).TaskLocked(taskId);
-            _logger.Information("Broadcasted TaskLocked to group: {GroupName} except: {ExceptConnectionId}", groupName, exceptConnectionId);
+            BroadcastToUserGroup(SignalRGlobals.TaskLocked, taskId, userId, exceptConnectionId);
         }
+        
         private void BroadcastTaskUnlocked(int taskId, int userId, string exceptConnectionId = null)
         {
-            var groupName = $"User_{userId}";
-            if (!string.IsNullOrEmpty(exceptConnectionId))
-                Clients.Group(groupName).AllExcept(exceptConnectionId).TaskUnlocked(taskId);
-            else
-                Clients.Group(groupName).TaskUnlocked(taskId);
-            _logger.Information("Broadcasted TaskUnlocked to group: {GroupName} except: {ExceptConnectionId}", groupName, exceptConnectionId);
+            BroadcastToUserGroup(SignalRGlobals.TaskUnlocked, taskId, userId, exceptConnectionId);
         }
     }
 } 

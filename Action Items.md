@@ -6,11 +6,14 @@ orch:
   margin above clear filter/simulate buttons
   add server log
 
-ui
-  load is called twice
+client:
+  Use a timer or debounce logic to prevent multiple rapid calls.
+  loading/ or something while tasks are loading
+
 
 Server:
    container types
+   check result after operation on hub
 
 
 * Simulate multiple users editing tasks concurrently to test locking and queues
