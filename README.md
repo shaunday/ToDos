@@ -67,56 +67,59 @@ A WPF + ASP.NET (SignalR) To-Do List application with real-time data synchroniza
 flowchart TB
     %% Top: Orchestrator
     Orchestrator["Orchestrator"]
+    ClientsOrchestrator["Clients Orchestrator"]
+    Orchestrator --> ClientsOrchestrator
+    ClientsOrchestrator -- "launches many" --> UI
+    ClientsOrchestrator -- "launches many" --> HeadlessSim
     HeadlessSim["HeadlessClientsSimulator"]
     AdapterService["AdapterService"]
-    Orchestrator --> UI
-    Orchestrator -- "launches many" --> HeadlessSim
     HeadlessSim --> AdapterService
-    AdapterService --> Queue
+    AdapterService --> OfflineQueueService
 
     %% Client Side
     UI["WPF Client"]
-    Queue["Queue Wrapper"]
+    OfflineQueueService["OfflineQueueService"]
     Polly["Polly (Resilience, Retry, Offline)"]
     SignalRClient["SignalR Client"]
     Mock["Mock Task Sync Client"]
     UserConnService["User/Connection Service"]
 
-    UI --> Queue
-    Queue --> Polly
+    UI --> OfflineQueueService
+    OfflineQueueService --> Polly
     Polly --> SignalRClient
     UI -.-> Mock
     Mock -.-> UI
-    SignalRClient --> SignalRHub
+    SignalRClient <--> SignalRHub
     UserConnService --> UI
 
     %% Middle: Auth Service (mock)
     AuthService["Auth Service (mock)"]
     AuthService --> SignalRHub
     AuthService --> UserConnService
+    SignalRHub --> AuthService
 
     %% Middle: Server Side
     SignalRHub["SignalR Hub Service"]
-    TasksOperations["TasksOperations Service"]
+    TaskOperations["TaskOperations Service (CRUD/Broadcast)"]
     Caching["Caching"]
     DbRepository["DbRepository"]
     Sharding["Sharding"]
-    ReadWriteSwitch["ReadWriteSwitch"]
+    ReadWriteDbRouter["ReadWriteDbRouter"]
     DB["SQL Server Database"]
     CacheCleanup["Cache Cleanup Service"]
 
-    SignalRHub --> TasksOperations
-    TasksOperations --> Caching
-    Caching --> TasksOperations
-    TasksOperations --> DbRepository
+    SignalRHub --> TaskOperations
+    TaskOperations --> Caching
+    Caching --> TaskOperations
+    TaskOperations --> DbRepository
     DbRepository -- Uses --> Sharding
-    DbRepository -- Uses --> ReadWriteSwitch
+    DbRepository -- Uses --> ReadWriteDbRouter
     DbRepository <--> DB
     ServerApp["ASP.NET Server"]
     ServerApp --> SignalRHub
     ServerApp --> CacheCleanup
 
-    %% Right: Shared/Common
+    %% Right: Shared/Common (top to bottom)
     CommonAll["Common.All"]
     CommonClient["Common.Client"]
     CommonServer["Common.Server"]
@@ -128,15 +131,12 @@ flowchart TB
 ```
 
 **Diagram Notes:**
-- Orchestrator is at the top and can launch many UI clients and headless simulators.
-- HeadlessClientsSimulator connects via AdapterService to the Queue Wrapper, simulating multiple clients.
-- Auth Service (mock) is in the middle, communicating with both SignalR Hub Service and User/Connection Service (which talks to WPF Client).
-- Caching is a feedback loop with the TasksOperations service.
-- Sharding and ReadWriteSwitch are used by DbRepository as side services, with bidirectional communication to the SQL Server database.
-- Polly provides resilience, retry logic, and offline queuing for the client.
-- The server loads a Cache Cleanup Service for cache management.
-- Shared/common projects are shown on the right for reference, with no direct lines for clarity.
-- Mock and offline support, as well as multi-instance and multi-user capabilities, are supported as described in the documentation.
+- The architecture is layered: Orchestrator (top, launches clients), Client (UI, offline queue, real-time sync), Server (SignalR Hub, TaskOperations, caching, database), and Shared/Common (right).
+- Communication flows top-down: Orchestrator launches multiple clients (UI/headless), which interact with the server via SignalR (bidirectional, real-time).
+- Auth Service (mock) mediates authentication between clients and server.
+- TaskOperations Service handles CRUD and broadcast, using caching or database as needed; repository uses sharding and read/write routing for scalability.
+- OfflineQueueService and Polly provide robust offline and retry support for clients.
+- The design supports multi-user, multi-instance, and robust real-time collaboration.
 
 ### Client Architecture
 - **WPF Client (Todos.Client.Ui):**
@@ -154,12 +154,16 @@ flowchart TB
     - The UI reflects task state changes instantly, including lock status, completion, and updates from other users.
   - **User Connection Management:**
     - The client maintains a persistent connection to the server via SignalR, with connection state reflected in the UI.
-    - User identity and presence are managed using JWT tokens (mocked in dev mode), and the connection ID is used to track and manage user sessions.
+    - User identity and presence are managed using JWT tokens (mocked in dev mode), and <u>the connection ID is used to track and manage user sessions</u>.
     - On disconnect or exit, the client ensures that any held task locks are released (unlock on exit), and the UI updates to reflect connection status.
   - **Offline/Mock Support:**
     - Can use a mock task sync client for offline scenarios or testing.
     - Includes a queue for offline operation and persistence, ensuring actions are reliably sent to the server when reconnected.
     - UI state persistence for user experience.
+- **Orchestrator (Todos.Client.Orchestrator):**
+  - Acts as a controller for launching and managing multiple simulated client instances.
+  - Coordinates actions across clients to simulate real-world usage, concurrency, and edge cases.
+  - Essential for stress-testing, scenario automation, and demonstrating system robustness under load.
   - **Multi-Instance & Multi-User Support:**
     - The system supports running multiple instances for the same user as well as for different users, all kept in sync in real time.
 
@@ -261,13 +265,11 @@ flowchart TB
 
 ## Key Implementation Notes / Tips & Tricks
 - **Connection ID:** Used to uniquely identify and manage client connections.
-- **NoSelectOnClickBehavior:** Custom WPF behavior to improve UX.
-- **Clear Focus:** Utility to clear focus from controls programmatically.
+- **NoSelectOnClickBehavior & Clear Focus:** Custom WPF utilities to prevent unwanted selection or focus when clicking UI elements, and to programmatically clear focus when needed—solving common WPF UX issues and improving user experience.
 - **Unlock on Exit:** The client ensures that any held task locks are released when the user disconnects or exits, preventing stale locks and ensuring smooth collaboration for all users.
 - **Use of HashSet in Sim Clients:** Efficiently tracks tasks in simulators.
 - **Shared Methods/Classes/Enums:** Common projects expose types for cross-assembly use (e.g., LogFactory).
-- **Broadcast Filtering:** The server filters which clients receive which updates, and clients further filter the received data before displaying it (e.g., by tag, user, or other criteria).
-- **Client-Side Filtering:** After receiving broadcasted updates, clients apply additional filtering (e.g., by tag, user, or other criteria) before displaying data in the UI.
+- **Broadcast Filtering:** The server filters which clients receive which updates. Clients may also filter received data in the UI due to SignalR server limitations (e.g., filtering by tag, user, or other criteria is done client-side if not possible server-side).
 - **Queue for Offline/Persistence:** The client uses a queue to buffer actions while offline and ensure persistence, so changes are reliably sent to the server when reconnected.
 - **IDs:** `userId` and `taskId` are created on the server as integers; `tagId` is created on the client as a GUID.
 - **Edge Case Handling:** Try/catch blocks around critical sync and broadcast logic.
@@ -279,6 +281,7 @@ flowchart TB
 - **Mock Authentication:** Used to simplify setup and focus on real-time sync logic. Can be replaced with real auth if needed.
 - **Mock Task Sync Client:** Allows for offline testing, simulating network failures, and rapid development.
 - **Semi-Mocked Sharding and CQRS:** Sharding and CQRS-style read/write separation are implemented in a semi-mocked fashion to demonstrate architectural patterns and enable easy extension to real distributed or production-grade implementations.
+- **Caching and Cache Cleanup Services (Real):** Caching and cache cleanup are implemented as real services for performance optimization and resource management.
 - **Real Implementations:** Used for core CRUD and SignalR communication.
 - **Rationale:** Enables rapid development, easier testing, and demonstration of architecture flexibility. Mocks are clearly separated and swappable.
 
