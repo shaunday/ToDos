@@ -65,64 +65,77 @@ A WPF + ASP.NET (SignalR) To-Do List application with real-time data synchroniza
 ### System Architecture Diagram
 ```mermaid
 flowchart TB
-    %% Server Side
-    ServerApp["ASP.NET Server"]
-    SignalRHub["SignalR Hub Service"]
-    Service["Service"]
-    Caching["Caching"]
-    Sharding["Sharding"]
-    ReadWriteSwitch["ReadWriteSwitch"]
-    DbRepository["DbRepository"]
-    DB["SQL Server Database"]
-    CacheCleanup["Cache Cleanup Service"]
-
-    ServerApp --> SignalRHub
-    SignalRHub --> Service
-    Service --> Caching
-    Service --> Sharding
-    Sharding --> ReadWriteSwitch
-    ReadWriteSwitch --> DbRepository
-    Caching --> DbRepository
-    DbRepository --> DB
-    ServerApp --> CacheCleanup
-
-    %% Client Side (simplified for clarity)
+    %% Top: Orchestrator
     Orchestrator["Orchestrator"]
+    HeadlessSim["HeadlessClientsSimulator"]
+    AdapterService["AdapterService"]
+    Orchestrator --> UI
+    Orchestrator -- "launches many" --> HeadlessSim
+    HeadlessSim --> AdapterService
+    AdapterService --> Queue
+
+    %% Client Side
     UI["WPF Client"]
     Queue["Queue Wrapper"]
-    Polly["Polly"]
+    Polly["Polly (Resilience, Retry, Offline)"]
     SignalRClient["SignalR Client"]
     Mock["Mock Task Sync Client"]
-    Orchestrator --> UI
+    UserConnService["User/Connection Service"]
+
     UI --> Queue
     Queue --> Polly
     Polly --> SignalRClient
     UI -.-> Mock
     Mock -.-> UI
     SignalRClient --> SignalRHub
+    UserConnService --> UI
 
-    %% Auth Service
-    AuthService["Auth Service"]
-    AuthService --> Orchestrator
+    %% Middle: Auth Service (mock)
+    AuthService["Auth Service (mock)"]
     AuthService --> SignalRHub
+    AuthService --> UserConnService
 
-    %% Common Projects (no lines, just listed at the bottom)
+    %% Middle: Server Side
+    SignalRHub["SignalR Hub Service"]
+    TasksOperations["TasksOperations Service"]
+    Caching["Caching"]
+    DbRepository["DbRepository"]
+    Sharding["Sharding"]
+    ReadWriteSwitch["ReadWriteSwitch"]
+    DB["SQL Server Database"]
+    CacheCleanup["Cache Cleanup Service"]
+
+    SignalRHub --> TasksOperations
+    TasksOperations --> Caching
+    Caching --> TasksOperations
+    TasksOperations --> DbRepository
+    DbRepository -- Uses --> Sharding
+    DbRepository -- Uses --> ReadWriteSwitch
+    DbRepository <--> DB
+    ServerApp["ASP.NET Server"]
+    ServerApp --> SignalRHub
+    ServerApp --> CacheCleanup
+
+    %% Right: Shared/Common
     CommonAll["Common.All"]
     CommonClient["Common.Client"]
     CommonServer["Common.Server"]
 
-    %% Position common projects visually
+    %% Position common projects visually (no lines)
     CommonAll
     CommonClient
     CommonServer
 ```
 
 **Diagram Notes:**
-- Common projects are shown at the bottom for reference, with no direct lines to other nodes for clarity.
-- The server structure flows: Server > SignalR Hub Service > Service > Caching / (Sharding > ReadWriteSwitch) > DbRepository > DB.
-- The server also loads a Cache Cleanup Service.
-- The client side is simplified for clarity, showing the orchestrator, UI, queue, and SignalR client.
-- Auth Service is shown as a central service for both client and server.
+- Orchestrator is at the top and can launch many UI clients and headless simulators.
+- HeadlessClientsSimulator connects via AdapterService to the Queue Wrapper, simulating multiple clients.
+- Auth Service (mock) is in the middle, communicating with both SignalR Hub Service and User/Connection Service (which talks to WPF Client).
+- Caching is a feedback loop with the TasksOperations service.
+- Sharding and ReadWriteSwitch are used by DbRepository as side services, with bidirectional communication to the SQL Server database.
+- Polly provides resilience, retry logic, and offline queuing for the client.
+- The server loads a Cache Cleanup Service for cache management.
+- Shared/common projects are shown on the right for reference, with no direct lines for clarity.
 - Mock and offline support, as well as multi-instance and multi-user capabilities, are supported as described in the documentation.
 
 ### Client Architecture
