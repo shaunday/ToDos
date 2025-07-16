@@ -5,12 +5,12 @@ namespace ToDos.Clients.Simulator
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static async System.Threading.Tasks.Task Main(string[] args)
         {
             var container = new UnityContainer();
             UnityConfig.RegisterTypes(container);
             var app = container.Resolve<SimulatorApp>();
-            app.Run(args);
+            await app.Run(args);
         }
     }
 }
