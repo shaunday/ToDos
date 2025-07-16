@@ -220,7 +220,7 @@ flowchart TB
 ## Usage
 - **Start the server** (Todos.TaskSyncServer)
 - **Start one or more clients** (Todos.Client.Ui)
-- **Login (if authentication enabled)**
+- **Login = automatic/mocked.
 - **Add, edit, delete, and complete tasks**
 - **Observe real-time updates across all clients**
 
