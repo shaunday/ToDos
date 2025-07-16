@@ -97,8 +97,11 @@ namespace ToDos.TaskSyncServer.Hubs
             {
                 _logger.Information("Deleting task {TaskId} for user: {UserId}", taskId, userId);
                 var result = await _taskService.DeleteTaskAsync(userId, taskId);
-                // Broadcast to all except sender
-                BroadcastTaskDeleted(taskId, userId, Context.ConnectionId);
+                if (result)
+                {
+                    // Broadcast to all except sender
+                    BroadcastTaskDeleted(taskId, userId, Context.ConnectionId);
+                }
                 stopwatch.Stop();
                 return result;
             }
@@ -338,7 +341,6 @@ namespace ToDos.TaskSyncServer.Hubs
             {
                 var groupName = $"User_{userId}";
                 var clientGroup = Clients.Group(groupName);
-                
                 if (!string.IsNullOrEmpty(exceptConnectionId))
                 {
                     clientGroup.AllExcept(exceptConnectionId).Invoke(methodName, data);
@@ -347,7 +349,6 @@ namespace ToDos.TaskSyncServer.Hubs
                 {
                     clientGroup.Invoke(methodName, data);
                 }
-                
                 _logger.Information("Broadcasted {MethodName} to group: {GroupName} except: {ExceptConnectionId}", methodName, groupName, exceptConnectionId);
             }
             catch (Exception ex)
