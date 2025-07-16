@@ -157,7 +157,6 @@ flowchart TB
     - UI state persistence for user experience.
 - **Orchestrator (Todos.Client.Orchestrator):**
   - Acts as a controller for launching and managing multiple simulated client instances.
-  - Coordinates actions across clients to simulate real-world usage, concurrency, and edge cases.
   - Essential for stress-testing, scenario automation, and demonstrating system robustness under load.
   - **Multi-Instance & Multi-User Support:**
     - The system supports running multiple instances for the same user as well as for different users, all kept in sync in real time.
