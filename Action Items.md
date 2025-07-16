@@ -1,17 +1,10 @@
 
 orch:
   first launch doesnt  give logs (again)
-  padding on search too big, is alive center
-  add server log
 
 client:
   Use a timer or debounce logic to prevent multiple rapid calls.
-  add tasks at the top
-  make higher
 
-
-Server:
-   check result after operation on hub
 
 
 Sim:
@@ -28,7 +21,7 @@ Sim:
 
 ## Nice To Have
 orchestration/simulation
-    simulate a large number of clients, throttled writes, and sharded reads
+    server log
     Track and simulate connection drops, reconnect logic, slow DB writes, and queue overflow
 
 UI Client 
@@ -43,5 +36,6 @@ SignalR/Tasks Client
     cancellation tokens or timeout policies to retry/wait delays for signalR client
 
 Server
+    check result after operation on hub
     Log thread blocking or starvation events to simulate server pressure
 
