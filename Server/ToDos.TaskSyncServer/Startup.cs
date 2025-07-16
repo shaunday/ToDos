@@ -77,11 +77,11 @@ namespace ToDos.TaskSyncServer
             container.RegisterInstance<ILogger>(Log.Logger);
 
             container.RegisterSingleton<IAuthService, MockAuthService.MockJwtAuthService>();
-            container.RegisterType<IReadWriteDbRouter, SuffixReadWriteDbRouter>(new ContainerControlledLifetimeManager());
+            container.RegisterSingleton<IReadWriteDbRouter, SuffixReadWriteDbRouter>();
             container.RegisterType<ITaskRepository, TaskRepository>(new HierarchicalLifetimeManager()); // Scoped
-            container.RegisterType<IDbSyncService, SimulatedDbSyncService>(new ContainerControlledLifetimeManager()); // Singleton
+            container.RegisterSingleton<IDbSyncService, SimulatedDbSyncService>();
             container.RegisterType<ITaskService, TaskOperations>();
-            container.RegisterType<IShardResolver, DefaultShardResolver>(new ContainerControlledLifetimeManager());
+            container.RegisterSingleton<IShardResolver, DefaultShardResolver>();
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile<ServerMappingProfile>();
