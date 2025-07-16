@@ -80,7 +80,8 @@ namespace Todos.Ui
         {
             Container = new UnityContainer();
 
-            //Logger first
+            // Register both Serilog.ILogger and ILogger for DI
+            Container.RegisterInstance<Serilog.ILogger>(Log.Logger);
             Container.RegisterInstance<ILogger>(Log.Logger);
 
             // Register services

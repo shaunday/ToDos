@@ -56,6 +56,8 @@ namespace Todos.Client.Orchestrator
                             return;
                     }
                 }
+                // Save simulator folder path and other settings
+                viewModel.SaveSettings();
             }
         }
     }

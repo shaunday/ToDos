@@ -14,6 +14,7 @@ using Todos.Client.Orchestrator.Services;
 using Todos.Client.Orchestrator.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using System.Text;
 
 namespace Todos.Client.Orchestrator.ViewModels
 {
@@ -152,6 +153,25 @@ namespace Todos.Client.Orchestrator.ViewModels
             FilteredClientsView.CollectionChanged += (s, e) => UpdateLogViewerLogFiles();
             FilteredClientsView.CurrentChanged += (s, e) => UpdateLogViewerLogFiles();
             UpdateLogViewerLogFiles();
+            // Try to load SimFolderPath from settings file
+            var settingsFile = "orchestrator_settings.txt";
+            try
+            {
+                if (File.Exists(settingsFile))
+                {
+                    var lines = File.ReadAllLines(settingsFile, Encoding.UTF8);
+                    var folderLine = lines.FirstOrDefault(l => l.StartsWith("SimFolderPath="));
+                    if (folderLine != null)
+                    {
+                        SimFolderPath = folderLine.Substring("SimFolderPath=".Length);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Optionally log or show a message
+                System.Diagnostics.Debug.WriteLine($"Failed to load settings: {ex.Message}");
+            }
         }
         #endregion
 
@@ -332,6 +352,21 @@ namespace Todos.Client.Orchestrator.ViewModels
                 .Where(System.IO.File.Exists)
                 .ToList();
             LogViewerViewModel.UpdateLogFiles(logFilePaths);
+        }
+
+        // Add a method to save SimFolderPath on close
+        public void SaveSettings()
+        {
+            var settingsFile = "orchestrator_settings.txt";
+            try
+            {
+                File.WriteAllText(settingsFile, $"SimFolderPath={SimFolderPath ?? ""}", Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                // Optionally log or show a message
+                System.Diagnostics.Debug.WriteLine($"Failed to save settings: {ex.Message}");
+            }
         }
         #endregion
     }
