@@ -142,7 +142,7 @@ flowchart TB
   - UI built with Material Design for WPF.
   - **Advanced Filtering:**
     - The UI supports advanced filtering of tasks by tag, user, completion status, and other criteria, allowing users to focus on relevant tasks.
-    - Filtering is performed both on the server (broadcast filtering) and on the client (due to SignalR limitations, some filtering—such as by tag or user—may be done client-side after receiving updates).
+    - Filtering is performed both on the server (broadcast filtering) and on the client (due to SignalR limitations/quirks some filtering dont always work -> client-side gets an unneeded update).
   - **Task Locking, Editing, Adding, Deleting:**
     - When a user begins editing a task, the client requests a lock from the server to prevent simultaneous edits by other users. The lock is released when editing is finished or the user disconnects.
     - Adding, editing, and deleting tasks are performed via SignalR calls to the server, which then broadcasts updates to all connected clients in real time.
