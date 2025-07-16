@@ -66,14 +66,78 @@ A WPF + ASP.NET (SignalR) To-Do List application with real-time data synchroniza
 
 ### System Architecture Diagram
 ```mermaid
-flowchart LR
-    A["WPF Client<br/>(Todos.Client.Ui)"] -- SignalR --> B["ASP.NET Server<br/>(Todos.TaskSyncServer)"]
-    B -- Entity Framework --> C["SQL Server Database"]
-    A -- Uses --> D["Client Common<br/>(Todos.Client.Common)"]
-    B -- Uses --> E["Server Common<br/>(ToDos.Server.Common)"]
-    D -- "Shared DTOs/Interfaces" --> E
-    A -.-> F["Mock/Sim Clients"]
+flowchart TB
+    %% Common Layer
+    CommonAll["Common.All<br/>(Shared DTOs/Interfaces)"]
+    CommonClient["Common.Client"]
+    CommonServer["Common.Server"]
+    CommonAll --- CommonClient
+    CommonAll --- CommonServer
+
+    %% Client Side
+    subgraph ClientSide
+        Orchestrator["Orchestrator"]
+        UI["WPF Client<br/>(Todos.Client.Ui)"]
+        Simulators["Client Simulators"]
+        Queue["Queue Wrapper"]
+        Polly["Polly (Resilience/Persistence)"]
+        SignalRClient["SignalR Client"]
+        Mock["Mock Task Sync Client"]
+        Orchestrator -- "Leads to" --> Simulators
+        Orchestrator -- "Controls" --> UI
+        UI -- "Uses" --> Queue
+        Queue -- "Wraps" --> Polly
+        Polly -- "Uses" --> SignalRClient
+        UI -- "Alternative: Uses" --> Mock
+        Mock -- "Simulates Sync/Offline" -.-> UI
+        CommonClient -.-> Orchestrator
+    end
+
+    %% Server Side
+    subgraph ServerSide
+        SignalRHub["SignalR Hub Service<br/>(Server)"]
+        Sharding["Sharding Service"]
+        ReadWriteSwitch["ReadWriteSwitch Service"]
+        MemoryCache["Memory Cache"]
+        ServerApp["ASP.NET Server<br/>(Todos.TaskSyncServer)"]
+        DB["SQL Server Database"]
+        SignalRHub -- "Uses" --> Sharding
+        SignalRHub -- "Uses" --> ReadWriteSwitch
+        SignalRHub -- "Uses" --> MemoryCache
+        Sharding -- "Uses" --> MemoryCache
+        ReadWriteSwitch -- "Uses" --> MemoryCache
+        Sharding -- "Routes" --> DB
+        ReadWriteSwitch -- "Routes" --> DB
+        ServerApp -- "Hosts" --> SignalRHub
+        CommonServer -.-> ServerApp
+    end
+
+    %% Central Services
+    AuthService["Auth Service"]
+    AuthService -- "Auth" --> Orchestrator
+    AuthService -- "Auth" --> SignalRHub
+
+    %% Central Connection
+    SignalRClient -- "Real-Time Connection" --> SignalRHub
+
+    %% Common Layer Connections
+    CommonAll -. "Shared DTOs/Interfaces" .-> SignalRClient
+    CommonAll -. "Shared DTOs/Interfaces" .-> SignalRHub
+
+    %% Visual separation and style
+    classDef faded fill:#f9f9f9,stroke:#bbb;
+    classDef dotted stroke-dasharray: 5 5;
+    class CommonAll,CommonClient,CommonServer faded;
+    class Simulators dotted;
 ```
+
+**Diagram Notes:**
+- The top layer contains all common/shared projects: `Common.All` (shared DTOs/interfaces), `Common.Client`, and `Common.Server`.
+- The client stack now includes an Orchestrator, which controls the UI and leads to Client Simulators. Simulators are shown with a dotted outline to indicate they are not part of the main working flow.
+- The Auth Service is shown in the center, connected to both the Orchestrator (client) and SignalR Hub (server), representing authentication flows.
+- The SignalR Hub Service is the central real-time connection point between client and server.
+- On the server side, the SignalR Hub expands to sharding, read/write switch, and memory cache services, which optimize and route to the database.
+- Shared DTOs and interfaces are defined in `Common.All` and referenced by both client and server for consistency.
 
 ### Client Architecture
 - **WPF Client (Todos.Client.Ui):**
