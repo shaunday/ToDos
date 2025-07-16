@@ -93,7 +93,7 @@ flowchart TB
 
     %% Server Side
     subgraph ServerSide
-        SignalRHub["SignalR Hub Service\n(implements JWT Auth, mostly mocked)"]
+        SignalRHub["SignalR Hub Service"]
         Sharding["Sharding Service"]
         ReadWriteSwitch["ReadWriteSwitch Service"]
         MemoryCache["Memory Cache"]
@@ -127,7 +127,7 @@ flowchart TB
 ```
 
 **Diagram Notes:**
-- The SignalR Hub implements JWT authentication (`jjwtauthenticate`), which is mostly mocked for this project. This addresses the bonus requirement for authentication.
+- The SignalR Hub implements JWT authentication (jjwtauthenticate), which is mostly mocked for this project. This addresses the bonus requirement for authentication.
 - The top layer contains all common/shared projects: `Common.All` (shared DTOs/interfaces), `Common.Client`, and `Common.Server`.
 - The client stack now includes an Orchestrator, which controls the UI and leads to Client Simulators. Simulators and mock clients are shown with dashed arrows to indicate they are not part of the main working flow.
 - The Auth Service is shown in the center, connected to both the Orchestrator (client) and SignalR Hub (server), representing authentication flows.
@@ -135,7 +135,7 @@ flowchart TB
 - On the server side, the SignalR Hub expands to sharding, read/write switch, and memory cache services, which optimize and route to the database.
 - The Memory Cache is managed by a Cache Cleanup Service, which ensures cache consistency and resource efficiency.
 - Shared DTOs and interfaces are defined in `Common.All` and referenced by both client and server for consistency.
-- **After the server broadcasts updates, clients perform additional filtering (e.g., by tag, user, etc.) before displaying data.**
+- After the server broadcasts updates, clients perform additional filtering (e.g., by tag, user, etc.) before displaying data.
 
 ### Client Architecture
 - **WPF Client (Todos.Client.Ui):**
