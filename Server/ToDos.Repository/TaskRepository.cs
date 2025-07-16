@@ -39,7 +39,7 @@ namespace ToDos.Repository
         {
             var shardedDbName = _shardResolver.GetDatabaseName(userId);
             var readWriteSwitchDbName = _dbRouter.GetPhysicalDbName(shardedDbName, isWriteOperation);
-            return ConnectionStringAccess.GetDbConnectionString(); //using empty instead of passing (physicalDb)
+            return ConnectionStringAccess.GetDbConnectionString(); //using empty instead of passing (readWriteSwitchDbName)
         }
         #endregion
 

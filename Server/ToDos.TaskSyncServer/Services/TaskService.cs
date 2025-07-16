@@ -12,7 +12,7 @@ using ToDos.DotNet.Caching;
 
 namespace ToDos.TaskSyncServer.Services
 {
-    public class TaskService : ITaskService, IDisposable
+    public class TaskOperations : ITaskService, IDisposable
     {
         private readonly ITaskRepository _taskRepository;
         private readonly IMapper _mapper;
@@ -28,7 +28,7 @@ namespace ToDos.TaskSyncServer.Services
         public event Action<int> TaskLocked;
         public event Action<int> TaskUnlocked;
 
-        public TaskService(ITaskRepository taskRepository, IMapper mapper, ILogger logger)
+        public TaskOperations(ITaskRepository taskRepository, IMapper mapper, ILogger logger)
         {
             _taskRepository = taskRepository;
             _mapper = mapper;
