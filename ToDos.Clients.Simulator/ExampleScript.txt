@@ -1,0 +1,11 @@
+# Example simulation script for ToDos.Clients.Simulator
+# Format: operation1,operation2,...,count,delayEach,delayEnd
+
+# Add 10 tasks, 100ms between each, 500ms after all
+Add,10,100,500
+
+# Add then Delete, 5 times, 200ms between, 100ms after
+Add,Delete,5,200,100
+
+# Just GetAll once, no delay
+GetAll,1,0,0 

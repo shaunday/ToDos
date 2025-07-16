@@ -8,7 +8,7 @@ namespace Todos.Client.Common
 {
     public class TypesGlobal
     {
-        public enum ClientType { UiClient, UiSimulator }
+        public enum ClientType { UiClient, ClientSimulator }
 
         public enum ConnectionStatus
         {

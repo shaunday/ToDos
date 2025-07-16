@@ -1,11 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using Serilog;
 
 namespace ToDos.Clients.Simulator
 {
     public class OperationExecutor
     {
+        private readonly ILogger _logger;
+        public OperationExecutor(ILogger logger)
+        {
+            _logger = logger;
+        }
         public void Execute(int userId, List<ScriptLine> scriptLines)
         {
             foreach (var line in scriptLines)
@@ -14,7 +20,7 @@ namespace ToDos.Clients.Simulator
                 {
                     foreach (var op in line.Operations)
                     {
-                        Console.WriteLine($"[User {userId}] Executing {op}");
+                        _logger.Information("[User {UserId}] Executing {Operation}", userId, op);
                         // TODO: Call TaskSyncClientAdapter for actual operation
                     }
                     if (line.DelayEach > 0)
