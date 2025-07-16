@@ -17,12 +17,11 @@
     - [Level of "Mockiness" Used and Why](#level-of-mockiness-used-and-why)
 12. [Testing](#testing)
 13. [Extensibility & Future Improvements](#extensibility--future-improvements)
-14. [Contact / Acknowledgements](#contact--acknowledgements)
 
 ---
 
 ## Project Summary
-A WPF + ASP.NET (SignalR) To-Do List application with real-time data synchronization. Multiple desktop clients connect and see updates instantly as tasks are added, edited, deleted, or locked for editing. Built for the CityShob C# full-stack developer interview homework, focusing on robust architecture, real-time sync, and production-grade patterns.
+A WPF + ASP.NET (SignalR) To-Do List application with real-time data synchronization. Multiple desktop clients connect and see updates instantly as tasks are added, edited, deleted, or locked for editing. The project focuses on robust architecture, real-time sync, and production-grade patterns.
 
 ---
 
@@ -32,7 +31,8 @@ A WPF + ASP.NET (SignalR) To-Do List application with real-time data synchroniza
 ---
 
 ## Features
-- Add, edit, delete tasks
+- Add, edit, delete tasks (tasks are per user, supporting multi-user scenarios)
+- Capable of serving multiple instances of the same user and multiple different users simultaneously, maintaining real-time synchronization and consistency across all clients
 - Mark tasks as complete/incomplete
 - Real-time updates across all clients (SignalR)
 - Task locking to prevent simultaneous edits
@@ -45,7 +45,7 @@ A WPF + ASP.NET (SignalR) To-Do List application with real-time data synchroniza
 ---
 
 ## Tech Stack
-- **Client:** WPF (.NET Framework 4.8, MVVM)
+- **Client:** WPF (.NET Framework 4.8, XAML, MVVM)
 - **Server:** ASP.NET (SignalR, .NET Framework 4.8)
 - **Database:** MS SQL Server (Entity Framework 6)
 - **Key Packages:**
@@ -157,12 +157,10 @@ flowchart TB
     - On disconnect or exit, the client ensures that any held task locks are released (unlock on exit), and the UI updates to reflect connection status.
   - **Offline/Mock Support:**
     - Can use a mock task sync client for offline scenarios or testing.
+    - Includes a queue for offline operation and persistence, ensuring actions are reliably sent to the server when reconnected.
     - UI state persistence for user experience.
-
-- **Orchestrator:**
-  - Acts as a controller for launching and managing multiple simulated client instances.
-  - Coordinates actions across clients to simulate real-world usage, concurrency, and edge cases.
-  - Essential for stress-testing, scenario automation, and demonstrating system robustness under load.
+  - **Multi-Instance & Multi-User Support:**
+    - The system supports running multiple instances for the same user as well as for different users, all kept in sync in real time.
 
 - **Client Common (Todos.Client.Common):**
   - Defines interfaces (e.g., `ITaskSyncClient`) and shared DTOs/models.
@@ -269,6 +267,7 @@ flowchart TB
 - **Shared Methods/Classes/Enums:** Common projects expose types for cross-assembly use (e.g., LogFactory).
 - **Broadcast Filtering:** The server filters which clients receive which updates, and clients further filter the received data before displaying it (e.g., by tag, user, or other criteria).
 - **Client-Side Filtering:** After receiving broadcasted updates, clients apply additional filtering (e.g., by tag, user, or other criteria) before displaying data in the UI.
+- **Queue for Offline/Persistence:** The client uses a queue to buffer actions while offline and ensure persistence, so changes are reliably sent to the server when reconnected.
 - **IDs:** `userId` and `taskId` are created on the server as integers; `tagId` is created on the client as a GUID.
 - **Edge Case Handling:** Try/catch blocks around critical sync and broadcast logic.
 - **JWT Authentication:** The SignalR Hub implements JWT authentication (`jjwtauthenticate`), which is mostly mocked for demonstration and testing purposes, fulfilling the bonus authentication requirement.
@@ -297,9 +296,6 @@ flowchart TB
 - Real authentication and authorization.
 
 ---
-
-## Contact / Acknowledgements
-- Developed as part of CityShob C# full-stack developer interview homework. 
 
 ## Highlights
 - **Comprehensive Feature Set & Scalability:** The codebase is large because it implements a wide range of features (real-time sync, locking, tagging, filtering, authentication, offline support, etc.), and is architected for scalability and extensibility.
