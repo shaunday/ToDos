@@ -26,7 +26,8 @@ A WPF + ASP.NET (SignalR) To-Do List application with real-time data synchroniza
 ---
 
 ## Demo / Screenshots
-*(Add screenshots or a link to a video walkthrough here if available)*
+
+<img src="temp1.png" alt="Main UI Screenshot" width="500"/>
 
 ---
 
