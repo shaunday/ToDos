@@ -103,11 +103,15 @@ namespace ToDos.Clients.Simulator
 
         public async Task AddTask(int userId)
         {
+            var rand = new Random(Guid.NewGuid().GetHashCode());
+            var priorities = Enum.GetValues(typeof(ToDos.DotNet.Common.TaskPriority));
             var task = new TaskDTO
             {
-                Title = $"SimTask_{userId}_{Guid.NewGuid()}" ,
+                Title = $"SimTask_{userId}_{rand.Next(1000, 10000)}",
                 Description = "Simulated task",
-                UserId = userId
+                UserId = userId,
+                Priority = (ToDos.DotNet.Common.TaskPriority)priorities.GetValue(rand.Next(priorities.Length)),
+                IsCompleted = rand.Next(2) == 0
             };
             var result = await _client.AddTaskAsync(task);
             _logger.Information("AddTask sent for user {UserId}, result: {Result}", userId, result);

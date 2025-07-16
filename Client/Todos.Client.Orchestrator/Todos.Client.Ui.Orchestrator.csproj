@@ -20,6 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TodDos.Ui\ToDos.Client.Ui.csproj" />
-    <ProjectReference Include="..\Todos.Clients.Simulator\ToDos.Clients.Simulator.csproj" />
+    <ProjectReference Include="..\Todos.ClientSimsY\Todos.ClientSimsY.csproj" />
   </ItemGroup>
 </Project>

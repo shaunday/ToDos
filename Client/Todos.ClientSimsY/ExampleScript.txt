@@ -1,0 +1,41 @@
+# This is one of potentially many script files in a directory.
+# All files in the selected directory will be launched concurrently as separate simulations.
+#
+# Usage:
+#   Place multiple .txt files with different scripts in the same folder.
+#   The orchestrator will launch a simulator for each file in the folder at the same time.
+
+# Example simulation script for ToDos.Clients.Simulator
+# Format: operation1,operation2,...,count,delayEach,delayEnd
+# Optional headers:
+#   userId=123           # sets the user ID for the simulation
+#   signToEvents=true    # if true, subscribes to task events and logs them
+#   numOfClients=5       # number of concurrent simulator instances to launch
+
+userId=123
+signToEvents=true
+numOfClients=5
+
+# Add 500 tasks, 500ms between each, 2000ms after all
+Add,500,500,2000
+
+# Add then Delete, 100 times, 1000ms between, 1000ms after
+Add,Delete,100,1000,1000
+
+# Just GetAll 10 times, 1000ms between, 500ms after
+GetAll,10,1000,500
+
+# Add 50 tasks quickly, 50ms between, 200ms after
+Add,50,50,200
+
+# Add and complete tasks, 30 times, 100ms between, 300ms after
+Add,Complete,30,100,300
+
+# Delete tasks with marginal delay, 20 times, 10ms between, 100ms after
+Delete,20,10,100
+
+# Lock and unlock tasks, 40 times, 200ms between, 400ms after
+Lock,Unlock,40,200,400
+
+# Add, lock, complete, unlock, delete, 10 times, 150ms between, 500ms after
+Add,Lock,Complete,Unlock,Delete,10,150,500 

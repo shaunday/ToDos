@@ -72,7 +72,9 @@ namespace Todos.Client.Orchestrator.ViewModels
                 folder = SimFolderPath;
             else if (!string.IsNullOrWhiteSpace(SimFolderPath))
                 folder = relPath; // fallback to relative if not found
-            var simExe = System.IO.Path.Combine(outputDir, "ToDos.Clients.Simulator.exe");
+            var simExe = System.IO.Path.Combine(outputDir, "Todos.ClientSimsY.exe");
+            // Comment out old simulator exe call
+            /*
             if (!System.IO.File.Exists(simExe))
             {
                 System.Windows.MessageBox.Show($"Simulator executable not found in: {outputDir}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
@@ -81,6 +83,30 @@ namespace Todos.Client.Orchestrator.ViewModels
             for (int i = 0; i < count; i++)
             {
                 // Find the first .txt script file in the folder
+                var scriptFile = System.IO.Directory.GetFiles(folder, "*.txt").FirstOrDefault();
+                if (scriptFile == null)
+                {
+                    System.Windows.MessageBox.Show($"No .txt script file found in: {folder}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                    return;
+                }
+                var args = $"{userId} \"{scriptFile}\"";
+                var startInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = simExe,
+                    WorkingDirectory = outputDir,
+                    Arguments = args
+                };
+                System.Diagnostics.Process.Start(startInfo);
+            }
+            */
+            // New: Launch Todos.ClientSimsY exe
+            if (!System.IO.File.Exists(simExe))
+            {
+                System.Windows.MessageBox.Show($"Simulator executable not found in: {outputDir}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                return;
+            }
+            for (int i = 0; i < count; i++)
+            {
                 var scriptFile = System.IO.Directory.GetFiles(folder, "*.txt").FirstOrDefault();
                 if (scriptFile == null)
                 {
