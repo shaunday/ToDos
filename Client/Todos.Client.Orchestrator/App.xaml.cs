@@ -24,6 +24,8 @@ namespace Todos.Client.Orchestrator
             Log.Information("Orchestrator started");
             Container = new UnityContainer();
 
+            // Register both Serilog.ILogger and ILogger for DI
+            Container.RegisterInstance<Serilog.ILogger>(Log.Logger);
             Container.RegisterInstance<ILogger>(Log.Logger);
 
             base.OnStartup(e);

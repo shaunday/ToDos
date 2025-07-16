@@ -79,7 +79,14 @@ namespace Todos.Client.Orchestrator.ViewModels
             }
             for (int i = 0; i < count; i++)
             {
-                var args = $"--user {userId} --folder {folder}";
+                // Find the first .txt script file in the folder
+                var scriptFile = System.IO.Directory.GetFiles(folder, "*.txt").FirstOrDefault();
+                if (scriptFile == null)
+                {
+                    System.Windows.MessageBox.Show($"No .txt script file found in: {folder}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                    return;
+                }
+                var args = $"{userId} \"{scriptFile}\"";
                 var startInfo = new System.Diagnostics.ProcessStartInfo
                 {
                     FileName = simExe,
