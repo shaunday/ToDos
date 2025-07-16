@@ -5,6 +5,7 @@ orch:
   add server log
 
 client:
+  add- adds twice on friends
   Use a timer or debounce logic to prevent multiple rapid calls.
 
 
