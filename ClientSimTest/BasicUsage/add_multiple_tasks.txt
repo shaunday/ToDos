@@ -1,0 +1,2 @@
+# Script: add_multiple_tasks.txt
+# Simulates a client adding several tasks in sequence. 

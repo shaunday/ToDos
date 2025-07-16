@@ -1,0 +1,2 @@
+# Script: remove_tag_client1.txt
+# Simulates client 1 removing a tag from a task. 

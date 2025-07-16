@@ -1,0 +1,2 @@
+# Script: sync_after_reconnect_client1.txt
+# Simulates client 1 syncing tasks after reconnecting. 

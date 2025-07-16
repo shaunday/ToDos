@@ -1,0 +1,2 @@
+# Script: network_failure_recovery_client2.txt
+# Simulates client 2 experiencing network failure and recovery. 

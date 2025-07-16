@@ -1,0 +1,2 @@
+# Script: bulk_add_tasks_client2.txt
+# Simulates client 2 adding many tasks at once. 

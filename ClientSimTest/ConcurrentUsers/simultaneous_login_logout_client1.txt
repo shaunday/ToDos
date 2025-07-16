@@ -1,0 +1,2 @@
+# Script: simultaneous_login_logout_client1.txt
+# Simulates client 1 logging in and out concurrently with another user. 

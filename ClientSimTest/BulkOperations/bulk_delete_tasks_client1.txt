@@ -1,0 +1,2 @@
+# Script: bulk_delete_tasks_client1.txt
+# Simulates client 1 deleting multiple tasks in bulk. 

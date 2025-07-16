@@ -1,0 +1,2 @@
+# Script: bulk_update_status_client2.txt
+# Simulates client 2 updating the status of many tasks at once. 

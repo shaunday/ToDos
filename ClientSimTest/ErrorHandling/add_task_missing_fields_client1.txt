@@ -1,0 +1,2 @@
+# Script: add_task_missing_fields_client1.txt
+# Simulates client 1 adding a task with missing required fields. 

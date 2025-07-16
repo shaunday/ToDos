@@ -1,0 +1,2 @@
+# Script: login_and_add_task.txt
+# Simulates a client logging in and adding a single task. 

@@ -1,0 +1,2 @@
+# Script: complete_task.txt
+# Simulates a client marking a task as completed. 

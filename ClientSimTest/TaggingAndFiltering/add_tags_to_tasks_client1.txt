@@ -1,0 +1,2 @@
+# Script: add_tags_to_tasks_client1.txt
+# Simulates client 1 adding tags to tasks. 

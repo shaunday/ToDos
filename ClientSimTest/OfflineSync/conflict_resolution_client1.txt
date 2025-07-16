@@ -1,0 +1,2 @@
+# Script: conflict_resolution_client1.txt
+# Simulates client 1 handling conflicts during sync. 
