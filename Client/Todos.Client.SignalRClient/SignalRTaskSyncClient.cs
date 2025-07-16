@@ -332,27 +332,7 @@ namespace Todos.Client.SignalRClient
             return await _retryPolicy.ExecuteAsync(async () =>
             {
                 _logger.Information("Invoking {MethodName} on SignalR hub...", methodName);
-                var result = await _hubProxy.Invoke<object>(methodName, args);
-                
-                // Handle type conversion for older SignalR client
-                if (result is T typedResult)
-                {
-                    return typedResult;
-                }
-                
-                // Try to convert the result to the expected type
-                if (typeof(T) == typeof(bool) && result is bool boolResult)
-                {
-                    return (T)(object)boolResult;
-                }
-                
-                if (typeof(T) == typeof(IEnumerable<TaskDTO>) && result is IEnumerable<TaskDTO> tasksResult)
-                {
-                    return (T)(object)tasksResult;
-                }
-                
-                // If conversion fails, throw an exception
-                throw new InvalidCastException($"Cannot convert result of type {result?.GetType().Name ?? "null"} to {typeof(T).Name}");
+                return await _hubProxy.Invoke<T>(methodName, args);
             });
         }
 
