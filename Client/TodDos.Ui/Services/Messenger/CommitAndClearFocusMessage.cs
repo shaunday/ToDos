@@ -1,4 +1,4 @@
-namespace Todos.Ui.Sections.Tasks
+namespace Todos.Ui.Services.Messenger
 {
     public class CommitAndClearFocusMessage { }
 } 

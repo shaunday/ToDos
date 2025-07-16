@@ -1,18 +1,15 @@
 
 orch:
   first launch doesnt  give logs (again)
-  padding on search too big
+  padding on search too big, is alive center
   add server log
 
 client:
   Use a timer or debounce logic to prevent multiple rapid calls.
-  loading/ or something while tasks are loading/adding
-  clear lock on crash/exit
 
 
 Server:
    check result after operation on hub
-   add prioye
 
 
 * Simulate multiple users editing tasks concurrently to test locking and queues
@@ -34,6 +31,8 @@ orchestration/simulation
 UI Client 
     tasks: padding for color/ right side is being cut off on edit mode
     show item editing when filter and its not on
+    loading/ or something while tasks are loading/adding
+    mark filtering/clear button if filtered
     On permanent disconnect, prompt UI to notify the user or retry manually
     commit pending methods manually/ notify on ui
 

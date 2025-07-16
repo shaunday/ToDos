@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Todos.Ui.Models;
+using Todos.Ui.Sections.Tasks;
 using Todos.Ui.Services;
+using Todos.Ui.Services.Messenger;
 using Todos.Ui.ViewModels;
 using Unity;
 
@@ -42,6 +45,8 @@ namespace Todos.Ui
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             SaveWindowState();
+            
+            WeakReferenceMessenger.Default.Send(new ClientIsClosingMessage());
         }
 
         private void LoadWindowState()

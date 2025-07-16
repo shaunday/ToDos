@@ -21,6 +21,7 @@ using System.Windows;
 using Unity;
 using Todos.Ui.Services;
 using static Todos.Client.Common.TypesGlobal;
+using Todos.Ui.Services.Messenger;
 
 namespace Todos.Ui.ViewModels
 {
@@ -93,7 +94,16 @@ namespace Todos.Ui.ViewModels
             _taskSyncClient.TaskUnlocked += HandleTaskUnlocked;
             Tasks.CollectionChanged += Tasks_CollectionChanged;
             Filter.PropertyChanged += Filter_PropertyChanged;
-          
+
+            // Subscribe to messenger for window close/unlock
+            WeakReferenceMessenger.Default.Register<ClientIsClosingMessage>(this, async (r, m) =>
+            {
+                if (EditingTask != null && EditingTask.IsEditing)
+                {
+                    var currentUserId = GetCurrentUserId();
+                    await _taskSyncClient.UnlockTaskAsync(currentUserId, EditingTask.Id);
+                }
+            });
             _ = ReloadAllTasksAndUiStateAsync();
         }
 
@@ -107,8 +117,8 @@ namespace Todos.Ui.ViewModels
             _taskSyncClient.TaskUnlocked -= HandleTaskUnlocked;
             Tasks.CollectionChanged -= Tasks_CollectionChanged;
             Filter.PropertyChanged -= Filter_PropertyChanged;
-            
 
+            WeakReferenceMessenger.Default.Unregister<ClientIsClosingMessage>(this);
         }
         #endregion
 

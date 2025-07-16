@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Todos.Ui.Sections.Tasks;
+using Todos.Ui.Services.Messenger;
 
 namespace Todos.Ui.Resources
 {

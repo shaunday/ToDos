@@ -72,7 +72,7 @@ Automapping: Model <> DTO
 ASP.Net.Web > Interface for Communication > Implementation
 Automapping: DB Entity <> DTO
 
-tips and tricks - connection id, NoSelectOnClickBehavior, clear focus, others
+tips and tricks - connection id, NoSelectOnClickBehavior, clear focus, others, unlock on exit
 write apis/interfaces for all access points / services
 
 Packages Used:
