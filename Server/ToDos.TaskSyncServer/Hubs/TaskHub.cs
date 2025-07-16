@@ -337,9 +337,9 @@ namespace ToDos.TaskSyncServer.Hubs
         // Unified broadcast method to handle all broadcast types
         private void BroadcastToUserGroup<T>(string methodName, T data, int userId, string exceptConnectionId = null)
         {
+            var groupName = $"User_{userId}";
             try
             {
-                var groupName = $"User_{userId}";
                 var clientGroup = Clients.Group(groupName);
                 if (!string.IsNullOrEmpty(exceptConnectionId))
                 {
@@ -353,7 +353,7 @@ namespace ToDos.TaskSyncServer.Hubs
             }
             catch (Exception ex)
             {
-                _logger.Warning(ex, "Failed to broadcast {MethodName} for user {UserId}. This might be normal if no clients are connected.", methodName, userId);
+                _logger.Debug(ex, "Broadcast might have failed due to no clients in group: {GroupName}", groupName);
             }
         }
 
