@@ -20,25 +20,24 @@
         </Style>
     </UserControl.Resources>
     <DockPanel LastChildFill="True" Background="Transparent">
-        <StackPanel Orientation="Vertical" DockPanel.Dock="Top" Margin="0,0,0,12">
-            <TextBlock Text="Aggregated Log(s) Viewer" FontSize="20" FontWeight="Bold" Foreground="#222" Margin="0,0,0,8"/>
+        <StackPanel Orientation="Vertical" DockPanel.Dock="Top" Margin="2,5,0,12">
+            <TextBlock Text="Aggregated Log(s) Viewer" FontWeight="Bold" FontSize="16" Foreground="#222" Margin="0,0,0,8"/>
             <Grid Margin="0,0,0,8" Height="44">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" Background="#F5F5F7" Padding="8,4" Height="40" VerticalAlignment="Center">
+                <Border Grid.Column="0" Background="#F5F5F7" Padding="8,2" Height="40" VerticalAlignment="Center">
                     <DockPanel LastChildFill="True">
                         <materialDesign:PackIcon Kind="Magnify" Width="22" Height="22" Foreground="#888" Margin="4,0,8,0" VerticalAlignment="Center"/>
                         <TextBox Width="320" Margin="0" VerticalAlignment="Center"
                                  Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" 
                                  ToolTip="Search/filter log lines..."
-                                 Style="{DynamicResource MaterialDesignOutlinedTextBox}"
                                  BorderThickness="0"
                                  Background="Transparent"
                                  Padding="0,0,0,0"
-                                 FontSize="14"/>
+                                 FontSize="18"/>
                     </DockPanel>
                 </Border>
                 <Button Grid.Column="2" Content="Clear" Command="{Binding ClearCommand}"

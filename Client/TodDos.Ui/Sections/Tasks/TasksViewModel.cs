@@ -172,7 +172,7 @@ namespace Todos.Ui.ViewModels
                 if (res)
                 {
 
-                    Tasks.Add(newTaskModel);
+                    Tasks.Insert(0, newTaskModel);
                     _taskIds.Add(newTaskModel.Id);
                     UpdateFilteredTasks();
                 }
@@ -444,7 +444,7 @@ namespace Todos.Ui.ViewModels
                 return;
             Application.Current.Dispatcher.Invoke(() =>
             {
-                Tasks.Add(model);
+                Tasks.Insert(0, model);
                 _taskIds.Add(model.Id);
                 UpdateFilteredTasks();
             });
