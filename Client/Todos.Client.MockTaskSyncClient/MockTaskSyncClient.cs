@@ -96,14 +96,14 @@ namespace Todos.Client.MockTaskSyncClient
             return Task.FromResult(true);
         }
 
-        public Task<bool> LockTaskAsync(int taskId)
+        public Task<bool> LockTaskAsync(int userId, int taskId)
         {
-            _logger?.Information("MockTaskSyncClient: TaskLocked event for TaskId {TaskId}", taskId);
+            _logger?.Information("MockTaskSyncClient: TaskLocked event for TaskId {TaskId} for UserId {UserId}", taskId, userId);
             return Task.FromResult(true);
         }
-        public Task<bool> UnlockTaskAsync(int taskId)
+        public Task<bool> UnlockTaskAsync(int userId, int taskId)
         {
-            _logger?.Information("MockTaskSyncClient: TaskUnlocked event for TaskId {TaskId}", taskId);
+            _logger?.Information("MockTaskSyncClient: TaskUnlocked event for TaskId {TaskId} for UserId {UserId}", taskId, userId);
             return Task.FromResult(true);
         }
 

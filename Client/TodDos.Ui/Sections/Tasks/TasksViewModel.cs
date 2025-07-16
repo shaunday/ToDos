@@ -181,7 +181,8 @@ namespace Todos.Ui.ViewModels
 
             await RunWithErrorHandlingAsync(async () =>
             {
-                var locked = await _taskSyncClient!.LockTaskAsync(task.Id);
+                var currentUserId = GetCurrentUserId();
+                var locked = await _taskSyncClient!.LockTaskAsync(currentUserId, task.Id);
                 if (locked)
                 {
                     ChangeTaskEditMode(task, true);
@@ -214,7 +215,8 @@ namespace Todos.Ui.ViewModels
                     var updateRes = await _taskSyncClient!.UpdateTaskAsync(updatedDto);
                     if (updateRes)
                     {
-                        bool unlockRes = await _taskSyncClient.UnlockTaskAsync(task.Id);
+                        var currentUserId = GetCurrentUserId();
+                        bool unlockRes = await _taskSyncClient.UnlockTaskAsync(currentUserId, task.Id);
                         ChangeTaskEditMode(task, false);
                         UpdateFilteredTasks();
                     }
@@ -233,7 +235,8 @@ namespace Todos.Ui.ViewModels
             if (task == null || !task.IsEditing || EditingTaskBackup == null) return;
             await RunWithErrorHandlingAsync(async () =>
             {
-                await _taskSyncClient!.UnlockTaskAsync(task.Id);
+                var currentUserId = GetCurrentUserId();
+                await _taskSyncClient!.UnlockTaskAsync(currentUserId, task.Id);
                 // Restore original values from backup
                 task.CopyFrom(EditingTaskBackup);
                 ChangeTaskEditMode(task, false);

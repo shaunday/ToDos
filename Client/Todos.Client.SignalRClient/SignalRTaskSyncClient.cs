@@ -286,13 +286,13 @@ namespace Todos.Client.SignalRClient
         public Task<IEnumerable<TaskDTO>> GetUserTasksAsync(int userId) =>
             InvokeWithRetrySafeAsync<IEnumerable<TaskDTO>>(SignalRGlobals.GetUserTasks, userId);
 
-        public Task<bool> LockTaskAsync(int taskId)
+        public Task<bool> LockTaskAsync(int userId, int taskId)
         {
-            return InvokeWithRetrySafeAsync<bool>(SignalRGlobals.LockTask, taskId);
+            return InvokeWithRetrySafeAsync<bool>(SignalRGlobals.LockTask, userId, taskId);
         }
-        public Task<bool> UnlockTaskAsync(int taskId)
+        public Task<bool> UnlockTaskAsync(int userId, int taskId)
         {
-            return InvokeWithRetrySafeAsync<bool>(SignalRGlobals.UnlockTask, taskId);
+            return InvokeWithRetrySafeAsync<bool>(SignalRGlobals.UnlockTask, userId, taskId);
         }
 
         #endregion

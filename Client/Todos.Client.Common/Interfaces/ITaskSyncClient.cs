@@ -26,8 +26,8 @@ namespace Todos.Client.Common.Interfaces
         Task<bool> AddTaskAsync(TaskDTO task);
         Task<bool> UpdateTaskAsync(TaskDTO task);
         Task<bool> DeleteTaskAsync(int userId, int taskId);
-        Task<bool> LockTaskAsync(int taskId);
-        Task<bool> UnlockTaskAsync(int taskId);
+        Task<bool> LockTaskAsync(int userId, int taskId);
+        Task<bool> UnlockTaskAsync(int userId, int taskId);
 
         // Get tasks by user ID for initial loading
         Task<IEnumerable<TaskDTO>> GetUserTasksAsync(int userId);

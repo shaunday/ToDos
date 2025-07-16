@@ -84,24 +84,24 @@ namespace Todos.Client.TaskSyncWithOfflineQueues
             }
         }
 
-        public async Task<bool> LockTaskAsync(int taskId)
+        public async Task<bool> LockTaskAsync(int userId, int taskId)
         {
             if (_isOnline)
-                return await _innerClient.LockTaskAsync(taskId);
+                return await _innerClient.LockTaskAsync(userId, taskId);
             else
             {
-                var action = new PendingAction { ActionType = "Lock", Task = new TaskDTO { Id = taskId }, Timestamp = DateTime.UtcNow };
+                var action = new PendingAction { ActionType = "Lock", Task = new TaskDTO { Id = taskId }, UserId = userId, Timestamp = DateTime.UtcNow };
                 _queueService.Enqueue(action);
                 return true;
             }
         }
-        public async Task<bool> UnlockTaskAsync(int taskId)
+        public async Task<bool> UnlockTaskAsync(int userId, int taskId)
         {
             if (_isOnline)
-                return await _innerClient.UnlockTaskAsync(taskId);
+                return await _innerClient.UnlockTaskAsync(userId, taskId);
             else
             {
-                var action = new PendingAction { ActionType = "Unlock", Task = new TaskDTO { Id = taskId }, Timestamp = DateTime.UtcNow };
+                var action = new PendingAction { ActionType = "Unlock", Task = new TaskDTO { Id = taskId }, UserId = userId, Timestamp = DateTime.UtcNow };
                 _queueService.Enqueue(action);
                 return true;
             }

@@ -44,7 +44,7 @@ namespace ToDos.TaskSyncServer.Hubs
             return -1; 
         }
 
-        public async Task<TaskDTO> AddTask(TaskDTO task)
+        public async Task<bool> AddTask(TaskDTO task)
         {
             var stopwatch = Stopwatch.StartNew();
             try
@@ -57,7 +57,7 @@ namespace ToDos.TaskSyncServer.Hubs
                 // Broadcast to all except sender
                 BroadcastTaskAdded(result, Context.ConnectionId);
                 stopwatch.Stop();
-                return result;
+                return true; // Return success if we got here
             }
             catch (Exception ex)
             {
