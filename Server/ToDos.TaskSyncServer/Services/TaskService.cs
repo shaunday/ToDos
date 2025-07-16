@@ -94,7 +94,7 @@ namespace ToDos.TaskSyncServer.Services
             }
         }
 
-        public async Task<bool> AddTaskAsync(TaskDTO taskDto)
+        public async Task<TaskDTO> AddTaskAsync(TaskDTO taskDto)
         {
             try
             {
@@ -118,7 +118,7 @@ namespace ToDos.TaskSyncServer.Services
                 {
                     _logger.Warning(cacheEx, "Cache invalidate failed for user: {UserId}", taskDto.UserId);
                 }
-                return true;
+                return addedTask;
             }
             catch (Exception ex)
             {
