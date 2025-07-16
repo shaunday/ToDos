@@ -273,7 +273,6 @@ namespace Todos.Client.Orchestrator.ViewModels
         private void OpenLog(ClientModel model)
         {
             if (model == null) return;
-            System.Console.WriteLine($"[DEBUG] Attempting to open log file: {model.LogFilePath}");
             if (System.IO.File.Exists(model.LogFilePath))
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(model.LogFilePath) { UseShellExecute = true });
             else
@@ -375,7 +374,6 @@ namespace Todos.Client.Orchestrator.ViewModels
         {
             var logFilePaths = FilteredClientsView.Cast<ClientModel>()
                 .Select(c => c.LogFilePath)
-                .Where(System.IO.File.Exists)
                 .ToList();
             LogViewerViewModel.UpdateLogFiles(logFilePaths);
         }

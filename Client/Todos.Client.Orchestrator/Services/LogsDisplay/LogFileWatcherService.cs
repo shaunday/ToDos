@@ -74,7 +74,12 @@ namespace Todos.Client.Orchestrator.Services
             {
                 NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size
             };
-            watcher.Changed += (s, e) => OnFileChanged(filePath);
+            watcher.Changed += (s, e) => {
+                OnFileChanged(filePath);
+            };
+            watcher.Created += (s, e) => {
+                OnFileChanged(filePath);
+            };
             watcher.EnableRaisingEvents = true;
             _watchers[filePath] = watcher;
             _filePositions[filePath] = 0;
