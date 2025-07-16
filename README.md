@@ -8,7 +8,6 @@
 5. [Architecture Overview](#architecture-overview)
     - [Client Architecture](#client-architecture)
     - [Server Architecture](#server-architecture)
-    - [Relationships Between Layers/Projects/Interfaces](#relationships-between-layersprojectsinterfaces)
 6. [Design Patterns & Principles](#design-patterns--principles)
 7. [Scalability & Performance](#scalability--performance)
 8. [Setup & Installation](#setup--installation)
@@ -18,8 +17,7 @@
     - [Level of "Mockiness" Used and Why](#level-of-mockiness-used-and-why)
 12. [Testing](#testing)
 13. [Extensibility & Future Improvements](#extensibility--future-improvements)
-14. [License](#license)
-15. [Contact / Acknowledgements](#contact--acknowledgements)
+14. [Contact / Acknowledgements](#contact--acknowledgements)
 
 ---
 
@@ -41,7 +39,7 @@ A WPF + ASP.NET (SignalR) To-Do List application with real-time data synchroniza
 - Task prioritization, tagging, and due dates
 - MS SQL Server persistence (Entity Framework 6)
 - Clean, MVVM-based WPF UI
-- (Bonus) User authentication (mock or real)
+- (Bonus) User authentication (mock or real, with automatic login in dev mode)
 - (Bonus) UI state persistence
 
 ---
@@ -68,7 +66,7 @@ A WPF + ASP.NET (SignalR) To-Do List application with real-time data synchroniza
 ```mermaid
 flowchart TB
     %% Common Layer
-    CommonAll["Common.All<br/>(Shared DTOs/Interfaces)"]
+    CommonAll["Common.All (Shared DTOs/Interfaces)"]
     CommonClient["Common.Client"]
     CommonServer["Common.Server"]
     CommonAll --- CommonClient
@@ -77,67 +75,67 @@ flowchart TB
     %% Client Side
     subgraph ClientSide
         Orchestrator["Orchestrator"]
-        UI["WPF Client<br/>(Todos.Client.Ui)"]
+        UI["WPF Client"]
         Simulators["Client Simulators"]
         Queue["Queue Wrapper"]
         Polly["Polly (Resilience/Persistence)"]
         SignalRClient["SignalR Client"]
         Mock["Mock Task Sync Client"]
-        Orchestrator -- "Leads to" --> Simulators
-        Orchestrator -- "Controls" --> UI
-        UI -- "Uses" --> Queue
-        Queue -- "Wraps" --> Polly
-        Polly -- "Uses" --> SignalRClient
-        UI -- "Alternative: Uses" --> Mock
-        Mock -- "Simulates Sync/Offline" -.-> UI
-        CommonClient -.-> Orchestrator
+        Orchestrator --> Simulators
+        Orchestrator --> UI
+        UI --> Queue
+        Queue --> Polly
+        Polly --> SignalRClient
+        UI -.-> Mock
+        Mock -.-> UI
+        CommonClient -. "uses interfaces/DTOs" .-> Orchestrator
     end
 
     %% Server Side
     subgraph ServerSide
-        SignalRHub["SignalR Hub Service<br/>(Server)"]
+        SignalRHub["SignalR Hub Service\n(implements JWT Auth, mostly mocked)"]
         Sharding["Sharding Service"]
         ReadWriteSwitch["ReadWriteSwitch Service"]
         MemoryCache["Memory Cache"]
-        ServerApp["ASP.NET Server<br/>(Todos.TaskSyncServer)"]
+        CacheCleanup["Cache Cleanup Service"]
+        ServerApp["ASP.NET Server"]
         DB["SQL Server Database"]
-        SignalRHub -- "Uses" --> Sharding
-        SignalRHub -- "Uses" --> ReadWriteSwitch
-        SignalRHub -- "Uses" --> MemoryCache
-        Sharding -- "Uses" --> MemoryCache
-        ReadWriteSwitch -- "Uses" --> MemoryCache
-        Sharding -- "Routes" --> DB
-        ReadWriteSwitch -- "Routes" --> DB
-        ServerApp -- "Hosts" --> SignalRHub
+        SignalRHub --> Sharding
+        SignalRHub --> ReadWriteSwitch
+        SignalRHub --> MemoryCache
+        Sharding --> MemoryCache
+        ReadWriteSwitch --> MemoryCache
+        MemoryCache --> CacheCleanup
+        CacheCleanup -.-> MemoryCache
+        Sharding --> DB
+        ReadWriteSwitch --> DB
+        ServerApp --> SignalRHub
         CommonServer -.-> ServerApp
     end
 
     %% Central Services
     AuthService["Auth Service"]
-    AuthService -- "Auth" --> Orchestrator
-    AuthService -- "Auth" --> SignalRHub
+    AuthService --> Orchestrator
+    AuthService --> SignalRHub
 
     %% Central Connection
-    SignalRClient -- "Real-Time Connection" --> SignalRHub
+    SignalRClient --> SignalRHub
 
     %% Common Layer Connections
-    CommonAll -. "Shared DTOs/Interfaces" .-> SignalRClient
-    CommonAll -. "Shared DTOs/Interfaces" .-> SignalRHub
-
-    %% Visual separation and style
-    classDef faded fill:#f9f9f9,stroke:#bbb;
-    classDef dotted stroke-dasharray: 5 5;
-    class CommonAll,CommonClient,CommonServer faded;
-    class Simulators dotted;
+    CommonAll -.-> SignalRClient
+    CommonAll -.-> SignalRHub
 ```
 
 **Diagram Notes:**
+- The SignalR Hub implements JWT authentication (`jjwtauthenticate`), which is mostly mocked for this project. This addresses the bonus requirement for authentication.
 - The top layer contains all common/shared projects: `Common.All` (shared DTOs/interfaces), `Common.Client`, and `Common.Server`.
-- The client stack now includes an Orchestrator, which controls the UI and leads to Client Simulators. Simulators are shown with a dotted outline to indicate they are not part of the main working flow.
+- The client stack now includes an Orchestrator, which controls the UI and leads to Client Simulators. Simulators and mock clients are shown with dashed arrows to indicate they are not part of the main working flow.
 - The Auth Service is shown in the center, connected to both the Orchestrator (client) and SignalR Hub (server), representing authentication flows.
 - The SignalR Hub Service is the central real-time connection point between client and server.
 - On the server side, the SignalR Hub expands to sharding, read/write switch, and memory cache services, which optimize and route to the database.
+- The Memory Cache is managed by a Cache Cleanup Service, which ensures cache consistency and resource efficiency.
 - Shared DTOs and interfaces are defined in `Common.All` and referenced by both client and server for consistency.
+- **After the server broadcasts updates, clients perform additional filtering (e.g., by tag, user, etc.) before displaying data.**
 
 ### Client Architecture
 - **WPF Client (Todos.Client.Ui):**
@@ -147,9 +145,24 @@ flowchart TB
   - Supports tagging, prioritization, and due dates.
   - Uses dependency injection (Unity) for service management.
   - UI built with Material Design for WPF.
+  - **Advanced Filtering:**
+    - The UI supports advanced filtering of tasks by tag, user, completion status, and other criteria, allowing users to focus on relevant tasks.
+  - **Task Locking, Editing, Adding, Deleting:**
+    - When a user begins editing a task, the client requests a lock from the server to prevent simultaneous edits by other users. The lock is released when editing is finished or the user disconnects.
+    - Adding, editing, and deleting tasks are performed via SignalR calls to the server, which then broadcasts updates to all connected clients in real time.
+    - The UI reflects task state changes instantly, including lock status, completion, and updates from other users.
+  - **User Connection Management:**
+    - The client maintains a persistent connection to the server via SignalR, with connection state reflected in the UI.
+    - User identity and presence are managed using JWT tokens (mocked in dev mode), and the connection ID is used to track and manage user sessions.
+    - On disconnect or exit, the client ensures that any held task locks are released (unlock on exit), and the UI updates to reflect connection status.
   - **Offline/Mock Support:**
     - Can use a mock task sync client for offline scenarios or testing.
     - UI state persistence for user experience.
+
+- **Orchestrator:**
+  - Acts as a controller for launching and managing multiple simulated client instances.
+  - Coordinates actions across clients to simulate real-world usage, concurrency, and edge cases.
+  - Essential for stress-testing, scenario automation, and demonstrating system robustness under load.
 
 - **Client Common (Todos.Client.Common):**
   - Defines interfaces (e.g., `ITaskSyncClient`) and shared DTOs/models.
@@ -175,38 +188,13 @@ flowchart TB
 - **DbReplication/DbSharding:**
   - Support for sharding and replication to improve scalability and reliability.
 
-### Relationships Between Layers/Projects/Interfaces
-
-```mermaid
-flowchart TD
-    subgraph Client
-      UI["Todos.Client.Ui"]
-      CommonC["Todos.Client.Common"]
-      Sim["Simulators/Mocks"]
-    end
-    subgraph Server
-      ServerApp["Todos.TaskSyncServer"]
-      CommonS["ToDos.Server.Common"]
-      Repo["ToDos.Repository"]
-      Shard["DbSharding/DbReplication"]
-    end
-    UI -- Implements --> CommonC
-    Sim -- Implements --> CommonC
-    UI -- SignalR --> ServerApp
-    ServerApp -- Uses --> CommonS
-    ServerApp -- Uses --> Repo
-    ServerApp -- Uses --> Shard
-    CommonC -- "Shared DTOs/Interfaces" --> CommonS
-    Repo -- "Entity Framework" --> DB["SQL Server"]
-```
-
 ---
 
 ## Design Patterns & Principles
 - **MVVM:** For WPF client structure and testability.
 - **Repository Pattern:** For data access abstraction on the server.
 - **Pub/Sub (SignalR):** For real-time updates and event broadcasting.
-- **Dependency Injection (Unity):** For managing object lifetimes and dependencies.
+- **Dependency Injection (Unity):** For managing object lifetimes and dependencies, and enabling easy swapping between mock and real implementations for testing.
 - **Automapper:** For mapping between models, DTOs, and entities.
 - **CQRS-style Separation:** For scalable read/write operations.
 - **Thread Safety:** Locks and concurrent collections for multi-client scenarios.
@@ -239,10 +227,9 @@ flowchart TD
        <add name="TaskDbContext" connectionString="Data Source=YOUR_SERVER;Initial Catalog=ToDosDb;Integrated Security=True;" providerName="System.Data.SqlClient" />
      </connectionStrings>
      ```
-5. **Run Entity Framework migrations** (if applicable) to create the database.
-6. **Build and run the server**
-7. **Build and run one or more WPF clients**
-8. **The database will be created automatically on first run.**
+5. **Build and run the server**
+6. **Build and run one or more WPF clients**
+7. **The database and test data will be created automatically on first run using a mock factory.**
 
 ---
 
@@ -262,6 +249,7 @@ flowchart TD
   - `Todos.ClientSimsY`, `ToDos.Clients.Simulator`: Simulators for load and concurrency testing
   - `Todos.Client.MockTaskSyncClient`: Mock implementation for offline/testing
   - `Todos.Client.UserService`: User authentication (mock/real)
+  - `Orchestrator`: Manages and coordinates multiple simulated client instances, allowing for stress-testing and scenario automation. Can be used to launch and control many client instances for concurrency and robustness testing.
 - **Server/**
   - `Todos.TaskSyncServer`: ASP.NET SignalR server
   - `ToDos.Server.Common`: Shared DTOs, entities, interfaces
@@ -276,15 +264,21 @@ flowchart TD
 - **Connection ID:** Used to uniquely identify and manage client connections.
 - **NoSelectOnClickBehavior:** Custom WPF behavior to improve UX.
 - **Clear Focus:** Utility to clear focus from controls programmatically.
-- **Unlock on Exit:** Ensures tasks are unlocked if a client disconnects.
+- **Unlock on Exit:** The client ensures that any held task locks are released when the user disconnects or exits, preventing stale locks and ensuring smooth collaboration for all users.
 - **Use of HashSet in Sim Clients:** Efficiently tracks tasks in simulators.
 - **Shared Methods/Classes/Enums:** Common projects expose types for cross-assembly use (e.g., LogFactory).
-- **Broadcast Filtering:** Server filters which clients receive which updates.
+- **Broadcast Filtering:** The server filters which clients receive which updates, and clients further filter the received data before displaying it (e.g., by tag, user, or other criteria).
+- **Client-Side Filtering:** After receiving broadcasted updates, clients apply additional filtering (e.g., by tag, user, or other criteria) before displaying data in the UI.
+- **IDs:** `userId` and `taskId` are created on the server as integers; `tagId` is created on the client as a GUID.
 - **Edge Case Handling:** Try/catch blocks around critical sync and broadcast logic.
+- **JWT Authentication:** The SignalR Hub implements JWT authentication (`jjwtauthenticate`), which is mostly mocked for demonstration and testing purposes, fulfilling the bonus authentication requirement.
+- **Automatic Login in Dev Mode:** In current development mode, login is performed automatically using a demo user or via orchestrator overload, simplifying testing and demonstration.
+- **Dependency Injection for Testing:** The use of DI (Unity) allows for easy swapping between mock and real implementations, supporting spot testing and unit testing throughout the codebase.
 
 ### Level of "Mockiness" Used and Why
 - **Mock Authentication:** Used to simplify setup and focus on real-time sync logic. Can be replaced with real auth if needed.
 - **Mock Task Sync Client:** Allows for offline testing, simulating network failures, and rapid development.
+- **Semi-Mocked Sharding and CQRS:** Sharding and CQRS-style read/write separation are implemented in a semi-mocked fashion to demonstrate architectural patterns and enable easy extension to real distributed or production-grade implementations.
 - **Real Implementations:** Used for core CRUD and SignalR communication.
 - **Rationale:** Enables rapid development, easier testing, and demonstration of architecture flexibility. Mocks are clearly separated and swappable.
 
@@ -294,23 +288,22 @@ flowchart TD
 - Unit tests for core logic in both client and server (see `*.Tests` projects).
 - Simulators for load and concurrency testing.
 - To run tests: open solution in Visual Studio, build, and run tests via Test Explorer.
+- **Multi-client/system testing:** Use Visual Studio's multi-startup profiles to launch both the server and orchestrator, simulating many clients. Alternatively, launch both executables manually to observe real-time sync and concurrency behavior.
 
 ---
 
 ## Extensibility & Future Improvements
 - Easy to extend with new features (e.g., advanced filtering, notifications).
 - Real authentication and authorization.
-- More granular permissions and audit logging.
-- Web client or mobile app.
-- Cloud deployment and scaling.
-
----
-
-## License
-MIT (or specify your license)
 
 ---
 
 ## Contact / Acknowledgements
-- Developed as part of CityShob C# full-stack developer interview homework.
-- For questions, contact [Your Name/Email]. 
+- Developed as part of CityShob C# full-stack developer interview homework. 
+
+## Highlights
+- **Comprehensive Feature Set & Scalability:** The codebase is large because it implements a wide range of features (real-time sync, locking, tagging, filtering, authentication, offline support, etc.), and is architected for scalability and extensibility.
+- **Separation for Testability & Maintainability:** Strong separation of concerns is maintained throughout the solution, with clear boundaries between client, server, and common projects. Coding files (logic, view models, services) are structurally separated from XAML/UI files, ensuring maintainability, clarity, and ease of testing.
+- **Production-Grade Patterns:** The project uses production-grade design patterns (MVVM, Repository, Pub/Sub, DI, CQRS, etc.) and robust error handling, not just “getting it working.”
+- **Zero Warnings:** The solution builds with zero warnings and near-zero messages, reflecting a high standard of code quality.
+- **Adaptability:** While this project demonstrates a full-featured, scalable architecture, the same principles can be applied to deliver smaller, focused solutions as needed. 
