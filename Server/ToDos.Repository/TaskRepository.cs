@@ -229,12 +229,24 @@ namespace ToDos.Repository
             context.SaveChanges();
 
             var mockTasks = ToDos.Server.Entities.Factory.TaskFactory.GenerateTasksForUsers(userIds, tasksPerUser);
+
+            // Collect all unique tags from mockTasks
+            var allTagNames = mockTasks.SelectMany(t => t.Tags.Select(tag => tag.Name)).Distinct().ToList();
+            var tagEntities = allTagNames.Select(name => new ToDos.Entities.TagEntity { Id = Guid.NewGuid(), Name = name }).ToList();
+            context.Tags.AddRange(tagEntities);
+            context.SaveChanges();
+
+            // Map TagDTOs in mockTasks to TagEntities
+            var tagEntityDict = tagEntities.ToDictionary(te => te.Name, te => te);
+
             context.Tasks.AddRange(mockTasks.Select(t => new ToDos.Entities.TaskEntity
             {
                 UserId = t.UserId,
                 Title = t.Title,
                 Description = t.Description,
-                IsCompleted = t.IsCompleted
+                IsCompleted = t.IsCompleted,
+                Priority = t.Priority,
+                Tags = t.Tags.Select(tagDto => tagEntityDict[tagDto.Name]).ToList()
             }));
             context.SaveChanges();
         }

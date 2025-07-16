@@ -154,7 +154,7 @@
 
                         <!-- PID Filter -->
                         <TextBlock Text="PID:" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                        <TextBox Text="{Binding FilterProcessIdText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" VerticalContentAlignment="Center" Margin="60,0,0,0"/>
+                        <TextBox Text="{Binding FilterProcessIdText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" VerticalContentAlignment="Center" Margin="8,0,0,2"/>
                     </Grid>
                     <Button Content="Clear All Filters" Style="{StaticResource MaterialDesignOutlinedButton}" Command="{Binding ClearFiltersCommand}" HorizontalAlignment="Stretch" Margin="0,4,0,8"/>
                     <!-- Kill All Clients button, only visible if there are clients -->
