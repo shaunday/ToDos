@@ -76,24 +76,23 @@ flowchart TB
     HeadlessSim --> AdapterService
     AdapterService --> OfflineQueueService
 
-    %% Client Side
+    %% User/Connection Service above UI
     UserConnService["User/Connection Service"]
+    UserConnService --> UI
+
+    %% Client Side
     UI["WPF Client"]
     OfflineQueueService["OfflineQueueService"]
     Polly["Polly (Resilience, Retry, Offline)"]
     SignalRClient["SignalR Client"]
     Mock["Mock Task Sync Client"]
 
-    UserConnService --> UI
     UI --> OfflineQueueService
     OfflineQueueService --> Polly
     Polly --> SignalRClient
     UI -.-> Mock
     Mock -.-> UI
-
-    %% Divider: SignalR boundary
     SignalRClient <--> SignalRHub
-    %% --- Client/Server boundary ---
 
     %% Middle: Auth Service (mock)
     AuthService["Auth Service (mock)"]
@@ -116,13 +115,11 @@ flowchart TB
     DbRepository <--> DB
     CacheCleanup["Cache Cleanup Service"]
 
-    %% Sharding and ReadWriteDbRouter above DB
+    %% Sharding and ReadWriteDbRouter as services for DbRepository
     Sharding["Sharding"]
     ReadWriteDbRouter["ReadWriteDbRouter"]
     DbRepository -- Uses --> Sharding
     DbRepository -- Uses --> ReadWriteDbRouter
-    Sharding --> DB
-    ReadWriteDbRouter --> DB
     DB["SQL Server Database"]
 
     %% Right: Shared/Common (top to bottom)
@@ -135,14 +132,6 @@ flowchart TB
     CommonClient
     CommonServer
 ```
-
-**Diagram Notes:**
-- The architecture is layered: Orchestrator (top, launches clients), Client (UserConnectionService, UI, offline queue, real-time sync), Server (SignalR Hub, TaskOperations, caching, database), and Shared/Common (right).
-- SignalR Client and SignalR Hub Service are the boundary between client and server (bidirectional, real-time communication).
-- Auth Service (mock) mediates authentication between clients and server.
-- TaskOperations Service handles CRUD and broadcast, using caching or database as needed; repository uses sharding and read/write routing for scalability.
-- OfflineQueueService and Polly provide robust offline and retry support for clients.
-- The design supports multi-user, multi-instance, and robust real-time collaboration.
 
 ### Client Architecture
 - **WPF Client (Todos.Client.Ui):**
@@ -172,14 +161,6 @@ flowchart TB
   - Essential for stress-testing, scenario automation, and demonstrating system robustness under load.
   - **Multi-Instance & Multi-User Support:**
     - The system supports running multiple instances for the same user as well as for different users, all kept in sync in real time.
-
-- **Client Common (Todos.Client.Common):**
-  - Defines interfaces (e.g., `ITaskSyncClient`) and shared DTOs/models.
-  - Enables decoupling between UI and sync implementations.
-
-- **Client Simulators (Todos.ClientSimsY, ToDos.Clients.Simulator, etc.):**
-  - Used for load testing, simulating multiple clients, and edge case validation.
-  - Use HashSet for efficient task tracking.
 
 ### Server Architecture
 - **ASP.NET Server (Todos.TaskSyncServer):**
