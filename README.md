@@ -77,20 +77,23 @@ flowchart TB
     AdapterService --> OfflineQueueService
 
     %% Client Side
+    UserConnService["User/Connection Service"]
     UI["WPF Client"]
     OfflineQueueService["OfflineQueueService"]
     Polly["Polly (Resilience, Retry, Offline)"]
     SignalRClient["SignalR Client"]
     Mock["Mock Task Sync Client"]
-    UserConnService["User/Connection Service"]
 
+    UserConnService --> UI
     UI --> OfflineQueueService
     OfflineQueueService --> Polly
     Polly --> SignalRClient
     UI -.-> Mock
     Mock -.-> UI
+
+    %% Divider: SignalR boundary
     SignalRClient <--> SignalRHub
-    UserConnService --> UI
+    %% --- Client/Server boundary ---
 
     %% Middle: Auth Service (mock)
     AuthService["Auth Service (mock)"]
@@ -98,26 +101,29 @@ flowchart TB
     AuthService --> UserConnService
     SignalRHub --> AuthService
 
-    %% Middle: Server Side
+    %% Server Side
     SignalRHub["SignalR Hub Service"]
     TaskOperations["TaskOperations Service (CRUD/Broadcast)"]
     Caching["Caching"]
     DbRepository["DbRepository"]
-    Sharding["Sharding"]
-    ReadWriteDbRouter["ReadWriteDbRouter"]
-    DB["SQL Server Database"]
-    CacheCleanup["Cache Cleanup Service"]
-
+    ServerApp["ASP.NET Server"]
+    ServerApp --> SignalRHub
+    ServerApp --> CacheCleanup
     SignalRHub --> TaskOperations
     TaskOperations --> Caching
     Caching --> TaskOperations
     TaskOperations --> DbRepository
+    DbRepository <--> DB
+    CacheCleanup["Cache Cleanup Service"]
+
+    %% Sharding and ReadWriteDbRouter above DB
+    Sharding["Sharding"]
+    ReadWriteDbRouter["ReadWriteDbRouter"]
     DbRepository -- Uses --> Sharding
     DbRepository -- Uses --> ReadWriteDbRouter
-    DbRepository <--> DB
-    ServerApp["ASP.NET Server"]
-    ServerApp --> SignalRHub
-    ServerApp --> CacheCleanup
+    Sharding --> DB
+    ReadWriteDbRouter --> DB
+    DB["SQL Server Database"]
 
     %% Right: Shared/Common (top to bottom)
     CommonAll["Common.All"]
@@ -131,8 +137,8 @@ flowchart TB
 ```
 
 **Diagram Notes:**
-- The architecture is layered: Orchestrator (top, launches clients), Client (UI, offline queue, real-time sync), Server (SignalR Hub, TaskOperations, caching, database), and Shared/Common (right).
-- Communication flows top-down: Orchestrator launches multiple clients (UI/headless), which interact with the server via SignalR (bidirectional, real-time).
+- The architecture is layered: Orchestrator (top, launches clients), Client (UserConnectionService, UI, offline queue, real-time sync), Server (SignalR Hub, TaskOperations, caching, database), and Shared/Common (right).
+- SignalR Client and SignalR Hub Service are the boundary between client and server (bidirectional, real-time communication).
 - Auth Service (mock) mediates authentication between clients and server.
 - TaskOperations Service handles CRUD and broadcast, using caching or database as needed; repository uses sharding and read/write routing for scalability.
 - OfflineQueueService and Polly provide robust offline and retry support for clients.
