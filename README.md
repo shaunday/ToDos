@@ -67,12 +67,12 @@ A WPF + ASP.NET (SignalR) To-Do List application with real-time data synchroniza
 ### System Architecture Diagram
 ```mermaid
 flowchart LR
-    A[WPF Client (Todos.Client.Ui)] -- SignalR --> B[ASP.NET Server (Todos.TaskSyncServer)]
-    B -- Entity Framework --> C[(SQL Server Database)]
-    A -- Uses --> D[Client Common (Todos.Client.Common)]
-    B -- Uses --> E[Server Common (ToDos.Server.Common)]
-    D -- Shared DTOs/Interfaces --> E
-    A -.-> F[Mock/Sim Clients]
+    A["WPF Client<br/>(Todos.Client.Ui)"] -- SignalR --> B["ASP.NET Server<br/>(Todos.TaskSyncServer)"]
+    B -- Entity Framework --> C["SQL Server Database"]
+    A -- Uses --> D["Client Common<br/>(Todos.Client.Common)"]
+    B -- Uses --> E["Server Common<br/>(ToDos.Server.Common)"]
+    D -- "Shared DTOs/Interfaces" --> E
+    A -.-> F["Mock/Sim Clients"]
 ```
 
 ### Client Architecture
@@ -116,15 +116,15 @@ flowchart LR
 ```mermaid
 flowchart TD
     subgraph Client
-      UI[Todos.Client.Ui]
-      CommonC[Todos.Client.Common]
-      Sim[Simulators/Mocks]
+      UI["Todos.Client.Ui"]
+      CommonC["Todos.Client.Common"]
+      Sim["Simulators/Mocks"]
     end
     subgraph Server
-      ServerApp[Todos.TaskSyncServer]
-      CommonS[ToDos.Server.Common]
-      Repo[ToDos.Repository]
-      Shard[DbSharding/DbReplication]
+      ServerApp["Todos.TaskSyncServer"]
+      CommonS["ToDos.Server.Common"]
+      Repo["ToDos.Repository"]
+      Shard["DbSharding/DbReplication"]
     end
     UI -- Implements --> CommonC
     Sim -- Implements --> CommonC
@@ -132,8 +132,8 @@ flowchart TD
     ServerApp -- Uses --> CommonS
     ServerApp -- Uses --> Repo
     ServerApp -- Uses --> Shard
-    CommonC -- Shared DTOs/Interfaces --> CommonS
-    Repo -- Entity Framework --> DB[(SQL Server)]
+    CommonC -- "Shared DTOs/Interfaces" --> CommonS
+    Repo -- "Entity Framework" --> DB["SQL Server"]
 ```
 
 ---
