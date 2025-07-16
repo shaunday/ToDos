@@ -129,11 +129,11 @@ namespace Todos.Client.SignalRClient
 
                 _hubProxy = _hubConnection.CreateHubProxy("TaskHub");
 
-                _hubProxy.On<TaskDTO>(SignalRGlobals.TaskAdded, task => SafeInvoke(() => TaskAdded?.Invoke(task), nameof(TaskAdded)));
-                _hubProxy.On<TaskDTO>(SignalRGlobals.TaskUpdated, task => SafeInvoke(() => TaskUpdated?.Invoke(task), nameof(TaskUpdated)));
-                _hubProxy.On<int>(SignalRGlobals.TaskDeleted, id => SafeInvoke(() => TaskDeleted?.Invoke(id), nameof(TaskDeleted)));
-                _hubProxy.On<int>(SignalRGlobals.TaskLocked, id => SafeInvoke(() => TaskLocked?.Invoke(id), nameof(TaskLocked)));
-                _hubProxy.On<int>(SignalRGlobals.TaskUnlocked, id => SafeInvoke(() => TaskUnlocked?.Invoke(id), nameof(TaskUnlocked)));
+                RegisterFilteredEventHandler<TaskDTO>(SignalRGlobals.TaskAdded, task => TaskAdded?.Invoke(task));
+                RegisterFilteredEventHandler<TaskDTO>(SignalRGlobals.TaskUpdated, task => TaskUpdated?.Invoke(task));
+                RegisterFilteredEventHandler<int>(SignalRGlobals.TaskDeleted, id => TaskDeleted?.Invoke(id));
+                RegisterFilteredEventHandler<int>(SignalRGlobals.TaskLocked, id => TaskLocked?.Invoke(id));
+                RegisterFilteredEventHandler<int>(SignalRGlobals.TaskUnlocked, id => TaskUnlocked?.Invoke(id));
 
                 await _hubConnection.Start();
 
@@ -209,11 +209,11 @@ namespace Todos.Client.SignalRClient
 
                         // Re-setup event handlers
                         _hubProxy = _hubConnection.CreateHubProxy("TaskHub");
-                        _hubProxy.On<TaskDTO>(SignalRGlobals.TaskAdded, task => SafeInvoke(() => TaskAdded?.Invoke(task), nameof(TaskAdded)));
-                        _hubProxy.On<TaskDTO>(SignalRGlobals.TaskUpdated, task => SafeInvoke(() => TaskUpdated?.Invoke(task), nameof(TaskUpdated)));
-                        _hubProxy.On<int>(SignalRGlobals.TaskDeleted, id => SafeInvoke(() => TaskDeleted?.Invoke(id), nameof(TaskDeleted)));
-                        _hubProxy.On<int>(SignalRGlobals.TaskLocked, id => SafeInvoke(() => TaskLocked?.Invoke(id), nameof(TaskLocked)));
-                        _hubProxy.On<int>(SignalRGlobals.TaskUnlocked, id => SafeInvoke(() => TaskUnlocked?.Invoke(id), nameof(TaskUnlocked)));
+                        RegisterFilteredEventHandler<TaskDTO>(SignalRGlobals.TaskAdded, task => TaskAdded?.Invoke(task));
+                        RegisterFilteredEventHandler<TaskDTO>(SignalRGlobals.TaskUpdated, task => TaskUpdated?.Invoke(task));
+                        RegisterFilteredEventHandler<int>(SignalRGlobals.TaskDeleted, id => TaskDeleted?.Invoke(id));
+                        RegisterFilteredEventHandler<int>(SignalRGlobals.TaskLocked, id => TaskLocked?.Invoke(id));
+                        RegisterFilteredEventHandler<int>(SignalRGlobals.TaskUnlocked, id => TaskUnlocked?.Invoke(id));
 
                         await _hubConnection.Start();
                         _logger.Information("SignalR reconnected.");
@@ -346,6 +346,20 @@ namespace Todos.Client.SignalRClient
             {
                 _logger.Error(ex, "Error in event handler for {Context}", context);
             }
+        }
+
+        private void HandleIfNotSender(dynamic payload, Action handler)
+        {
+            if (payload.SenderConnectionId == ConnectionId) return;
+            handler();
+        }
+
+        private void RegisterFilteredEventHandler<T>(string methodName, Action<T> handler)
+        {
+            _hubProxy.On<dynamic>(methodName, payload =>
+            {
+                HandleIfNotSender(payload, (Action)(() => handler((T)payload.Data)));
+            });
         }
 
         #endregion

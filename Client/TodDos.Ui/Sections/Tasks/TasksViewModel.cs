@@ -83,7 +83,7 @@ namespace Todos.Ui.ViewModels
             FilteredTasksView.Filter = FilterPredicate;
         }
 
-        public override async void Init()
+        public override void Init()
         {
             _logger?.Information("TasksViewModel: Init called");
             _taskSyncClient!.TaskAdded += HandleTaskAdded;

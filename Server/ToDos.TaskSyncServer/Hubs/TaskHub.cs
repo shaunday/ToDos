@@ -221,9 +221,8 @@ namespace ToDos.TaskSyncServer.Hubs
                 var userId = GetTaskOwnerFromService(taskId);
                 if (userId > 0)
                 {
-                    var groupName = $"User_{userId}";
-                    Clients.Group(groupName).TaskDeleted(taskId);
-                    _logger.Information("Broadcasted TaskDeleted to group: {GroupName}", groupName);
+                    BroadcastTaskDeleted(taskId, userId);
+                    _logger.Information("Broadcasted TaskDeleted to group: {GroupName}", $"User_{userId}");
                 }
             }
             catch (Exception ex)
@@ -239,9 +238,8 @@ namespace ToDos.TaskSyncServer.Hubs
                 var userId = GetTaskOwnerFromService(taskId);
                 if (userId > 0)
                 {
-                    var groupName = $"User_{userId}";
-                    Clients.Group(groupName).TaskLocked(taskId);
-                    _logger.Information("Broadcasted TaskLocked to group: {GroupName}", groupName);
+                    BroadcastTaskLocked(taskId, userId);
+                    _logger.Information("Broadcasted TaskLocked to group: {GroupName}", $"User_{userId}");
                 }
             }
             catch (Exception ex)
@@ -257,9 +255,8 @@ namespace ToDos.TaskSyncServer.Hubs
                 var userId = GetTaskOwnerFromService(taskId);
                 if (userId > 0)
                 {
-                    var groupName = $"User_{userId}";
-                    Clients.Group(groupName).TaskUnlocked(taskId);
-                    _logger.Information("Broadcasted TaskUnlocked to group: {GroupName}", groupName);
+                    BroadcastTaskUnlocked(taskId, userId);
+                    _logger.Information("Broadcasted TaskUnlocked to group: {GroupName}", $"User_{userId}");
                 }
             }
             catch (Exception ex)
@@ -341,13 +338,15 @@ namespace ToDos.TaskSyncServer.Hubs
             try
             {
                 var clientGroup = Clients.Group(groupName);
+                // Always add SenderConnectionId to the payload
+                var payload = new { Data = data, SenderConnectionId = Context.ConnectionId };
                 if (!string.IsNullOrEmpty(exceptConnectionId))
                 {
-                    clientGroup.AllExcept(exceptConnectionId).Invoke(methodName, data);
+                    clientGroup.AllExcept(exceptConnectionId).Invoke(methodName, payload);
                 }
                 else
                 {
-                    clientGroup.Invoke(methodName, data);
+                    clientGroup.Invoke(methodName, payload);
                 }
                 _logger.Information("Broadcasted {MethodName} to group: {GroupName} except: {ExceptConnectionId}", methodName, groupName, exceptConnectionId);
             }
@@ -357,7 +356,6 @@ namespace ToDos.TaskSyncServer.Hubs
             }
         }
 
-        // Helper methods to broadcast with operationId and exceptConnectionId
         private void BroadcastTaskAdded(TaskDTO task, string exceptConnectionId = null)
         {
             BroadcastToUserGroup(SignalRGlobals.TaskAdded, task, task.UserId, exceptConnectionId);
@@ -370,17 +368,17 @@ namespace ToDos.TaskSyncServer.Hubs
         
         private void BroadcastTaskDeleted(int taskId, int userId, string exceptConnectionId = null)
         {
-            BroadcastToUserGroup(SignalRGlobals.TaskDeleted, taskId, userId, exceptConnectionId);
+            BroadcastToUserGroup(SignalRGlobals.TaskDeleted, new { TaskId = taskId }, userId, exceptConnectionId);
         }
         
         private void BroadcastTaskLocked(int taskId, int userId, string exceptConnectionId = null)
         {
-            BroadcastToUserGroup(SignalRGlobals.TaskLocked, taskId, userId, exceptConnectionId);
+            BroadcastToUserGroup(SignalRGlobals.TaskLocked, new { TaskId = taskId }, userId, exceptConnectionId);
         }
         
         private void BroadcastTaskUnlocked(int taskId, int userId, string exceptConnectionId = null)
         {
-            BroadcastToUserGroup(SignalRGlobals.TaskUnlocked, taskId, userId, exceptConnectionId);
+            BroadcastToUserGroup(SignalRGlobals.TaskUnlocked, new { TaskId = taskId }, userId, exceptConnectionId);
         }
     }
 } 

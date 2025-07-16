@@ -106,3 +106,18 @@ That you focused on production-grade patterns, not just “getting it working.�
 That you can also deliver smaller, focused solutions if needed
 
 highlight - no warnings of any kind
+
+
+
+
+
+instruction should have:
+Make sure SQL Server is installed and running locally
+
+Edit .env.repository (or wherever the connection string is) to point to your SQL Server instance
+
+Run the app – the database will be created automatically
+(add instructions)
+
+broadcast filtering on server + try catch for edge cases and filtering on client
+

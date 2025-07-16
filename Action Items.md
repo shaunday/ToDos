@@ -9,7 +9,6 @@ orch:
 client:
   Use a timer or debounce logic to prevent multiple rapid calls.
   loading/ or something while tasks are loading/adding
-  tasks are added twice..
 
 
 Server:
