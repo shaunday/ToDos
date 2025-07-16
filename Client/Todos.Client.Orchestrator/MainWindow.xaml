@@ -9,7 +9,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Padding="5"
-        Title="Orchestrator" Height="1200" Width="1600" 
+        Title="Orchestrator" Height="1000" Width="1600" 
         MinHeight="600" MinWidth="1200"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>

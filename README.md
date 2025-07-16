@@ -287,3 +287,26 @@ flowchart TB
 ## Highlights
 - Large codebase due to features, separation, testability, scalability
 - Production-grade patterns, zero warnings, adaptable for smaller solutions 
+
+## Requirements & Implementation Status
+
+- [x] Real-time updates via SignalR (no REST endpoints)
+- [x] Task locking for concurrent editing
+- [x] Advanced filtering and tagging
+- [x] Due dates for tasks
+- [x] Multi-user and multi-instance support
+- [x] Server-side and client-side filtering (with connectionId logic)
+- [x] Offline support with queue and retry logic (Polly)
+- [x] Caching and cache cleanup for performance
+- [x] Mocked JWT authentication (auto-login in dev)
+- [x] Server-side auto-incrementing IDs (userId, taskId); client-side GUIDs for tagId
+- [x] Orchestrator for launching multiple clients, running tests, and log viewing
+- [x] Structured logging (Serilog) with error surfacing in logs and UI
+- [x] Unlock on exit (release locks on disconnect/exit)
+- [x] Interface-driven, DI (Unity) for all access points/services
+- [x] Thread safety (operation-scoped TaskRepository, UI thread marshaling)
+- [x] Automapper for entity <-> DTO <-> model mapping
+- [x] WPF UX improvements (NoSelectOnClickBehavior, Clear Focus)
+- [x] Unit tests (MSTest), orchestrator/manual/structured testing, simulator for multi-client/system testing
+- [x] Extensible, layered, interface-driven architecture
+- [x] Future improvements listed (UI notification/manual retry, debounce, offline queue indication) 
