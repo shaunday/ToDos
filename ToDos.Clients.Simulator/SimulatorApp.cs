@@ -17,9 +17,28 @@ namespace ToDos.Clients.Simulator
 
         public void Run(string[] args)
         {
-            var simArgs = _argParser.Parse(args);
-            var scriptLines = _scriptParser.Parse(simArgs.FilePath);
-            _executor.Execute(simArgs.UserId, scriptLines);
+            string filePath = null;
+            int? userId = null;
+            bool? signToEvents = null;
+            if (args.Length == 0)
+            {
+                filePath = System.IO.Path.Combine(AppContext.BaseDirectory, "ExampleScript.txt");
+            }
+            else
+            {
+                var simArgs = _argParser.Parse(args);
+                userId = simArgs.UserId;
+                filePath = simArgs.FilePath;
+            }
+            var parseResult = _scriptParser.Parse(filePath);
+            if (parseResult.UserId.HasValue)
+                userId = parseResult.UserId;
+            if (parseResult.SignToEvents.HasValue)
+                signToEvents = parseResult.SignToEvents;
+            if (!userId.HasValue)
+                throw new ArgumentException("UserId must be specified either as a command-line argument or in the script file header.");
+            _executor.Logger.Info("Simulator starting with userId={UserId}, signToEvents={SignToEvents}, script={Script}", userId, signToEvents, filePath);
+            _executor.Execute(userId.Value, parseResult.ScriptLines, signToEvents ?? false);
         }
     }
 

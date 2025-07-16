@@ -4,6 +4,7 @@ using Todos.Client.Common.Factories;
 using Todos.Client.Common;
 using static Todos.Client.Common.TypesGlobal;
 using System.Diagnostics;
+using ToDos.MockAuthService;
 
 namespace ToDos.Clients.Simulator
 {
@@ -15,6 +16,9 @@ namespace ToDos.Clients.Simulator
             container.RegisterType<ScriptFileParser>();
             container.RegisterType<OperationExecutor>();
             container.RegisterType<SimulatorApp>();
+            container.RegisterType<TaskSyncClientAdapter>();
+            container.RegisterType<MockJwtAuthService>(new Unity.Lifetime.ContainerControlledLifetimeManager(),
+                new Unity.Injection.InjectionConstructor(container.Resolve<Serilog.ILogger>()));
             // Register TaskSyncClientAdapter and any dependencies here
             // Setup Serilog logger
             int pid = Process.GetCurrentProcess().Id;

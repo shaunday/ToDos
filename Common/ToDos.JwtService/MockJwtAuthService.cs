@@ -8,7 +8,7 @@ namespace ToDos.MockAuthService
 {
     public interface IAuthService
     {
-        string GenerateToken(int userId, string username);
+        string GenerateToken(int userId);
         bool ValidateToken(string token);
         int GetUserIdFromToken(string token);
         int GetUserIdFromTokenWithoutValidation(string token);
@@ -24,10 +24,12 @@ namespace ToDos.MockAuthService
             _logger.Information("Mock Auth Service initialized");
         }
 
-        public string GenerateToken(int userId, string username)
+        public string GenerateToken(int userId)
         {
             try
             {
+                string username = "mock";
+
                 // Create a simple mock token format: "MOCK_{userId}_{username}_{expiresAtTicks}"
                 var expiresAt = DateTime.UtcNow.AddHours(24);
                 var token = $"MOCK_{userId}_{username}_{expiresAt.Ticks}";

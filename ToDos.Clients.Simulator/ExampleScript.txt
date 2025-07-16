@@ -1,5 +1,11 @@
 # Example simulation script for ToDos.Clients.Simulator
 # Format: operation1,operation2,...,count,delayEach,delayEnd
+# Optional headers:
+#   userId=123           # sets the user ID for the simulation
+#   signToEvents=true    # if true, subscribes to task events and logs them
+
+userId=123
+signToEvents=true
 
 # Add 10 tasks, 100ms between each, 500ms after all
 Add,10,100,500

@@ -4,6 +4,12 @@
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <RootNamespace>ToDos.Clients.Simulator</RootNamespace>
     <AssemblyName>ToDos.Clients.Simulator</AssemblyName>
+    <OutputPath>..\bin\</OutputPath>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="ExampleScript.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

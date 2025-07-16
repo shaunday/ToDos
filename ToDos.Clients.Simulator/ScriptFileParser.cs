@@ -5,17 +5,38 @@ using System.Linq;
 
 namespace ToDos.Clients.Simulator
 {
+    public class ScriptFileParseResult
+    {
+        public int? UserId { get; set; }
+        public bool? SignToEvents { get; set; }
+        public List<ScriptLine> ScriptLines { get; set; }
+    }
+
     public class ScriptFileParser
     {
-        public List<ScriptLine> Parse(string filePath)
+        public ScriptFileParseResult Parse(string filePath)
         {
             var lines = File.ReadAllLines(filePath);
             var result = new List<ScriptLine>();
+            int? userId = null;
+            bool? signToEvents = null;
             foreach (var rawLine in lines)
             {
                 var line = rawLine.Trim();
                 if (string.IsNullOrEmpty(line) || line.StartsWith("#"))
                     continue;
+                if (line.StartsWith("userId=", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (int.TryParse(line.Substring(7), out int uid))
+                        userId = uid;
+                    continue;
+                }
+                if (line.StartsWith("signToEvents=", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (bool.TryParse(line.Substring(13), out bool sign))
+                        signToEvents = sign;
+                    continue;
+                }
                 var parts = line.Split(',');
                 if (parts.Length < 3)
                     throw new FormatException($"Invalid script line: {line}");
@@ -31,7 +52,12 @@ namespace ToDos.Clients.Simulator
                     DelayEnd = delayEnd
                 });
             }
-            return result;
+            return new ScriptFileParseResult
+            {
+                UserId = userId,
+                SignToEvents = signToEvents,
+                ScriptLines = result
+            };
         }
     }
 
