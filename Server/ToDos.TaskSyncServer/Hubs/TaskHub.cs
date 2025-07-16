@@ -10,6 +10,7 @@ using Serilog;
 using System.Collections.Generic;
 using ToDos.DotNet.Common.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
+using System.Collections.Concurrent;
 
 namespace ToDos.TaskSyncServer.Hubs
 {
@@ -20,6 +21,10 @@ namespace ToDos.TaskSyncServer.Hubs
         private readonly ITaskService _taskService;
         private readonly ILogger _logger;
         private static int _activeConnections = 0;
+
+        // Track group membership: group name -> set of connection IDs
+        private static readonly ConcurrentDictionary<string, HashSet<string>> GroupMembers = new ConcurrentDictionary<string, HashSet<string>>();
+        private static readonly object GroupLock = new object();
 
         public TaskHub(ITaskService taskService, ILogger logger)
         {
@@ -55,7 +60,7 @@ namespace ToDos.TaskSyncServer.Hubs
                 _logger.Information("Adding task for user: {UserId}", userId);
                 var result = await _taskService.AddTaskAsync(task);
                 // Broadcast to all except sender
-                BroadcastTaskAdded(result, Context.ConnectionId);
+                BroadcastTaskAdded(result);
                 stopwatch.Stop();
                 return true; // Return success if we got here
             }
@@ -77,7 +82,7 @@ namespace ToDos.TaskSyncServer.Hubs
                 var result = await _taskService.UpdateTaskAsync(task);
                 if (result)
                 {
-                    BroadcastTaskUpdated(task, Context.ConnectionId);
+                    BroadcastTaskUpdated(task);
                 }
                 stopwatch.Stop();
                 return result;
@@ -100,7 +105,7 @@ namespace ToDos.TaskSyncServer.Hubs
                 if (result)
                 {
                     // Broadcast to all except sender
-                    BroadcastTaskDeleted(taskId, userId, Context.ConnectionId);
+                    BroadcastTaskDeleted(taskId, userId);
                 }
                 stopwatch.Stop();
                 return result;
@@ -294,6 +299,12 @@ namespace ToDos.TaskSyncServer.Hubs
             {
                 var groupName = $"User_{userId}";
                 Groups.Add(Context.ConnectionId, groupName);
+                lock (GroupLock)
+                {
+                    if (!GroupMembers.ContainsKey(groupName))
+                        GroupMembers[groupName] = new HashSet<string>();
+                    GroupMembers[groupName].Add(Context.ConnectionId);
+                }
                 _logger.Information("User {UserId} connected and added to group: {GroupName}. Active connections: {ActiveConnections}", 
                     userId, groupName, _activeConnections);
             }
@@ -306,6 +317,14 @@ namespace ToDos.TaskSyncServer.Hubs
             _activeConnections = Math.Max(0, _activeConnections - 1);
             var userId = GetCurrentUserId();
             
+            // Remove from all groups
+            lock (GroupLock)
+            {
+                foreach (var group in GroupMembers.Keys)
+                {
+                    GroupMembers[group].Remove(Context.ConnectionId);
+                }
+            }
             _logger.Information("User {UserId} disconnected. Active connections: {ActiveConnections}", 
                 userId, _activeConnections);
             
@@ -321,6 +340,12 @@ namespace ToDos.TaskSyncServer.Hubs
             {
                 var groupName = $"User_{userId}";
                 Groups.Add(Context.ConnectionId, groupName);
+                lock (GroupLock)
+                {
+                    if (!GroupMembers.ContainsKey(groupName))
+                        GroupMembers[groupName] = new HashSet<string>();
+                    GroupMembers[groupName].Add(Context.ConnectionId);
+                }
                 _logger.Information("User {UserId} reconnected and re-added to group: {GroupName}", userId, groupName);
             }
             
@@ -332,23 +357,52 @@ namespace ToDos.TaskSyncServer.Hubs
         public static int GetActiveConnections() => _activeConnections;
 
         // Unified broadcast method to handle all broadcast types
-        private void BroadcastToUserGroup<T>(string methodName, T data, int userId, string exceptConnectionId = null)
+        private void BroadcastToUserGroup<T>(string methodName, T data, int userId)
         {
             var groupName = $"User_{userId}";
             try
             {
+                // Log active connections and group membership
+                _logger.Information("Active connections: {ActiveConnections}", _activeConnections);
+                HashSet<string> members;
+                lock (GroupLock)
+                {
+                    GroupMembers.TryGetValue(groupName, out members);
+                }
+                _logger.Information("Group {GroupName} members: {Members}", groupName, members != null ? string.Join(",", members) : "<none>");
                 var clientGroup = Clients.Group(groupName);
                 // Always add SenderConnectionId to the payload
                 var payload = new { Data = data, SenderConnectionId = Context.ConnectionId };
-                if (!string.IsNullOrEmpty(exceptConnectionId))
+                dynamic proxy = clientGroup;
+                if (proxy is System.Threading.Tasks.Task)
                 {
-                    clientGroup.AllExcept(exceptConnectionId).Invoke(methodName, payload);
+                    _logger.Warning("No clients in group {GroupName} to broadcast {MethodName}", groupName, methodName);
                 }
                 else
                 {
-                    clientGroup.Invoke(methodName, payload);
+                    _logger.Information("Broadcasting {MethodName} to group: {GroupName} (clients present)", methodName, groupName);
+                    switch (methodName)
+                    {
+                        case SignalRGlobals.TaskAdded:
+                            proxy.TaskAdded(payload);
+                            break;
+                        case SignalRGlobals.TaskUpdated:
+                            proxy.TaskUpdated(payload);
+                            break;
+                        case SignalRGlobals.TaskDeleted:
+                            proxy.TaskDeleted(payload);
+                            break;
+                        case SignalRGlobals.TaskLocked:
+                            proxy.TaskLocked(payload);
+                            break;
+                        case SignalRGlobals.TaskUnlocked:
+                            proxy.TaskUnlocked(payload);
+                            break;
+                        default:
+                            throw new InvalidOperationException($"Unknown SignalR method: {methodName}");
+                    }
                 }
-                _logger.Information("Broadcasted {MethodName} to group: {GroupName} except: {ExceptConnectionId}", methodName, groupName, exceptConnectionId);
+                _logger.Information("Broadcasted {MethodName} to group: {GroupName}", methodName, groupName);
             }
             catch (Exception ex)
             {
@@ -356,29 +410,29 @@ namespace ToDos.TaskSyncServer.Hubs
             }
         }
 
-        private void BroadcastTaskAdded(TaskDTO task, string exceptConnectionId = null)
+        private void BroadcastTaskAdded(TaskDTO task)
         {
-            BroadcastToUserGroup(SignalRGlobals.TaskAdded, task, task.UserId, exceptConnectionId);
+            BroadcastToUserGroup(SignalRGlobals.TaskAdded, task, task.UserId);
         }
         
-        private void BroadcastTaskUpdated(TaskDTO task, string exceptConnectionId = null)
+        private void BroadcastTaskUpdated(TaskDTO task)
         {
-            BroadcastToUserGroup(SignalRGlobals.TaskUpdated, task, task.UserId, exceptConnectionId);
+            BroadcastToUserGroup(SignalRGlobals.TaskUpdated, task, task.UserId);
         }
         
-        private void BroadcastTaskDeleted(int taskId, int userId, string exceptConnectionId = null)
+        private void BroadcastTaskDeleted(int taskId, int userId)
         {
-            BroadcastToUserGroup(SignalRGlobals.TaskDeleted, new { TaskId = taskId }, userId, exceptConnectionId);
+            BroadcastToUserGroup(SignalRGlobals.TaskDeleted, taskId, userId);
         }
         
-        private void BroadcastTaskLocked(int taskId, int userId, string exceptConnectionId = null)
+        private void BroadcastTaskLocked(int taskId, int userId)
         {
-            BroadcastToUserGroup(SignalRGlobals.TaskLocked, new { TaskId = taskId }, userId, exceptConnectionId);
+            BroadcastToUserGroup(SignalRGlobals.TaskLocked, taskId, userId);
         }
         
-        private void BroadcastTaskUnlocked(int taskId, int userId, string exceptConnectionId = null)
+        private void BroadcastTaskUnlocked(int taskId, int userId)
         {
-            BroadcastToUserGroup(SignalRGlobals.TaskUnlocked, new { TaskId = taskId }, userId, exceptConnectionId);
+            BroadcastToUserGroup(SignalRGlobals.TaskUnlocked, taskId, userId);
         }
     }
 } 

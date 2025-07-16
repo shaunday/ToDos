@@ -13,6 +13,7 @@ using ToDos.DotNet.Common.SignalR;
 using static Todos.Client.Common.TypesGlobal;
 using System.IO;
 using System.Text;
+using Newtonsoft.Json.Linq;
 
 namespace Todos.Client.SignalRClient
 {
@@ -129,8 +130,8 @@ namespace Todos.Client.SignalRClient
 
                 _hubProxy = _hubConnection.CreateHubProxy("TaskHub");
 
-                RegisterFilteredEventHandler<TaskDTO>(SignalRGlobals.TaskAdded, task => TaskAdded?.Invoke(task));
-                RegisterFilteredEventHandler<TaskDTO>(SignalRGlobals.TaskUpdated, task => TaskUpdated?.Invoke(task));
+                RegisterFilteredEventHandlerForTaskDTO(SignalRGlobals.TaskAdded, task => TaskAdded?.Invoke(task));
+                RegisterFilteredEventHandlerForTaskDTO(SignalRGlobals.TaskUpdated, task => TaskUpdated?.Invoke(task));
                 RegisterFilteredEventHandler<int>(SignalRGlobals.TaskDeleted, id => TaskDeleted?.Invoke(id));
                 RegisterFilteredEventHandler<int>(SignalRGlobals.TaskLocked, id => TaskLocked?.Invoke(id));
                 RegisterFilteredEventHandler<int>(SignalRGlobals.TaskUnlocked, id => TaskUnlocked?.Invoke(id));
@@ -209,8 +210,8 @@ namespace Todos.Client.SignalRClient
 
                         // Re-setup event handlers
                         _hubProxy = _hubConnection.CreateHubProxy("TaskHub");
-                        RegisterFilteredEventHandler<TaskDTO>(SignalRGlobals.TaskAdded, task => TaskAdded?.Invoke(task));
-                        RegisterFilteredEventHandler<TaskDTO>(SignalRGlobals.TaskUpdated, task => TaskUpdated?.Invoke(task));
+                        RegisterFilteredEventHandlerForTaskDTO(SignalRGlobals.TaskAdded, task => TaskAdded?.Invoke(task));
+                        RegisterFilteredEventHandlerForTaskDTO(SignalRGlobals.TaskUpdated, task => TaskUpdated?.Invoke(task));
                         RegisterFilteredEventHandler<int>(SignalRGlobals.TaskDeleted, id => TaskDeleted?.Invoke(id));
                         RegisterFilteredEventHandler<int>(SignalRGlobals.TaskLocked, id => TaskLocked?.Invoke(id));
                         RegisterFilteredEventHandler<int>(SignalRGlobals.TaskUnlocked, id => TaskUnlocked?.Invoke(id));
@@ -359,6 +360,25 @@ namespace Todos.Client.SignalRClient
             _hubProxy.On<dynamic>(methodName, payload =>
             {
                 HandleIfNotSender(payload, (Action)(() => handler((T)payload.Data)));
+            });
+        }
+
+        private void RegisterFilteredEventHandlerForTaskDTO(string methodName, Action<TaskDTO> handler)
+        {
+            _hubProxy.On<dynamic>(methodName, payload =>
+            {
+                HandleIfNotSender(payload, (Action)(() =>
+                {
+                    var data = payload.Data;
+                    TaskDTO dto;
+                    if (data is TaskDTO t)
+                        dto = t;
+                    else if (data is Newtonsoft.Json.Linq.JObject jObj)
+                        dto = jObj.ToObject<TaskDTO>();
+                    else
+                        throw new InvalidCastException("Cannot convert payload.Data to TaskDTO");
+                    handler(dto);
+                }));
             });
         }
 
