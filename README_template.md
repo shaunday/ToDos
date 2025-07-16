@@ -45,9 +45,6 @@ All client-server communication, including CRUD operations and real-time updates
 - **MVVM** for WPF client structure
 - **Pub/Sub** (SignalR) for real-time updates
 
-## Notes
-- For simplicity, entities are used directly in API responses and client models. In a production system, DTOs would be recommended.
-- The app is designed for extensibility and can be enhanced with authentication, advanced filtering, etc.
 
 ## Bonus Features (if implemented)
 - User authentication (mock or real)
@@ -123,4 +120,8 @@ Run the app – the database will be created automatically
 (add instructions)
 
 broadcast filtering on server + try catch for edge cases and filtering on client
+
+---
+
+The codebase contains approximately 294,284 lines of code (excluding markdown, JSON, config files, and all bin/obj directories).
 

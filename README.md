@@ -31,16 +31,14 @@ A WPF + ASP.NET (SignalR) To-Do List application with real-time data synchroniza
 ---
 
 ## Features
-- Add, edit, delete tasks (tasks are per user, supporting multi-user scenarios)
-- Capable of serving multiple instances of the same user and multiple different users simultaneously, maintaining real-time synchronization and consistency across all clients
-- Mark tasks as complete/incomplete
-- Real-time updates across all clients (SignalR)
-- Task locking to prevent simultaneous edits
+- Add, edit, delete tasks (per user, supports multi-user and multi-instance scenarios)
+- Real-time updates and task locking (SignalR)
+- Advanced filtering (by tag, user, status) both server-side and, where needed, client-side
 - Task prioritization, tagging, and due dates
-- MS SQL Server persistence (Entity Framework 6)
-- Clean, MVVM-based WPF UI
-- (Bonus) User authentication (mock or real, with automatic login in dev mode)
-- (Bonus) UI state persistence
+- Offline support with queue and retry
+- Orchestrator for launching multiple clients/client simulators and running multi-layered/manual/automated tests, with a combined logs viewer and filtering
+- UI state persistence
+- Mock/real authentication
 
 ---
 
@@ -184,13 +182,8 @@ flowchart TB
 ---
 
 ## Design Patterns & Principles
-- **MVVM:** For WPF client structure and testability.
-- **Repository Pattern:** For data access abstraction on the server.
-- **Pub/Sub (SignalR):** For real-time updates and event broadcasting.
-- **Dependency Injection (Unity):** For managing object lifetimes and dependencies, and enabling easy swapping between mock and real implementations for testing.
-- **Automapper:** For mapping between models, DTOs, and entities.
-- **CQRS-style Separation:** For scalable read/write operations.
-- **Thread Safety:** Locks and concurrent collections for multi-client scenarios.
+- MVVM, Repository, Pub/Sub (SignalR), Dependency Injection (Unity), Automapper (entity <-> DTO <-> model), CQRS-style separation, Thread safety
+- All major access points and services are interface-driven for testability, flexibility, and easy extension
 
 ---
 
@@ -252,18 +245,16 @@ flowchart TB
 ---
 
 ## Key Implementation Notes / Tips & Tricks
-- **Connection ID:** Used to uniquely identify and manage client connections.
-- **NoSelectOnClickBehavior & Clear Focus:** Custom WPF utilities to prevent unwanted selection or focus when clicking UI elements, and to programmatically clear focus when needed—solving common WPF UX issues and improving user experience.
-- **Unlock on Exit:** The client ensures that any held task locks are released when the user disconnects or exits, preventing stale locks and ensuring smooth collaboration for all users.
-- **Use of HashSet in Sim Clients:** Efficiently tracks tasks in simulators.
-- **Shared Methods/Classes/Enums:** Common projects expose types for cross-assembly use (e.g., LogFactory).
-- **Broadcast Filtering:** The server filters which clients receive which updates. Clients may also filter received data in the UI due to SignalR server limitations (e.g., filtering by tag, user, or other criteria is done client-side if not possible server-side).
-- **Queue for Offline/Persistence:** The client uses a queue to buffer actions while offline and ensure persistence, so changes are reliably sent to the server when reconnected.
-- **IDs:** `userId` and `taskId` are created on the server as auto-incrementing integers (by the database), ensuring uniqueness and referential integrity. `tagId` is created on the client as a GUID, which preserves uniqueness even before the tag is synced to the server.
-- **Edge Case Handling:** Try/catch blocks around critical sync and broadcast logic.
-- **JWT Authentication:** The SignalR Hub implements JWT authentication (`jjwtauthenticate`), which is mostly mocked for demonstration and testing purposes, fulfilling the bonus authentication requirement.
-- **Automatic Login in Dev Mode:** In current development mode, login is performed automatically using a demo user or via orchestrator overload, simplifying testing and demonstration.
-- **Dependency Injection for Testing:** The use of DI (Unity) allows for easy swapping between mock and real implementations, supporting spot testing and unit testing throughout the codebase.
+- **Filtering:** Server filters which clients receive updates; client may filter further by connectionId due to SignalR limitations.
+- **Caching:** Server-side caching accelerates reads and reduces DB load, improving performance for all clients.
+- **IDs:** `userId` and `taskId` are server-side auto-incrementing integers; `tagId` is a client-side GUID for uniqueness before sync.
+- **Error Handling/Logging:** Structured logging (Serilog) is used throughout; errors are surfaced in logs and, where relevant, in the UI.
+- **Unlock on Exit:** Clients release any held task locks on disconnect/exit to prevent stale locks.
+- **DI/Interfaces:** All access points and services are interface-driven and use DI (Unity) for testability and flexibility.
+- **Thread Safety/Concurrency:** TaskRepository is operation-scoped for thread safety; UI updates from background events are marshaled to the UI thread for responsiveness.
+- **Offline Queue:** Buffers actions for persistence/retry, ensuring reliable sync after reconnect.
+- **JWT Auth:** Mocked for demo/testing, but structure allows for real implementation.
+- **WPF UX:** NoSelectOnClickBehavior & Clear Focus prevent unwanted selection/focus and improve user experience.
 
 ### Level of "Mockiness" Used and Why
 - **Mock Authentication:** Used to simplify setup and focus on real-time sync logic. Can be replaced with real auth if needed.
@@ -276,22 +267,23 @@ flowchart TB
 ---
 
 ## Testing
-- Unit tests for core logic in both client and server (see `*.Tests` projects).
-- Simulators for load and concurrency testing.
-- To run tests: open solution in Visual Studio, build, and run tests via Test Explorer.
-- **Multi-client/system testing:** Use Visual Studio's multi-startup profiles to launch both the server and orchestrator, simulating many clients. Alternatively, launch both executables manually to observe real-time sync and concurrency behavior.
+- Unit tests (MSTest) for core logic in both client and server
+- Orchestrator enables manual and structured testing by launching multiple clients and providing a combined logs viewer with filtering
+- Simulator supports template-based task execution (script files with task lists) for repeatable, automated scenario testing
+- Multi-client/system testing via Visual Studio multi-startup profiles or manual launch
 
 ---
 
 ## Extensibility & Future Improvements
-- Easy to extend with new features (e.g., advanced filtering, notifications).
-- Real authentication and authorization.
+- Layered, interface-driven architecture makes it easy to add new features, layers, or services
+- Easy to extend with new features (e.g., advanced filtering, notifications)
+- Real authentication and authorization
+- On permanent disconnect, prompt UI to notify the user or allow manual retry
+- Use a timer or debounce logic to prevent multiple rapid calls
+- Add visual indication of offline queued tasks and their resolution
 
 ---
 
 ## Highlights
-- **Comprehensive Feature Set & Scalability:** The codebase is large because it implements a wide range of features (real-time sync, locking, tagging, filtering, authentication, offline support, etc.), and is architected for scalability and extensibility.
-- **Separation for Testability & Maintainability:** Strong separation of concerns is maintained throughout the solution, with clear boundaries between client, server, and common projects. Coding files (logic, view models, services) are structurally separated from XAML/UI files, ensuring maintainability, clarity, and ease of testing.
-- **Production-Grade Patterns:** The project uses production-grade design patterns (MVVM, Repository, Pub/Sub, DI, CQRS, etc.) and robust error handling, not just “getting it working.”
-- **Zero Warnings:** The solution builds with zero warnings and near-zero messages, reflecting a high standard of code quality.
-- **Adaptability:** While this project demonstrates a full-featured, scalable architecture, the same principles can be applied to deliver smaller, focused solutions as needed. 
+- Large codebase due to features, separation, testability, scalability
+- Production-grade patterns, zero warnings, adaptable for smaller solutions 
