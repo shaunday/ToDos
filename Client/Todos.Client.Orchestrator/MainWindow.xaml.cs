@@ -32,7 +32,7 @@ namespace Todos.Client.Orchestrator
         {
             if (DataContext is MainWindowViewModel viewModel)
             {
-                var aliveClientsCount = viewModel.FilteredClientsView.Cast<ClientModel>().Count(c => c.IsAlive);
+                var aliveClientsCount = viewModel.ClientService.Clients.Cast<ClientModel>().Count(c => c.IsAlive);
                 if (aliveClientsCount > 0)
                 {
                     var result = MessageBox.Show(

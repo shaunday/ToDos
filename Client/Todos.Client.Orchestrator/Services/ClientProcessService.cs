@@ -4,16 +4,23 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Todos.Client.Common;
+using Serilog;
 
 namespace Todos.Client.Orchestrator.Services
 {
     public class ClientProcessService
     {
+        private readonly ILogger _logger;
+        public ClientProcessService(ILogger logger)
+        {
+            _logger = logger;
+        }
         public ObservableCollection<ClientModel> Clients { get; } = new ObservableCollection<ClientModel>();
 
         public void AddClient(TypesGlobal.ClientType clientType, Process process)
         {
             var model = new ClientModel(clientType, process);
+            _logger.Information($"[Orch] AddClient: {model.LogFilePath}");
             Clients.Add(model);
         }
 

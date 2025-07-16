@@ -1,7 +1,9 @@
-﻿using System.Configuration;
+﻿using Serilog;
+using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Windows;
-using Serilog;
+using Unity;
 
 namespace Todos.Client.Orchestrator
 {
@@ -11,12 +13,19 @@ namespace Todos.Client.Orchestrator
     public partial class App : Application
     {
         private const string LogFileName = "Todos.Client.Orchestrator.log";
+
+        public static IUnityContainer Container { get; private set; }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.File(LogFileName)
                 .CreateLogger();
             Log.Information("Orchestrator started");
+            Container = new UnityContainer();
+
+            Container.RegisterInstance<ILogger>(Log.Logger);
+
             base.OnStartup(e);
         }
     }
