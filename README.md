@@ -65,10 +65,8 @@ A WPF + ASP.NET (SignalR) To-Do List application with real-time data synchroniza
 ### System Architecture Diagram
 ```mermaid
 flowchart TB
-    %% Top: Orchestrator
-    Orchestrator["Orchestrator"]
+    %% Top: Clients Orchestrator
     ClientsOrchestrator["Clients Orchestrator"]
-    Orchestrator --> ClientsOrchestrator
     ClientsOrchestrator -- "launches many" --> UI
     ClientsOrchestrator -- "launches many" --> HeadlessSim
     HeadlessSim["HeadlessClientsSimulator"]
@@ -105,22 +103,24 @@ flowchart TB
     TaskOperations["TaskOperations Service (CRUD/Broadcast)"]
     Caching["Caching"]
     DbRepository["DbRepository"]
-    ServerApp["ASP.NET Server"]
-    ServerApp --> SignalRHub
-    ServerApp --> CacheCleanup
     SignalRHub --> TaskOperations
     TaskOperations --> Caching
     Caching --> TaskOperations
     TaskOperations --> DbRepository
     DbRepository <--> DB
-    CacheCleanup["Cache Cleanup Service"]
+    DB["SQL Server Database"]
 
-    %% Sharding and ReadWriteDbRouter as services for DbRepository
+    %% Sharding and ReadWriteDbRouter grouped to the right of DbRepository
     Sharding["Sharding"]
     ReadWriteDbRouter["ReadWriteDbRouter"]
     DbRepository -- Uses --> Sharding
     DbRepository -- Uses --> ReadWriteDbRouter
-    DB["SQL Server Database"]
+
+    %% ASP.NET Server and Cache Cleanup Service together on the right
+    ServerApp["ASP.NET Server"]
+    CacheCleanup["Cache Cleanup Service"]
+    ServerApp --> SignalRHub
+    ServerApp --> CacheCleanup
 
     %% Right: Shared/Common (top to bottom)
     CommonAll["Common.All"]
