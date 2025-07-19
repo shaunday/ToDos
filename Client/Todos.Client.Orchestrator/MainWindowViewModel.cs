@@ -57,11 +57,43 @@ namespace Todos.Client.Orchestrator.ViewModels
         public string SimLauncherInstructions => "Count defaults to 1. User ID is optional. Folder Path is optional and defaults to the output directory. The launcher will attempt to load the folder path as relative to the output directory first, then as an absolute path if not found.";
 
         // --- Sim Launcher command ---
+        private void LaunchSimulatorProcess(string simExe, string outputDir, int userId, string scriptFile)
+        {
+            var args = $"{userId} \"{scriptFile}\"";
+            var startInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = simExe,
+                WorkingDirectory = outputDir,
+                Arguments = args
+            };
+            System.Diagnostics.Process.Start(startInfo);
+        }
+
+        private void LaunchSimulatorsForScripts(string outputDir, int userId, string folder, int count)
+        {
+            var simExe = System.IO.Path.Combine(outputDir, "ToDos.Clients.Simulator.exe");
+            var scriptFilesArray = System.IO.Directory.GetFiles(folder, "*.txt");
+            if (scriptFilesArray.Length == 0)
+            {
+                System.Windows.MessageBox.Show($"No .txt script file found in: {folder}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                return;
+            }
+            for (int i = 0; i < count; i++)
+            {
+                foreach (var scriptFile in scriptFilesArray)
+                {
+                    LaunchSimulatorProcess(simExe, outputDir, userId, scriptFile);
+                }
+            }
+        }
+
         [RelayCommand]
         private void LaunchClientSim()
         {
             int count = Math.Max(1, SimLaunchCount);
-            string userId = string.IsNullOrWhiteSpace(SimUserId) ? "defaultUser" : SimUserId;
+            int userId;
+            if (!int.TryParse(SimUserId, out userId))
+                userId = 0;
             string outputDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? ".";
             string folder = string.IsNullOrWhiteSpace(SimFolderPath) ? outputDir : SimFolderPath;
             // Try relative first, then absolute
@@ -72,55 +104,20 @@ namespace Todos.Client.Orchestrator.ViewModels
                 folder = SimFolderPath;
             else if (!string.IsNullOrWhiteSpace(SimFolderPath))
                 folder = relPath; // fallback to relative if not found
-            var simExe = System.IO.Path.Combine(outputDir, "Todos.ClientSimsY.exe");
-            // Comment out old simulator exe call
-            /*
-            if (!System.IO.File.Exists(simExe))
+            string[] subDirs;
+            try
             {
-                System.Windows.MessageBox.Show($"Simulator executable not found in: {outputDir}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+                subDirs = System.IO.Directory.GetDirectories(folder);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Error accessing subdirectories in: {folder}\n{ex.Message}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                 return;
             }
-            for (int i = 0; i < count; i++)
+            string[] dirsToProcess = (subDirs.Length > 0) ? subDirs : new[] { folder };
+            //foreach (var dir in dirsToProcess)
             {
-                // Find the first .txt script file in the folder
-                var scriptFile = System.IO.Directory.GetFiles(folder, "*.txt").FirstOrDefault();
-                if (scriptFile == null)
-                {
-                    System.Windows.MessageBox.Show($"No .txt script file found in: {folder}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-                    return;
-                }
-                var args = $"{userId} \"{scriptFile}\"";
-                var startInfo = new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = simExe,
-                    WorkingDirectory = outputDir,
-                    Arguments = args
-                };
-                System.Diagnostics.Process.Start(startInfo);
-            }
-            */
-            // New: Launch Todos.ClientSimsY exe
-            if (!System.IO.File.Exists(simExe))
-            {
-                System.Windows.MessageBox.Show($"Simulator executable not found in: {outputDir}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-                return;
-            }
-            for (int i = 0; i < count; i++)
-            {
-                var scriptFile = System.IO.Directory.GetFiles(folder, "*.txt").FirstOrDefault();
-                if (scriptFile == null)
-                {
-                    System.Windows.MessageBox.Show($"No .txt script file found in: {folder}", "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-                    return;
-                }
-                var args = $"{userId} \"{scriptFile}\"";
-                var startInfo = new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = simExe,
-                    WorkingDirectory = outputDir,
-                    Arguments = args
-                };
-                System.Diagnostics.Process.Start(startInfo);
+                LaunchSimulatorsForScripts(outputDir, userId, subDirs[0], count);
             }
         }
 
