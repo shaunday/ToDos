@@ -4,9 +4,6 @@
 * Add a button to open server-log 
 * Track and simulate connection drops, reconnect logic, slow DB writes, and queue overflow 
 
-## Headless Sim:
-* Get to work
-
 ## Client:
 * Actions Col is cut when multi launch via orch
 * Use a timer or debounce logic to prevent multiple rapid calls.
