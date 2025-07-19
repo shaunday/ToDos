@@ -8,4 +8,7 @@
     <AssemblyName>ToDos.Server.DbReplication</AssemblyName>
   </PropertyGroup>
 
+  <ItemGroup>
+  </ItemGroup>
+
 </Project>

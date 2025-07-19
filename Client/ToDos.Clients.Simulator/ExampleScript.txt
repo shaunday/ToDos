@@ -17,10 +17,10 @@ signToEvents=true
 numOfClients=5
 
 # Add 500 tasks, 500ms between each, 2000ms after all
-Add,500,500,2000
+Add,20,500,2000
 
 # Add then Delete, 100 times, 1000ms between, 1000ms after
-Add,Delete,100,1000,1000
+Add,Delete,20,1000,1000
 
 # Just GetAll 10 times, 1000ms between, 500ms after
 GetAll,10,1000,500

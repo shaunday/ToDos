@@ -17,8 +17,10 @@
     <PackageReference Include="Serilog" Version="4.3.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TodDos.Ui\ToDos.Client.Ui.csproj" />
+    <ProjectReference Include="..\ToDos.Clients.Simulator\ToDos.Clients.Simulator.csproj" />
   </ItemGroup>
 </Project>
